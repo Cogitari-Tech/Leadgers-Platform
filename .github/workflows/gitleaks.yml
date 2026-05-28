@@ -22,4 +22,4 @@ jobs:
           chmod +x gitleaks
           mv gitleaks /usr/local/bin/
       - name: Run Gitleaks
-        run: gitleaks detect --source . --verbose --redact
+        run: gitleaks detect --source . --verbose --redact --config .gitleaks.toml

@@ -1,0 +1,13 @@
+[allowlist]
+description = "Ignore baseline leaks from historical commits"
+files = [
+    ".claude/rules/settings.json",
+    "supabase/functions/github-actions/index.ts",
+]
+# Ignoring specific historical fingerprints detected by gitleaks
+fingerprints = [
+    "3ff9d0a89606d0259bf47c8b80e272c81aa5b7bb:.claude/rules/settings.json:gcp-api-key:2",
+    "cf602bb47a633d8a725582ab2b15157f5a412fc3:scripts/temp-check-db.js:jwt:29",
+    "cf602bb47a633d8a725582ab2b15157f5a412fc3:scripts/temp-check-db.js:jwt:33",
+    "6f0aad62aa0e068bbd1b51ae6f7b146383f23f1f:supabase/functions/github-actions/index.ts:private-key:25"
+]
