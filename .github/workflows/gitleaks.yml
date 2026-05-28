@@ -16,4 +16,4 @@ jobs:
           fetch-depth: 0
       - name: gitleaks scan
         run: |
-          docker run --v $(pwd):/path zricethezav/gitleaks:latest detect --source="/path" --verbose --redact
+          docker run -v $(pwd):/path zricethezav/gitleaks:latest detect --source="/path" --verbose --redact
