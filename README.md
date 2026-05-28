@@ -3,6 +3,7 @@
 **Sistema de Auditoria, Compliance e Gestão Financeira**  
 **Cogitari Tech** (CNPJ: 64.460.886/0001-39)
 **Versão Atual:** 1.2.2-stable
+
 ---
 
 ## 📚 Índice de Documentação
@@ -62,6 +63,7 @@ Para garantir a melhor experiência de desenvolvimento e evitar conflitos de por
    - **Deprecated:** A abordagem de múltiplos arquivos `.antigravity/mcp.json` na raiz dos projetos está **descontinuada** por gerar conflitos de escopo. O MCP `brasil` também foi removido do stack Leadgers por ociosidade do MVP atual.
 
 ### 📝 Regras de "Vibe Coding" para Agentes
+
 - **Regra 1 (UI/UX):** Nunca escreva um componente base (`Button`, `Dialog`, `Input`, `Form`) do zero. DEVE rodar `npx shadcn-ui@latest add [component]` com a estilização atual do projeto (`@/shared/components`).
 - **Regra 2 (Testes E2E):** Todo endpoint Hono criado em `apps/api/src/routes` DEVE ter um correspondente `*.test.ts` usando a framework testing nativa do Hono/Vitest. Ex: `npm run test --workspace=api`.
 - **Regra 3 (Variáveis de Ambiente):** Use a CLI da vercel `npx vercel env pull` para debugar configurações ou baixar novas envs para `.env` local.
@@ -90,12 +92,14 @@ npm run dev:all
 ## 🗺️ Roadmap & Progresso
 
 ### ✅ Q1 2026 (Fundação e Fase 1)
+
 - [x] Monorepo npm workspaces, Supabase, Hono Edge API
 - [x] Autenticação Multi-Tenant, Sistema de Permissões (RBAC) e Billing HUB (#189)
 - [x] Estrutura Inicial do Módulo Financeiro, Compliance, Auditoria e Configuração de Vercel Infrastructure
 - [x] Setup do Toolchain de IA (Shadcn configurado, utilitário `cn`, Vitest passando a 100% E2E)
 
 ### 🔄 Q2 2026 (Expansão Fase 2)
+
 - [x] Criação Rota Base `/api/investor` (Issue #188 via Hono, Migration CTE)
 - [x] Refatoração de UI/UX (Split-screen Enterprise) para Fluxos de Autenticação e Onboarding
 - [x] Padronização pesada de UI (Report Builder e Modal) via Shadcn + Virtual Scrolling e offload JS

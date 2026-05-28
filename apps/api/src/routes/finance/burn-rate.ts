@@ -3,6 +3,8 @@ import { prisma } from "../../config/prisma";
 import { PrismaFinanceRepository } from "../../adapters/PrismaFinanceRepository";
 import { authMiddleware } from "../../middleware/auth";
 import { tenancyMiddleware } from "../../middleware/tenancy";
+import { validateQuery } from "../../middleware/validate";
+import { burnRateQuerySchema } from "../../schemas/finance";
 import { AppEnv } from "../../types/env";
 
 const burnRateRoutes = new Hono<AppEnv>();
@@ -10,11 +12,11 @@ const burnRateRoutes = new Hono<AppEnv>();
 burnRateRoutes.use("*", authMiddleware);
 burnRateRoutes.use("*", tenancyMiddleware);
 
-burnRateRoutes.get("/", async (c) => {
+burnRateRoutes.get("/", validateQuery(burnRateQuerySchema), async (c) => {
   const tenantId = c.get("tenantId");
   const repo = new PrismaFinanceRepository(prisma, tenantId);
 
-  const months = Number(c.req.query("months")) || 6;
+  const { months } = c.get("validatedQuery");
 
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth() - months, 1);

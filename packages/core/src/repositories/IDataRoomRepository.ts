@@ -1,6 +1,9 @@
 // packages/core/src/repositories/IDataRoomRepository.ts
 
-import { DataRoomDocument, DocumentCategory } from "../entities/DataRoomDocument";
+import {
+  DataRoomDocument,
+  DocumentCategory,
+} from "../entities/DataRoomDocument";
 
 /**
  * Port: Data Room Repository Interface
@@ -15,7 +18,10 @@ export interface IDataRoomRepository {
   save(document: DataRoomDocument): Promise<void>;
 
   /** Find a single document by ID within a tenant */
-  findById(tenantId: string, documentId: string): Promise<DataRoomDocument | null>;
+  findById(
+    tenantId: string,
+    documentId: string,
+  ): Promise<DataRoomDocument | null>;
 
   /** List all documents for a tenant, optionally filtered by category */
   findByTenant(
