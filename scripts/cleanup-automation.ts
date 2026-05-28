@@ -6,7 +6,7 @@ import * as path from "path";
 async function cleanupProject(name: string, url: string, key: string) {
   console.log(`\n🚀 INICIANDO LIMPEZA: Ambiente [${name}]`);
   console.log(`📍 URL: ${url}`);
-  
+
   const supabase = createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -30,26 +30,37 @@ async function cleanupProject(name: string, url: string, key: string) {
     "accounts",
     "objectives",
     "milestones",
-    "cap_table_rounds"
+    "cap_table_rounds",
   ];
 
   // 2. Diagnóstico de Tabelas Extras (Profiles, etc)
   console.log(`🔍 Diagnosticando tabelas extras...`);
-  const extraTables = ["profiles", "notifications", "user_settings", "audit_log", "invites"];
+  const extraTables = [
+    "profiles",
+    "notifications",
+    "user_settings",
+    "audit_log",
+    "invites",
+  ];
   const tablesToClean = [...businessTables];
 
   for (const table of extraTables) {
-    const { error } = await supabase.from(table).select("count", { count: 'exact', head: true });
+    const { error } = await supabase
+      .from(table)
+      .select("count", { count: "exact", head: true });
     if (!error) {
-       console.log(`    📍 Tabela extra detectada: ${table}`);
-       tablesToClean.push(table);
+      console.log(`    📍 Tabela extra detectada: ${table}`);
+      tablesToClean.push(table);
     }
   }
 
   // 3. Encontrar o usuário de teste
   console.log(`🔍 Buscando usuário de teste: ${TEST_EMAIL}...`);
-  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-  
+  const {
+    data: { users },
+    error: listError,
+  } = await supabase.auth.admin.listUsers();
+
   if (listError) {
     console.error(`  🔴 Erro ao listar usuários:`, listError);
     return;
@@ -57,7 +68,9 @@ async function cleanupProject(name: string, url: string, key: string) {
 
   const testUser = users.find((u: any) => u.email === TEST_EMAIL);
   if (!testUser) {
-    console.warn(`  ⚠️ Usuário de teste ${TEST_EMAIL} não encontrado! Nada será preservado.`);
+    console.warn(
+      `  ⚠️ Usuário de teste ${TEST_EMAIL} não encontrado! Nada será preservado.`,
+    );
   }
 
   // 4. Identificar tenants a serem preservados
@@ -67,18 +80,22 @@ async function cleanupProject(name: string, url: string, key: string) {
       .from("tenant_members")
       .select("tenant_id")
       .eq("user_id", testUser.id);
-    
+
     testMemberships?.forEach((m: any) => preservedTenants.add(m.tenant_id));
-    console.log(`  🛡️ Tenants preservados: [${Array.from(preservedTenants).join(", ")}]`);
+    console.log(
+      `  🛡️ Tenants preservados: [${Array.from(preservedTenants).join(", ")}]`,
+    );
   }
 
   // 5. Obter alvos de remoção
-  const usersToDelete = users.filter((u: any) => u.email !== TEST_EMAIL && u.email !== "teste@cogitari.com");
+  const usersToDelete = users.filter(
+    (u: any) => u.email !== TEST_EMAIL && u.email !== "teste@cogitari.com",
+  );
   const { data: allTenants } = await supabase.from("tenants").select("id");
   const tenantsToDelete = (allTenants || [])
     .map((t: any) => t.id)
-    .filter(id => !preservedTenants.has(id));
-  
+    .filter((id) => !preservedTenants.has(id));
+
   console.log(`  👥 Usuários para remover: ${usersToDelete.length}`);
   console.log(`  🏢 Tenants para limpar: ${tenantsToDelete.length}`);
 
@@ -86,8 +103,14 @@ async function cleanupProject(name: string, url: string, key: string) {
   if (tenantsToDelete.length > 0) {
     for (const table of tablesToClean) {
       console.log(`    🧹 Limpando [${table}]...`);
-      const { error } = await supabase.from(table).delete().in("tenant_id", tenantsToDelete);
-      if (error && !error.message.includes("column \"tenant_id\" does not exist")) {
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .in("tenant_id", tenantsToDelete);
+      if (
+        error &&
+        !error.message.includes('column "tenant_id" does not exist')
+      ) {
         // Se a tabela não tem tenant_id (ex: profiles), tentaremos limpar por user_id depois
       }
     }
@@ -108,7 +131,7 @@ async function cleanupProject(name: string, url: string, key: string) {
     { table: "profiles", col: "id" },
     { table: "user_settings", col: "user_id" },
     { table: "notifications", col: "user_id" },
-    { table: "device_trusts", col: "user_id" }
+    { table: "device_trusts", col: "user_id" },
   ];
 
   const userIdsToDelete = usersToDelete.map((u: any) => u.id);
@@ -119,20 +142,28 @@ async function cleanupProject(name: string, url: string, key: string) {
         .from(item.table)
         .delete()
         .in(item.col, userIdsToDelete);
-      
+
       if (error && !error.message.includes("column does not exist")) {
-        console.warn(`      ⚠️ Erro ao limpar ${item.table}.${item.col}: ${error.message}`);
+        console.warn(
+          `      ⚠️ Erro ao limpar ${item.table}.${item.col}: ${error.message}`,
+        );
       }
     }
 
     // Garantir remoção dos memberships (FK)
-    await supabase.from("tenant_members").delete().in("user_id", userIdsToDelete);
+    await supabase
+      .from("tenant_members")
+      .delete()
+      .in("user_id", userIdsToDelete);
   }
 
   // 8. Deletar membros e depois tenants (para evitar FK de membros)
   if (tenantsToDelete.length > 0) {
     console.log(`    🧹 Deletando membros e tenants...`);
-    await supabase.from("tenant_members").delete().in("tenant_id", tenantsToDelete);
+    await supabase
+      .from("tenant_members")
+      .delete()
+      .in("tenant_id", tenantsToDelete);
     await supabase.from("tenants").delete().in("id", tenantsToDelete);
   }
 
@@ -147,18 +178,31 @@ async function cleanupProject(name: string, url: string, key: string) {
     }
   }
 
-  console.log(`✨ SUCESSO [${name}]: ${usersToDelete.length} usuários e ${tenantsToDelete.length} tenants removidos.`);
+  console.log(
+    `✨ SUCESSO [${name}]: ${usersToDelete.length} usuários e ${tenantsToDelete.length} tenants removidos.`,
+  );
 }
 
 async function run() {
   dotenv.config({ path: path.resolve(process.cwd(), ".env") });
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    await cleanupProject("BETA", process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    await cleanupProject(
+      "BETA",
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+    );
   }
 
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.production"), override: true });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.production"),
+    override: true,
+  });
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    await cleanupProject("PROD", process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    await cleanupProject(
+      "PROD",
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+    );
   }
 }
 

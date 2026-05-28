@@ -172,10 +172,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (!tenant.onboarding_completed) {
       // Safety net: If the wizard just completed but React state hasn't propagated yet,
       // do NOT redirect back to onboarding (prevents redirect loop)
-      const justCompleted = sessionStorage.getItem("onboarding_just_completed") === "true";
+      const justCompleted =
+        sessionStorage.getItem("onboarding_just_completed") === "true";
       if (justCompleted) {
-        console.log("[AuthGuard] Onboarding just completed (session flag). Allowing through.");
-        // DO NOT REMOVE the flag here. Let the context catch up. 
+        console.log(
+          "[AuthGuard] Onboarding just completed (session flag). Allowing through.",
+        );
+        // DO NOT REMOVE the flag here. Let the context catch up.
         // When tenant.onboarding_completed becomes true, this block won't run.
       } else {
         console.log(

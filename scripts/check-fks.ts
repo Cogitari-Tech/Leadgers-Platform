@@ -1,10 +1,10 @@
 import { prisma } from "../apps/api/src/config/prisma";
 
 async function findFKs() {
-    console.log("🔍 Buscando Foreign Keys que apontam para auth.users...");
-    
-    // Query to find all foreign keys pointing to auth.users
-    const fks: any[] = await prisma.$queryRaw`
+  console.log("🔍 Buscando Foreign Keys que apontam para auth.users...");
+
+  // Query to find all foreign keys pointing to auth.users
+  const fks: any[] = await prisma.$queryRaw`
         SELECT
             tc.table_schema, 
             tc.table_name, 
@@ -25,10 +25,12 @@ async function findFKs() {
           AND ccu.table_schema = 'auth';
     `;
 
-    console.log("📋 Tabelas com FK para auth.users:");
-    fks.forEach(fk => {
-        console.log(` - ${fk.table_schema}.${fk.table_name} (${fk.column_name})`);
-    });
+  console.log("📋 Tabelas com FK para auth.users:");
+  fks.forEach((fk) => {
+    console.log(` - ${fk.table_schema}.${fk.table_name} (${fk.column_name})`);
+  });
 }
 
-findFKs().catch(console.error).finally(() => prisma.$disconnect());
+findFKs()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());
