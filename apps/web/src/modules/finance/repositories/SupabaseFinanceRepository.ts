@@ -275,4 +275,30 @@ export class SupabaseFinanceRepository implements IFinanceRepository {
       balance: Number(item.balance),
     }));
   }
+
+  // === CAP TABLE ===
+
+  async deleteRound(id: string, tenantId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from("cap_table_rounds")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      throw new Error(`Failed to delete round: ${error.message}`);
+    }
+  }
+
+  async deleteShareholder(id: string, tenantId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from("cap_table_shareholders")
+      .delete()
+      .eq("id", id)
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      throw new Error(`Failed to delete shareholder: ${error.message}`);
+    }
+  }
 }

@@ -197,11 +197,12 @@ capTableRoutes.delete(
     const useCase = new DeleteCapTableRound(repo);
 
     try {
-      await useCase.execute({
-        roundId: id,
-        tenantId: tenantId as string,
-        userRole: userRole as string,
-      });
+      const input = {
+        roundId: id as string,
+        tenantId: tenantId ?? "",
+        userRole: (userRole as string) ?? "",
+      };
+      await useCase.execute(input);
       return c.json({ success: true });
     } catch (error: any) {
       if (error.code === "UNAUTHORIZED") {
@@ -297,11 +298,12 @@ capTableRoutes.delete(
     const useCase = new DeleteShareholder(repo);
 
     try {
-      await useCase.execute({
-        shareholderId: id,
-        tenantId: tenantId as string,
-        userRole: userRole as string,
-      });
+      const input = {
+        shareholderId: id as string,
+        tenantId: tenantId ?? "",
+        userRole: (userRole as string) ?? "",
+      };
+      await useCase.execute(input);
       return c.json({ success: true });
     } catch (error: any) {
       if (error.code === "UNAUTHORIZED") {
