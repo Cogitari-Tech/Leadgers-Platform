@@ -1,7 +1,16 @@
 import { Hono } from "hono";
 import { prisma } from "../../config/prisma";
+import { PrismaFinanceRepository } from "../../adapters/PrismaFinanceRepository";
+import { DeleteCapTableRound } from "@leadgers/core/src/usecases/finance/DeleteCapTableRound";
+import { DeleteShareholder } from "@leadgers/core/src/usecases/finance/DeleteShareholder";
 import { authMiddleware } from "../../middleware/auth";
 import { tenancyMiddleware } from "../../middleware/tenancy";
+import { rateLimiter } from "../../middleware/rate-limiter";
+import { validateBody } from "../../middleware/validate";
+import {
+  createRoundSchema,
+  createShareholderSchema,
+} from "../../schemas/finance";
 import { AppEnv } from "../../types/env";
 
 // --- Type definitions ---
@@ -143,48 +152,67 @@ capTableRoutes.get("/rounds", async (c) => {
   }
 });
 
-capTableRoutes.post("/rounds", async (c) => {
-  const tenantId = c.get("tenantId");
-  const user = c.get("user");
+capTableRoutes.post(
+  "/rounds",
+  rateLimiter({ max: 10, windowMs: 60000 }),
+  validateBody(createRoundSchema),
+  async (c) => {
+    const tenantId = c.get("tenantId");
+    const user = c.get("user");
 
-  try {
-    const body = await c.req.json();
+    try {
+      const body = c.get("validatedBody");
 
-    const round = await prisma.cap_table_rounds.create({
-      data: {
-        tenant_id: tenantId as string,
-        round_name: body.round_name,
-        round_type: body.round_type,
-        pre_money_valuation: body.pre_money_valuation,
-        amount_raised: body.amount_raised,
-        post_money_valuation: body.post_money_valuation,
-        round_date: body.round_date ? new Date(body.round_date) : null,
-        notes: body.notes,
-        created_by: user?.id,
-      },
-    });
+      const round = await prisma.cap_table_rounds.create({
+        data: {
+          tenant_id: tenantId as string,
+          round_name: body.round_name,
+          round_type: body.round_type,
+          pre_money_valuation: body.pre_money_valuation,
+          amount_raised: body.amount_raised,
+          post_money_valuation: body.post_money_valuation,
+          round_date: body.round_date ? new Date(body.round_date) : null,
+          notes: body.notes,
+          created_by: user?.id,
+        },
+      });
 
-    return c.json(round, 201);
-  } catch (error) {
-    console.error("Error creating round:", error);
-    return c.json({ error: "Failed to create round" }, 500);
-  }
-});
+      return c.json(round, 201);
+    } catch (error) {
+      console.error("Error creating round:", error);
+      return c.json({ error: "Failed to create round" }, 500);
+    }
+  },
+);
 
-capTableRoutes.delete("/rounds/:id", async (c) => {
-  const tenantId = c.get("tenantId");
-  const id = c.req.param("id");
+capTableRoutes.delete(
+  "/rounds/:id",
+  rateLimiter({ max: 5, windowMs: 60000 }),
+  async (c) => {
+    const tenantId = c.get("tenantId");
+    const userRole = c.get("userRole");
+    const id = c.req.param("id");
 
-  try {
-    await prisma.cap_table_rounds.delete({
-      where: { id, tenant_id: tenantId as string },
-    });
-    return c.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting round:", error);
-    return c.json({ error: "Failed to delete round" }, 500);
-  }
-});
+    const repo = new PrismaFinanceRepository(prisma, tenantId as string);
+    const useCase = new DeleteCapTableRound(repo);
+
+    try {
+      const input = {
+        roundId: id as string,
+        tenantId: tenantId ?? "",
+        userRole: (userRole as string) ?? "",
+      };
+      await useCase.execute(input);
+      return c.json({ success: true });
+    } catch (error: any) {
+      if (error.code === "UNAUTHORIZED") {
+        return c.json({ error: error.message }, 403);
+      }
+      console.error("Error deleting round:", error);
+      return c.json({ error: "Failed to delete round" }, 500);
+    }
+  },
+);
 
 // --- SHAREHOLDERS ---
 
@@ -219,54 +247,73 @@ capTableRoutes.get("/shareholders", async (c) => {
   }
 });
 
-capTableRoutes.post("/shareholders", async (c) => {
-  const tenantId = c.get("tenantId");
+capTableRoutes.post(
+  "/shareholders",
+  rateLimiter({ max: 10, windowMs: 60000 }),
+  validateBody(createShareholderSchema),
+  async (c) => {
+    const tenantId = c.get("tenantId");
 
-  try {
-    const body = await c.req.json();
+    try {
+      const body = c.get("validatedBody");
 
-    // Validate vesting schedule if provided
-    const vestingError = validateVestingSchedule(body.vesting_schedule);
-    if (vestingError) {
-      return c.json({ error: vestingError }, 400);
+      // Validate vesting schedule if provided (additional business logic checks)
+      const vestingError = validateVestingSchedule(body.vesting_schedule);
+      if (vestingError) {
+        return c.json({ error: vestingError }, 400);
+      }
+
+      const shareholder = await prisma.cap_table_shareholders.create({
+        data: {
+          tenant_id: tenantId as string,
+          round_id: body.round_id,
+          shareholder_name: body.shareholder_name,
+          shareholder_type: body.shareholder_type,
+          shares_count: body.shares_count,
+          share_price: body.share_price,
+          ownership_percentage: body.ownership_percentage,
+          investment_amount: body.investment_amount,
+          vesting_schedule: body.vesting_schedule,
+          notes: body.notes,
+        },
+      });
+
+      return c.json(shareholder, 201);
+    } catch (error) {
+      console.error("Error adding shareholder:", error);
+      return c.json({ error: "Failed to add shareholder" }, 500);
     }
+  },
+);
 
-    const shareholder = await prisma.cap_table_shareholders.create({
-      data: {
-        tenant_id: tenantId as string,
-        round_id: body.round_id,
-        shareholder_name: body.shareholder_name,
-        shareholder_type: body.shareholder_type,
-        shares_count: body.shares_count,
-        share_price: body.share_price,
-        ownership_percentage: body.ownership_percentage,
-        investment_amount: body.investment_amount,
-        vesting_schedule: body.vesting_schedule,
-        notes: body.notes,
-      },
-    });
+capTableRoutes.delete(
+  "/shareholders/:id",
+  rateLimiter({ max: 5, windowMs: 60000 }),
+  async (c) => {
+    const tenantId = c.get("tenantId");
+    const userRole = c.get("userRole");
+    const id = c.req.param("id");
 
-    return c.json(shareholder, 201);
-  } catch (error) {
-    console.error("Error adding shareholder:", error);
-    return c.json({ error: "Failed to add shareholder" }, 500);
-  }
-});
+    const repo = new PrismaFinanceRepository(prisma, tenantId as string);
+    const useCase = new DeleteShareholder(repo);
 
-capTableRoutes.delete("/shareholders/:id", async (c) => {
-  const tenantId = c.get("tenantId");
-  const id = c.req.param("id");
-
-  try {
-    await prisma.cap_table_shareholders.delete({
-      where: { id, tenant_id: tenantId as string },
-    });
-    return c.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting shareholder:", error);
-    return c.json({ error: "Failed to delete shareholder" }, 500);
-  }
-});
+    try {
+      const input = {
+        shareholderId: id as string,
+        tenantId: tenantId ?? "",
+        userRole: (userRole as string) ?? "",
+      };
+      await useCase.execute(input);
+      return c.json({ success: true });
+    } catch (error: any) {
+      if (error.code === "UNAUTHORIZED") {
+        return c.json({ error: error.message }, 403);
+      }
+      console.error("Error deleting shareholder:", error);
+      return c.json({ error: "Failed to delete shareholder" }, 500);
+    }
+  },
+);
 
 // --- SUMMARY ---
 

@@ -184,4 +184,18 @@ export class PrismaFinanceRepository implements IFinanceRepository {
   ): Promise<AccountBalanceDTO[]> {
     throw new Error("Method not implemented.");
   }
+
+  // === CAP TABLE ===
+
+  async deleteRound(id: string, tenantId: string): Promise<void> {
+    await this.prisma.cap_table_rounds.delete({
+      where: { id, tenant_id: tenantId },
+    });
+  }
+
+  async deleteShareholder(id: string, tenantId: string): Promise<void> {
+    await this.prisma.cap_table_shareholders.delete({
+      where: { id, tenant_id: tenantId },
+    });
+  }
 }

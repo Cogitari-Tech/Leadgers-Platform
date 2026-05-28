@@ -59,7 +59,11 @@ function BankAccountFetchingWrapper() {
   }, [fetchAccounts]);
 
   if (loading) {
-    return <div className="p-4 flex items-center justify-center text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin" /></div>;
+    return (
+      <div className="p-4 flex items-center justify-center text-muted-foreground">
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </div>
+    );
   }
 
   return <BankAccountForm accounts={accounts} onUpdate={fetchAccounts} />;
@@ -79,7 +83,9 @@ function OnboardingInviteWrapper() {
   useEffect(() => {
     // Definir default role "auditor" ou o primeiro não-owner
     if (roles.length > 0 && !linkRoleId) {
-      const defaultRole = roles.find(r => r.name === "auditor") || roles.find(r => r.name !== "owner");
+      const defaultRole =
+        roles.find((r) => r.name === "auditor") ||
+        roles.find((r) => r.name !== "owner");
       if (defaultRole) setLinkRoleId(defaultRole.id);
     }
   }, [roles, linkRoleId]);
@@ -88,10 +94,16 @@ function OnboardingInviteWrapper() {
     if (!linkRoleId) return;
     setGenerating(true);
     setSuccessMsg("");
-    
+
     // Uses default settings: maxUses=10, expiresDays=7
-    const url = await generateInviteLink(linkRoleId, 10, 7, "🔗 Link de Onboarding", email || undefined);
-    
+    const url = await generateInviteLink(
+      linkRoleId,
+      10,
+      7,
+      "🔗 Link de Onboarding",
+      email || undefined,
+    );
+
     if (url) {
       setGeneratedLink(url);
       if (email) {
@@ -133,10 +145,16 @@ function OnboardingInviteWrapper() {
           onChange={(e) => setLinkRoleId(e.target.value)}
           className="w-full px-4 py-3 text-sm bg-background/50 border border-border/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all rounded-xl font-medium appearance-none"
         >
-          <option value="" disabled>Selecione um cargo...</option>
-          {roles.filter(r => r.name !== "owner").map(r => (
-            <option key={r.id} value={r.id}>{r.display_name}</option>
-          ))}
+          <option value="" disabled>
+            Selecione um cargo...
+          </option>
+          {roles
+            .filter((r) => r.name !== "owner")
+            .map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.display_name}
+              </option>
+            ))}
         </select>
       </div>
 
@@ -147,7 +165,11 @@ function OnboardingInviteWrapper() {
           disabled={generating || !linkRoleId}
           className="w-full sm:w-auto px-8 py-5 rounded-xl font-bold uppercase tracking-wider text-xs"
         >
-          {generating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Link2 className="w-4 h-4 mr-2" />}
+          {generating ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : (
+            <Link2 className="w-4 h-4 mr-2" />
+          )}
           Gerar Convite
         </Button>
       </div>
@@ -181,7 +203,8 @@ function OnboardingInviteWrapper() {
 
       <div className="mt-8 pt-6 border-t border-border/20 text-center">
         <p className="text-xs text-muted-foreground font-medium">
-          Você poderá adicionar mais membros e configurar acessos complexos depois na etapa de <strong>Equipe</strong> no Painel.
+          Você poderá adicionar mais membros e configurar acessos complexos
+          depois na etapa de <strong>Equipe</strong> no Painel.
         </p>
       </div>
     </div>
@@ -814,7 +837,9 @@ export default function OnboardingWizard() {
           {step.key === "invite" && (
             <div className="space-y-5 animate-in fade-in zoom-in-95 duration-200">
               <p className="text-sm text-muted-foreground">
-                Convide membros da equipe gerando um link rápido de convite (válido por 7 dias). Você também pode pular esta etapa e fazer isso mais tarde no painel de{" "}
+                Convide membros da equipe gerando um link rápido de convite
+                (válido por 7 dias). Você também pode pular esta etapa e fazer
+                isso mais tarde no painel de{" "}
                 <strong>Administração → Equipe</strong>.
               </p>
 
@@ -840,11 +865,11 @@ export default function OnboardingWizard() {
               </p>
 
               <div className="grid gap-3">
-                <div
-                  className="flex items-center justify-between p-4 border border-border/20 rounded-xl bg-background/50"
-                >
+                <div className="flex items-center justify-between p-4 border border-border/20 rounded-xl bg-background/50">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl text-foreground"><Github className="w-8 h-8" /></span>
+                    <span className="text-2xl text-foreground">
+                      <Github className="w-8 h-8" />
+                    </span>
                     <div>
                       <p className="text-sm font-semibold">GitHub</p>
                       <p className="text-xs text-muted-foreground">

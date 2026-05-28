@@ -94,6 +94,18 @@ export interface IFinanceRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<AccountBalanceDTO[]>;
+
+  // === CAP TABLE ===
+
+  /**
+   * Deleta um round da cap table
+   */
+  deleteRound(id: string, tenantId: string): Promise<void>;
+
+  /**
+   * Deleta um shareholder
+   */
+  deleteShareholder(id: string, tenantId: string): Promise<void>;
 }
 
 // DTOs para relatórios
