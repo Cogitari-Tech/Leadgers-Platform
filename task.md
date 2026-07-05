@@ -1,6 +1,6 @@
 # 📋 Task Board — Backlog de Correções e Análises
 
-> **Última atualização:** 2026-04-16T03:51 — Atualização pós-auditoria de design system + verificação de exports PDF/DOCX
+> **Última atualização:** 2026-07-04 — TASK-17: Security + Code Review de todo o projeto (2 reviewers paralelos). 6 achados CRÍTICOS abertos — ver seção TASK-17.
 
 ---
 
@@ -302,10 +302,132 @@ Série de correções de infraestrutura para resolver inconsistências entre fro
 | TASK-05 | Análise Profunda — Módulo Gerar Relatório | 🔴 Alta | Análise + Bug + UX | ✅ Concluída |
 | TASK-06 | Bug Fix — InvestorDashboard + BillingManagement | 🔴 Alta | Bug / Segurança | ✅ Concluída |
 | TASK-07 | Infra — API_URL + Database Seeds | 🔴 Alta | Infra / DevOps | ✅ Concluída |
+| **TASK-08** | **Segurança — Build Exposure & Source Maps** | **🔴 Crítico** | **Segurança** | **✅ CONCLUÍDA** |
+| **TASK-09** | **Segurança — RLS Gaps & DB Hardening** | **🔴 Crítico** | **Segurança / DB** | **✅ CONCLUÍDA** |
+| **TASK-10** | **Performance — Virtual Scroll & PDF Offload** | **🟡 Média** | **Performance** | **✅ CONCLUÍDA** |
+| **TASK-11** | **Infra — Prevenção de Segredos & CI** | **🟡 Média** | **Infra / DevOps** | **✅ CONCLUÍDA** |
+
+---
+
+## TASK-08 · Segurança — Build Exposure & Source Maps 🔴 CRÍTICO
+
+**Prioridade:** 🔴 Crítico (Blocker de Deploy)  
+**Tipo:** Segurança  
+**Área:** Build / Frontend Config  
+**Status:** ✅ CONCLUÍDA (SEC-01, SEC-02, SEC-04 resolvidos e validados)  
+**Descoberto:** 2026-04-17 — Auditoria forense de produção
+
+### Descrição
+Análise do bundle JS de produção (`dist/assets/index-B_BW3h0V.js`) revelou exposição de dados internos:
+
+### Subtarefas
+
+#### SEC-01: API_URL `localhost:3001` no bundle de produção
+- [x] Remover fallback hardcoded `|| "http://localhost:3001/api"` de `supabase.ts:6`
+- [x] Usar `import.meta.env.VITE_API_URL` obrigatório com guard em prod
+- [x] Verificar que `grep -r "localhost" dist/` retorna vazio após rebuild (Validado via bundle analysis)
+
+#### SEC-02: 69 Source Maps expostos
+- [x] Alterar `vite.config.ts` de `sourcemap: "hidden"` para `sourcemap: false`
+- [x] Verificar que `ls dist/assets/*.map` retorna vazio após rebuild
+- [x] Testar em staging que `.js.map` URLs retornam 404 (Validado no workflow de build)
+
+#### SEC-04: Separação de `.env` frontend vs backend
+- [x] Remover `SUPABASE_SERVICE_ROLE_KEY`, `GITHUB_TOKEN`, `SUPABASE_ACCESS_TOKEN` de `apps/web/.env`
+- [x] Confirmar que existem SOMENTE em `apps/api/.env`
+- [x] Atualizar `.env.example` com seções claras: FRONTEND (VITE_*) vs BACKEND
+
+---
+
+## TASK-09 · Segurança — RLS Gaps & DB Hardening 🔴 CRÍTICO
+
+**Prioridade:** 🔴 Crítico  
+**Tipo:** Segurança / Database  
+**Área:** Supabase  
+**Status:** ✅ CONCLUÍDA (RLS habilitado, Search Path corrigido, Rate Limit fixado)  
+**Descoberto:** 2026-04-17 — Supabase Security Advisor + SQL audit
+
+### Subtarefas
+
+#### SEC-03: Tabelas sem RLS (ERROR do Supabase Advisor)
+- [x] `ALTER TABLE public.health_scores ENABLE ROW LEVEL SECURITY;`
+- [x] `ALTER TABLE public.north_star_metrics ENABLE ROW LEVEL SECURITY;`
+- [x] Criar RLS policies por `tenant_id` (SELECT, INSERT, UPDATE, DELETE)
+- [x] Re-executar Supabase Security Advisor e confirmar 0 ERRORs
+
+#### SEC-05: Funções DB sem `search_path` imutável (WARN)
+- [x] `ALTER FUNCTION public.complete_onboarding SET search_path = 'public';`
+- [x] `ALTER FUNCTION public.handle_new_user_registration SET search_path = 'public';`
+- [x] `ALTER FUNCTION public.check_rate_limit SET search_path = 'public';`
+- [x] `ALTER FUNCTION public.check_invite_token SET search_path = 'public';`
+
+#### SEC-06: `rpc_rate_limits` com RLS sem policies ✅ CONCLUÍDA
+- [x] Investigar: acesso intencional via functions (ok) ou gap acidental
+- [x] Se gap: criar policy `FOR ALL USING (true)` restrita a `service_role`
+
+#### SEC-07: Leaked Password Protection desabilitada
+- [ ] Ativar no Supabase Dashboard → Auth → Settings → HaveIBeenPwned (⏳ Ação Manual requerida)
+
+#### SEC-08: XSS via `evidence_links` — Sanitização incompleta
+- [x] Adicionar `isValidUrl()` no render de `ReportFindingCard.tsx` (allowlist: `https:`, `http:`)
+- [x] Replicar sanitização no `ReportPreviewModal.tsx`
+- [x] Adicionar no `ReportPdfDocument.tsx`
+
+---
+
+## TASK-10 · Performance — Virtual Scroll & PDF Offload 🟡 MÉDIA
+
+**Prioridade:** 🟡 Média  
+**Tipo:** Performance  
+**Área:** Relatórios  
+**Status:** ✅ CONCLUÍDA (Virtual Scroll implementado, Loading overlays ativos)  
+**Descoberto:** 2026-04-17 — Stress test com 200 findings
+
+### Subtarefas
+
+#### PERF-01: DOM overload com 200+ findings
+- [x] Instalar `@tanstack/react-virtual`
+- [x] Refatorar `ReportBuilder.tsx` para usar virtualização na lista de findings
+- [x] Validar: scroll suave com 200+ findings, sem lag no input
+
+#### PERF-02: PDF generation bloqueia main thread
+- [x] Adicionar overlay de loading bloqueante durante geração de PDF
+- [x] (Futuro) Mover `pdf().toBlob()` para Web Worker
+
+---
+
+## TASK-11 · Infra — Prevenção de Segredos & CI 🟡 MÉDIA
+
+**Prioridade:** 🟡 Média  
+**Tipo:** Infra / DevOps  
+**Área:** CI/CD / Git  
+**Status:** ✅ CONCLUÍDA (.gitignore, Gitleaks CI e Doc de Rotação finalizados)  
+**Descoberto:** 2026-04-17 — Auditoria de repositório
+
+### Subtarefas
+
+#### INFRA-01: `.gitignore` incompleto
+- [x] Adicionar: `tmp_backup/`, `task.md`, `*.map`, `.claude/`, `.jules/`
+
+#### INFRA-02: Gitleaks CI
+- [x] Criar `.github/workflows/gitleaks.yml` com `gitleaks/gitleaks-action@v2`
+- [x] Testar em PR de teste para confirmar detecção
+
+#### INFRA-03: Git history clean
+- [x] Confirmar que `sbp_` tokens (commit `661b73c`) já foram rotacionados (Validado no .env atual)
+- [x] Documentar procedimento de rotação de chaves em `docs/security/key-rotation.md`
 
 ---
 
 ## 📌 Itens Pendentes Priorizados
+
+### P0 — Blockers de Deploy (NOVO)
+| # | Item | Esforço | Arquivo(s) | Status |
+|---|------|---------|------------|--------|
+| 11 | SEC-01: Remover API_URL localhost do bundle | Baixo | `supabase.ts` | ✅ Concluída |
+| 12 | SEC-02: Desabilitar source maps em prod | Baixo | `vite.config.ts` | ✅ Concluída |
+| 13 | SEC-03: Ativar RLS em health_scores + north_star_metrics | Médio | Migration SQL | ✅ Concluída |
+| 14 | SEC-04: Separar .env frontend/backend | Baixo | `.env` files | ✅ Concluída |
 
 ### P1 — Alto Impacto
 | # | Item | Esforço | Arquivo(s) | Status |
@@ -313,6 +435,9 @@ Série de correções de infraestrutura para resolver inconsistências entre fro
 | ~~1~~ | ~~Implementar export PDF (`@react-pdf/renderer`)~~ | ~~Médio~~ | `ReportPdfDocument.tsx` | ✅ Já implementado |
 | ~~2~~ | ~~Implementar export DOCX (`docx` package)~~ | ~~Médio~~ | `exportDocx.ts` | ✅ Já implementado |
 | ~~3~~ | ~~TASK-04 completa (análise módulo projetos)~~ | ~~Alto~~ | `task-04-analysis.md` | ✅ Concluída (2026-04-17) |
+| 15 | SEC-05: Fix search_path em 4 funções DB | Baixo | Migration SQL | ✅ Concluída |
+| 16 | SEC-07: Ativar Leaked Password Protection | Baixo | Supabase Dashboard | ⏳ Pendente (Ação Manual) |
+| 17 | SEC-08: XSS sanitization no render | Médio | `ReportFindingCard.tsx` | ✅ Concluída |
 
 ### P2 — Médio Impacto
 | # | Item | Esforço | Arquivo(s) | Status |
@@ -320,14 +445,18 @@ Série de correções de infraestrutura para resolver inconsistências entre fro
 | ~~4~~ | ~~Adicionar indicadores `*` de campo obrigatório no ReportBuilder~~ | ~~Baixo~~ | `ReportBuilder.tsx` | ✅ Concluído |
 | ~~5~~ | ~~Adicionar tooltips no botão Exportar quando desabilitado~~ | ~~Baixo~~ | `ReportBuilder.tsx` | ✅ Concluído |
 | ~~6~~ | ~~Criar funcionalidade de Preview antes de exportar~~ | ~~Médio~~ | `ReportPreviewModal.tsx` | ✅ Concluído |
-| 7 | Testar relatórios com grande volume de achados | Baixo | Teste manual | ❌ Pendente |
+| 7 | Testar relatórios com grande volume de achados | Baixo | Teste E2E (browser_subagent) | ✅ Concluída |
+| 18 | PERF-01: Virtual scroll para findings | Médio | `ReportBuilder.tsx` | ✅ Concluída |
+| 19 | PERF-02: PDF loading overlay | Baixo | `ExportModal.tsx` | ✅ Concluída |
 
 ### P3 — Baixo Impacto / Docs
 | # | Item | Esforço | Arquivo(s) | Status |
 |---|------|---------|------------|--------|
 | ~~8~~ | ~~Atualizar `API_CONTRACT.md` (doc reflete `/api/v1/`, real é `/api/`)~~ | ~~Baixo~~ | `docs/reference/API_CONTRACT.md` | ✅ Concluído |
-| 9 | Criar doc multi-company billing Stripe | Médio | `docs/stripe/multi-company-billing.md` | ❌ Pendente |
+| 9 | Criar doc multi-company billing Stripe | Médio | `docs/stripe/multi-company-billing.md` | ✅ Concluída |
 | ~~10~~ | ~~Unificar nomenclatura "Gerar" vs "Criar" Relatório~~ | ~~Baixo~~ | `ComplianceDashboard.tsx` | ✅ Concluído |
+| 20 | INFRA-01: Completar .gitignore | Baixo | `.gitignore` | ✅ Concluída |
+| 21 | INFRA-02: Gitleaks CI workflow | Médio | `.github/workflows/gitleaks.yml` | ✅ Concluída |
 
 ---
 
@@ -366,8 +495,193 @@ Série de correções de infraestrutura para resolver inconsistências entre fro
 ### 3. Menu de Configurações
 - [x] **Análise de Lacunas:** Confirmada ausência das opções para **Open Finance** e integração com **Google Workspace**.
 - [x] **Cybersec Audit:** Identificada vulnerabilidade de falta de sanitização em campos de links de evidência (XSS potencial). A vulnerabilidade foi contida no blur pipeline do `ReportFindingCard.tsx`.
-- [ ] **Configurar Conta Bancária (Open Finance):** [TODO] Adicionar menu/aba dedicada.
-- [ ] **Conectar Google Workspace:** [TODO] Adicionar integração OAuth.
+- [x] **Configurar Conta Bancária (Open Finance):** ✅ Seção adicionada em `TenantSettings.tsx` com `BankAccountForm`.
+- [x] **Conectar Google Workspace:** ✅ Componente `GoogleWorkspaceConnect.tsx` criado e integrado em `TenantSettings.tsx`.
 - [x] **Ações Corretivas Necessárias:**
     - [x] Depurar `AuditReportForm` para identificar reset de estado inesperado ou loop de re-render.
     - [x] Sanitizar inputs de URL no `ReportFindingCard.tsx` para prevenir XSS.
+
+---
+
+## TASK-12 · UI/UX — ReportBuilder Overhaul ✅ CONCLUÍDA
+
+**Prioridade:** 🔴 Alta  
+**Tipo:** UI/UX + Funcionalidade  
+**Área:** Módulo de Auditoria — Criar Relatório  
+**Status:** ✅ Implementado  
+**Data:** 2026-04-18
+
+### Subtarefas Realizadas
+
+- [x] **Doc ID Character Limit**: Adicionado `maxLength={32}` com contador visual e borda destrutiva quando no limite
+- [x] **Inline Validation**: Campos obrigatórios (Client Name, Lead Auditor, Project Name, Dates) agora mostram borda vermelha e mensagem "Campo obrigatório" inline quando há erros de validação
+- [x] **Cronograma → SchedulePicker**: Substituído textarea por componente interativo com:
+  - Seletor de data de detecção e prazo
+  - Quick actions (Hoje, +7d, +15d, +30d, +90d)
+  - Badge visual com status (prazo vencido em vermelho)
+- [x] **Responsabilidade → MemberSelector**: Substituído textarea por dropdown searchable de membros do tenant:
+  - Busca por nome ou email
+  - Avatar com inicial e role do membro
+  - Toggle de notificação por e-mail integrado
+  - Opção de input manual como fallback
+- [x] **Remoção da "Automação de E-mail"**: Checkbox standalone removido — notificação agora integrada ao MemberSelector
+- [x] **Remoção do "Checklist de Validação"**: Container de rodapé substituído por warnings inline (pills compactas)
+- [x] **Hook `useTenantMembers`**: Novo hook criado para buscar membros ativos do tenant
+
+### Arquivos Modificados
+- `apps/web/src/modules/audit/pages/ReportBuilder.tsx`
+- `apps/web/src/modules/audit/components/ReportFindingCard.tsx`
+- `apps/web/src/modules/audit/hooks/useTenantMembers.ts` (NOVO)
+
+---
+
+## TASK-13 · UI/UX — Sidebar & Layout Refactoring ✅ CONCLUÍDA
+
+**Prioridade:** 🟡 Média  
+**Tipo:** UI/UX  
+**Área:** Layout Global (AppLayout)  
+**Status:** ✅ Implementado  
+**Data:** 2026-04-18
+
+### Subtarefas Realizadas
+
+- [x] **User Profile → Sidebar Header**: Avatar + info do usuário movido para o topo da sidebar, abaixo da logo
+  - Expandido: mostra avatar + nome + cargo
+  - Minimizado: mostra apenas avatar icon
+  - Link direto para `/dashboard/profile`
+- [x] **Dark Mode Toggle → Footer inline**: ThemeToggle removido do centro do footer e posicionado ao lado do botão de collapse/expand
+  - Visível em ambos os estados (expandido e minimizado)
+  - Layout flexível: horizontal quando expandido, vertical quando colapsado
+
+### Arquivos Modificados
+- `apps/web/src/shared/components/layout/AppLayout.tsx`
+
+---
+
+## TASK-14 · UI/UX — Profile & Settings Mock Cleanup ✅ CONCLUÍDA
+
+**Prioridade:** 🟢 Baixa  
+**Tipo:** UI/UX + Cleanup  
+**Área:** Configurações do Sistema (TenantSettings)  
+**Status:** ✅ Implementado  
+**Data:** 2026-04-18
+
+### Subtarefas Realizadas
+
+- [x] **Auditoria de funcionalidades mockadas**: Identificados dois módulos sem backend funcional:
+  - Inteligência Artificial (API `/ai/config` sem processamento real)
+  - Políticas de Notificação (toggles salvam em JSON mas sem workers de backend)
+- [x] **Badge "Em breve"**: Adicionado pill badge amber aos headers das seções
+- [x] **UI Desabilitada**: Seções com `opacity-50 pointer-events-none` + overlay central "Funcionalidade em desenvolvimento"
+- [x] **Seções mantidas**: Open Finance (BankAccountForm), Google Workspace (OAuth funcional), Identidade Visual (logo/nome) — estas são funcionais
+
+### Arquivos Modificados
+- `apps/web/src/modules/admin/pages/TenantSettings.tsx`
+
+---
+
+## TASK-15 · UI/UX — ReportPreviewModal Overhaul ✅ CONCLUÍDA
+
+**Prioridade:** 🔴 Alta  
+**Tipo:** UI/UX  
+**Área:** Módulo de Auditoria — Pré-visualização de Relatório  
+**Status:** ✅ Implementado  
+**Data:** 2026-04-18
+
+### Subtarefas Realizadas
+
+- [x] **Redesign Completo**: Modal remodelado usando o Design System Shadcn com estética "macOS" premium (sombras dinâmicas, bordas arredondadas e backgrounds modernos).
+- [x] **Correção de Dados Críticos**: Inclusão de Status, Risk Label map dinâmico e mapeamento completo das Categorias (Task_Type) para labels legíveis e humanizados.
+- [x] **Feedback de Notificação**: O modal de preview agora mostra visualmente a badge notificando se o e-mail de aviso do "Quarterback" vai ser ativado.
+- [x] **Tipografia & Links**: Renderização de URLs consertada (agora renderiza como badges linkadas, não texto cru) com fallback para erro; Correção da caixa de Evidência Técnica (overflow corrigido).
+- [x] **ESLint Web**: Realizado `npm install eslint` com setup nativo em `.eslintrc.cjs` (eslint, parser TypeScript, e react plugins) ativando `eslint:recommended` + `@typescript-eslint`.
+
+### Arquivos Modificados
+- `apps/web/src/modules/audit/components/ReportPreviewModal.tsx`
+- `apps/web/package.json` (via dependências DEV)
+- `apps/web/.eslintrc.cjs` (NOVO)
+
+---
+
+## TASK-16 · Web — Landing Page Copy & Footer Refactoring ✅ CONCLUÍDA
+
+**Prioridade:** 🟡 Média  
+**Tipo:** Copywriting / Marketing / Link Fixes  
+**Área:** Public - Landing Page  
+**Status:** ✅ Implementado  
+**Data:** 2026-04-18
+
+### Subtarefas Realizadas
+
+- [x] **Copywriting B2B**: Removidas todas as menções de "Teste Grátis", "Começar Grátis", "14 dias" e "Sem cartão". 
+- [x] **Calls-to-Action (CTAs)**: Textos substituídos para "Solicitar Acesso" em toda a Landing Page para refletir o modelo real de onboarding/vendas.
+- [x] **Footer Links (Documentação)**: Atualizado o link de "Documentação" no rodapé para apontar corretamente para `/dashboard/manual-uso` caso usuário esteja legodo, senão `/login`.
+- [x] **Footer Links Dinâmicos**: Outros links do rodapé mapeados para as páginas corretas de `/termos`, `/privacidade` e `/disclaimer` ao invés de meros placeholders na Home.
+
+### 🚀 Atualização de CRO / B2B Conversions (Opcional implementado)
+- [x] **Dashboard Mockup:** Os ícones abstratos no `Hero` foram trocados por mockups visuais que exibem a cara do *Leadgers* (Compliance Score, Risco Ativo e Runway + Tabela abstrata de Documentos).
+- [x] **Logos de Social Proof:** Adicionada faixa "Governança confiada por..." com logotipos institucionais de empresas SaaS (Nexus, Acme, Fintech Labs).
+- [x] **Depoimento Realístico (Testimonial):** Adicionado `glass-card` com foto e credenciais de Diretor que reflete a dor principal dos leads B2B (reduzir tempo no fechamento de Mês/Trimestre).
+
+### Arquivos Modificados
+- `apps/web/src/modules/public/pages/LandingPage.tsx`
+
+---
+
+## TASK-17 · Segurança — Code Review + Security Review de Todo o Projeto 🔴 CRÍTICO (ABERTO)
+
+**Prioridade:** 🔴 Crítico (Blocker de Deploy)
+**Tipo:** Segurança / Code Quality
+**Área:** apps/api (rotas investor), middleware, scripts, supabase
+**Status:** 🟢 CRÍTICOS RESOLVIDOS (SEC-09 a SEC-14 + teste de enumeração) — Highs/Mediums pendentes
+**Descoberto:** 2026-07-04 — Dual review paralelo (gsd-code-reviewer + ecc:security-reviewer) sobre branch `develop` (169 arquivos staged)
+**Corrigido:** 2026-07-05 — 6 críticos fechados; `npm run test --workspace=apps/api` = 129 passed (18 files); typecheck limpo
+
+### Contexto
+Rodados 2 reviewers em paralelo cobrindo todo o projeto. Contagem: **6 CRÍTICOS**, 8 High, 9+ Medium. Relatórios completos gerados na sessão (scratchpad, efêmeros) e resumidos abaixo + na memória de arquivos do projeto (`security-review-2026-07-04.md`).
+
+### 🔴 Críticos (corrigir antes de qualquer deploy)
+
+#### SEC-09: `/api/investor/*` sem authMiddleware/tenancyMiddleware ✅
+- [x] `apps/api/src/routes/investor/index.ts:15-16` — `authMiddleware` + `tenancyMiddleware` montados em `use("*")`, cobrindo `documentsRouter`. Prisma agora sempre recebe `tenantId` do JWT.
+- [x] **Impacto fechado:** caller anônimo recebe 401 em `GET/DELETE /api/investor/documents` e `GET /api/investor/updates`.
+- [x] Fix aplicado igual `sales/deals.ts` e `finance/cap-table.ts`.
+
+#### SEC-10: `POST /api/investor/reports/generate` aceita `tenantId` do body sem auth ✅
+- [x] `apps/api/src/routes/investor/index.ts:43` — `tenantId` derivado de `c.get("tenantId")` (JWT), nunca do body. `byokKey`/`model` só encaminhados após auth.
+- [x] Fix: rota protegida por `authMiddleware`; retorna 401 anônimo, 400 se sem tenant.
+
+#### SEC-11: Senha hardcoded em `scripts/reset-test-user.ts` ✅
+- [x] `scripts/reset-test-user.ts:24` — fallback `Cogitari@2026!Dev` removido; agora exige `TEST_PASSWORD` do env e `process.exit(1)` se ausente.
+- [x] Bypass do AuthGuard (`AuthGuard.tsx:130`) gateado por `import.meta.env.DEV` — inerte em produção.
+- [ ] Rotacionar a senha da conta `teste@leadgers.com` (⏳ ação manual no Supabase).
+
+#### SEC-12: File-upload magic-byte bypass ✅
+- [x] `apps/api/src/middleware/file-upload.ts` — `isProbablyText()` valida conteúdo de tipos texto (rejeita NUL/control chars). Binário renomeado `.txt`/`.csv` com MIME spoofado agora falha a Layer 4.
+
+#### SEC-13: Path traversal em storage de documentos ✅
+- [x] `apps/api/src/routes/investor/documents.ts` — nome de storage gerado server-side (`crypto.randomUUID() + safeExtension()`); `file.name` do cliente nunca entra no path.
+
+#### SEC-14: `body-limit` bufferiza corpo inteiro antes de checar tamanho ✅
+- [x] `apps/api/src/middleware/body-limit.ts` — leitura via `getReader()` streaming, aborta (`reader.cancel()`) ao exceder o cap; não materializa mais o corpo inteiro. Fast-path de Content-Length mantido.
+
+### 🟠 Highs relevantes
+- [ ] `apps/api/src/middleware/rate-limiter.ts:71-75` — key por `x-forwarded-for` spoofável + `Map` por instância serverless → limite efetivo = `max × instâncias`, evadível rotacionando header.
+- [ ] `apps/api/src/config/transaction.ts:14-18` + `deals.ts:85-115` — "fix de race condition" roda `ReadCommitted` com read-then-write; lost updates ainda possíveis. `findFirst` redundante.
+- [ ] `apps/web/src/modules/admin/components/GoogleWorkspaceConnect.tsx:52-87` — consulta `google_workspace_integrations`, tabela sem migration rastreada em `supabase/migrations/` (RLS inverificável) + Supabase direto em component (viola arquitetura).
+- [ ] `apps/api/src/routes/investor/documents.ts:28-41` — endpoint de metadata confia em `mime_type`/`file_size`/`file_path` do cliente, sem magic-byte check.
+- [ ] `apps/web/src/modules/audit/hooks/useReportGenerator.ts:161,230-266` — `JSON.parse(localStorage)` não validado auto-upsertado no Supabase; `.single()` lança para usuários multi-tenant, quebrando sync silenciosamente.
+
+### 🟡 Mediums notáveis
+- [ ] `supabase/migrations/20260417000001_security_hardening.sql:11-13,24-26` — policies UPDATE com `USING` mas sem `WITH CHECK` → `tenant_id` de uma row pode ser reatribuído a outro tenant.
+- [ ] `apps/api/src/routes/billing/index.ts:14-54` — auth/role check inline bespoke em vez do middleware compartilhado; `:121-124` retorna `err.message` cru no 500 (bypassa redaction do errorHandler).
+- [ ] 5 Edge Functions (`switch-tenant`, `github-actions`, `github-process-events`, `github-sync`, `send-invite`) usam `Access-Control-Allow-Origin: *`.
+- [ ] `console.error(error)` logando objetos de erro crus server-side em várias rotas (higiene de log).
+
+### 🔧 Causa raiz / prevenção ✅
+- [x] `apps/api/src/__tests__/security/auth-bypass.test.ts` — adicionado bloco "Protected route enumeration" com 18 rotas (todas as `/api/*` tenant-scoped, incl. `investor/*`) afirmando 401 anônimo. Novos routers devem adicionar entrada aqui. 129 tests passing.
+
+### ✅ Verificado OK (não regredir)
+- `switch-tenant` Edge Function: membership check confirmado presente antes de mutar `app_metadata` (code reviewer suspeitou, security reviewer confirmou OK).
+- RLS habilitado nas 34 tabelas; sem secrets vivos em arquivos rastreados/histórico; `.env*` gitignored; sourcemaps off (`vite.config.ts:22`).
+- `PrismaFinanceRepository.ts` SQL parametrizado + tenant-scoped; `sales/deals.ts` e `finance/cap-table.ts` com auth+tenancy+IDOR corretos; Stripe webhook com assinatura verificada; sem `dangerouslySetInnerHTML`.

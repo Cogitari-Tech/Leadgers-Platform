@@ -21,7 +21,15 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function findAndResetUser() {
   const email = process.env.TEST_EMAIL || "teste@leadgers.com";
-  const newPassword = process.env.TEST_PASSWORD || "Fallback@2026!Dev";
+  const newPassword = process.env.TEST_PASSWORD;
+
+  // Never ship a hardcoded credential fallback — require it from the environment.
+  if (!newPassword) {
+    console.error(
+      "Missing TEST_PASSWORD env var. Set it before running this script.",
+    );
+    process.exit(1);
+  }
 
   console.log(`Checking for user: ${email}...`);
 
