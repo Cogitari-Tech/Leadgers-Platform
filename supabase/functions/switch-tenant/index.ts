@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -65,18 +61,18 @@ serve(async (req) => {
 
     // 4. Update the user app_metadata using Admin API
     const currentMetadata = user.app_metadata || {};
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
-      {
+    const { error: updateError } =
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
         app_metadata: {
           ...currentMetadata,
           tenant_id: tenant_id,
         },
-      }
-    );
+      });
 
     if (updateError) {
-      throw new Error(`Failed to update tenant metadata: ${updateError.message}`);
+      throw new Error(
+        `Failed to update tenant metadata: ${updateError.message}`,
+      );
     }
 
     return new Response(JSON.stringify({ success: true, tenant_id }), {
@@ -92,7 +88,7 @@ serve(async (req) => {
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
-      }
+      },
     );
   }
 });

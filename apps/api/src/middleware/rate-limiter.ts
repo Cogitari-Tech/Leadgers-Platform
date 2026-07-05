@@ -22,6 +22,33 @@ interface WindowEntry {
   resetAt: number;
 }
 
+/**
+ * Derives a client key that is hard to forge from the browser.
+ *
+ * `x-forwarded-for` is fully client-controllable, so rotating it lets an
+ * attacker mint a fresh bucket per request and bypass the limit. On Vercel /
+ * most reverse proxies `x-real-ip` is set by the platform (overwriting any
+ * client-supplied value), so it is preferred. When falling back to XFF we take
+ * only the left-most hop (the original client) instead of the raw header, so a
+ * padded chain still collapses to one key.
+ *
+ * Note: the backing store is an in-memory Map, so the effective limit is
+ * `max × number of serverless instances`. For strict limits back this with a
+ * shared store (Redis) via a custom `keyGenerator`.
+ */
+function defaultClientKey(c: Context): string {
+  const realIp = c.req.header("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  const forwarded = c.req.header("x-forwarded-for");
+  if (forwarded) {
+    const firstHop = forwarded.split(",")[0]?.trim();
+    if (firstHop) return firstHop;
+  }
+
+  return "unknown";
+}
+
 const stores = new Map<string, Map<string, WindowEntry>>();
 
 function getStore(name: string): Map<string, WindowEntry> {
@@ -68,11 +95,7 @@ export function rateLimiter(config: RateLimitConfig) {
   }
 
   return async function rateLimit(c: Context, next: Next) {
-    const key = keyGenerator
-      ? keyGenerator(c)
-      : c.req.header("x-forwarded-for") ||
-        c.req.header("x-real-ip") ||
-        "unknown";
+    const key = keyGenerator ? keyGenerator(c) : defaultClientKey(c);
 
     const now = Date.now();
     let entry = store.get(key);

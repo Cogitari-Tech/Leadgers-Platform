@@ -633,7 +633,7 @@ Análise do bundle JS de produção (`dist/assets/index-B_BW3h0V.js`) revelou ex
 **Prioridade:** 🔴 Crítico (Blocker de Deploy)
 **Tipo:** Segurança / Code Quality
 **Área:** apps/api (rotas investor), middleware, scripts, supabase
-**Status:** 🟢 CRÍTICOS RESOLVIDOS (SEC-09 a SEC-14 + teste de enumeração) — Highs/Mediums pendentes
+**Status:** 🟢 CRÍTICOS RESOLVIDOS (SEC-09 a SEC-14) + 5 Highs/Mediums fechados 2026-07-05 (rate-limiter, transaction race, google_workspace migration, WITH CHECK policies, CORS allowlist). Pendentes: metadata magic-byte, useReportGenerator localStorage, billing inline auth, console.error hygiene
 **Descoberto:** 2026-07-04 — Dual review paralelo (gsd-code-reviewer + ecc:security-reviewer) sobre branch `develop` (169 arquivos staged)
 **Corrigido:** 2026-07-05 — 6 críticos fechados; `npm run test --workspace=apps/api` = 129 passed (18 files); typecheck limpo
 
@@ -666,16 +666,16 @@ Rodados 2 reviewers em paralelo cobrindo todo o projeto. Contagem: **6 CRÍTICOS
 - [x] `apps/api/src/middleware/body-limit.ts` — leitura via `getReader()` streaming, aborta (`reader.cancel()`) ao exceder o cap; não materializa mais o corpo inteiro. Fast-path de Content-Length mantido.
 
 ### 🟠 Highs relevantes
-- [ ] `apps/api/src/middleware/rate-limiter.ts:71-75` — key por `x-forwarded-for` spoofável + `Map` por instância serverless → limite efetivo = `max × instâncias`, evadível rotacionando header.
-- [ ] `apps/api/src/config/transaction.ts:14-18` + `deals.ts:85-115` — "fix de race condition" roda `ReadCommitted` com read-then-write; lost updates ainda possíveis. `findFirst` redundante.
-- [ ] `apps/web/src/modules/admin/components/GoogleWorkspaceConnect.tsx:52-87` — consulta `google_workspace_integrations`, tabela sem migration rastreada em `supabase/migrations/` (RLS inverificável) + Supabase direto em component (viola arquitetura).
+- [x] `apps/api/src/middleware/rate-limiter.ts` — chave agora via `defaultClientKey()`: prefere `x-real-ip` (setado pela plataforma), fallback = primeiro hop do XFF (não o header cru). Header-rotation trivial não gera mais buckets novos. Limitação `max × instâncias` documentada no JSDoc (mitigar com `keyGenerator`/Redis).
+- [x] `apps/api/src/routes/sales/deals.ts` — PATCH reescrito para `UPDATE ... WHERE {id, tenant_id}` único e atômico (sem read-then-write); `findFirst` + `withTransaction` removidos; P2025 → 404. IDOR-safe e race-free.
+- [x] `google_workspace_integrations` — migration criada (`20260705000001_google_workspace_integrations.sql`): tabela + RLS tenant-scoped (SELECT/INSERT/UPDATE/DELETE, UPDATE/INSERT com `WITH CHECK`). ⚠️ Ainda aberto: Supabase direto no component (violação arquitetural — refactor p/ repository+hook fora do escopo deste patch).
 - [ ] `apps/api/src/routes/investor/documents.ts:28-41` — endpoint de metadata confia em `mime_type`/`file_size`/`file_path` do cliente, sem magic-byte check.
 - [ ] `apps/web/src/modules/audit/hooks/useReportGenerator.ts:161,230-266` — `JSON.parse(localStorage)` não validado auto-upsertado no Supabase; `.single()` lança para usuários multi-tenant, quebrando sync silenciosamente.
 
 ### 🟡 Mediums notáveis
-- [ ] `supabase/migrations/20260417000001_security_hardening.sql:11-13,24-26` — policies UPDATE com `USING` mas sem `WITH CHECK` → `tenant_id` de uma row pode ser reatribuído a outro tenant.
+- [x] `supabase/migrations/20260705000002_update_policies_with_check.sql` — recria as policies UPDATE de `health_scores` e `north_star_metrics` com `WITH CHECK` (forward-fix; migration original é imutável). Re-parenting de `tenant_id` via UPDATE bloqueado.
 - [ ] `apps/api/src/routes/billing/index.ts:14-54` — auth/role check inline bespoke em vez do middleware compartilhado; `:121-124` retorna `err.message` cru no 500 (bypassa redaction do errorHandler).
-- [ ] 5 Edge Functions (`switch-tenant`, `github-actions`, `github-process-events`, `github-sync`, `send-invite`) usam `Access-Control-Allow-Origin: *`.
+- [x] 5 Edge Functions (`switch-tenant`, `github-actions`, `github-process-events`, `github-sync`, `send-invite`) — CORS `*` substituído por allowlist compartilhada (`_shared/cors.ts`, `getCorsHeaders(req)`, origens via env `ALLOWED_ORIGINS`, default = domínios leadgers.com + localhost dev).
 - [ ] `console.error(error)` logando objetos de erro crus server-side em várias rotas (higiene de log).
 
 ### 🔧 Causa raiz / prevenção ✅
