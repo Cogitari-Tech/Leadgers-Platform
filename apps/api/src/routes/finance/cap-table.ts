@@ -2,7 +2,13 @@ import { Hono } from "hono";
 import { prisma } from "../../config/prisma";
 import { authMiddleware } from "../../middleware/auth";
 import { tenancyMiddleware } from "../../middleware/tenancy";
+import { validateBody } from "../../middleware/validate";
+import { createRoundSchema, createShareholderSchema } from "../../schemas";
 import { AppEnv } from "../../types/env";
+
+// Deleting cap table data is destructive and tenant-wide (rounds cascade to
+// shareholders) — restrict to the same roles allowed to manage billing.
+const FINANCE_WRITE_ROLES = ["owner", "admin"];
 
 // --- Type definitions ---
 
@@ -143,12 +149,12 @@ capTableRoutes.get("/rounds", async (c) => {
   }
 });
 
-capTableRoutes.post("/rounds", async (c) => {
+capTableRoutes.post("/rounds", validateBody(createRoundSchema), async (c) => {
   const tenantId = c.get("tenantId");
   const user = c.get("user");
 
   try {
-    const body = await c.req.json();
+    const body = c.get("validatedBody");
 
     const round = await prisma.cap_table_rounds.create({
       data: {
@@ -173,7 +179,15 @@ capTableRoutes.post("/rounds", async (c) => {
 
 capTableRoutes.delete("/rounds/:id", async (c) => {
   const tenantId = c.get("tenantId");
+  const userRole = c.get("userRole");
   const id = c.req.param("id");
+
+  if (!FINANCE_WRITE_ROLES.includes(userRole)) {
+    return c.json(
+      { error: "Insufficient permissions to delete financial records" },
+      403,
+    );
+  }
 
   try {
     await prisma.cap_table_rounds.delete({
@@ -219,43 +233,55 @@ capTableRoutes.get("/shareholders", async (c) => {
   }
 });
 
-capTableRoutes.post("/shareholders", async (c) => {
-  const tenantId = c.get("tenantId");
+capTableRoutes.post(
+  "/shareholders",
+  validateBody(createShareholderSchema),
+  async (c) => {
+    const tenantId = c.get("tenantId");
 
-  try {
-    const body = await c.req.json();
+    try {
+      const body = c.get("validatedBody");
 
-    // Validate vesting schedule if provided
-    const vestingError = validateVestingSchedule(body.vesting_schedule);
-    if (vestingError) {
-      return c.json({ error: vestingError }, 400);
+      // Validate vesting schedule if provided
+      const vestingError = validateVestingSchedule(body.vesting_schedule);
+      if (vestingError) {
+        return c.json({ error: vestingError }, 400);
+      }
+
+      const shareholder = await prisma.cap_table_shareholders.create({
+        data: {
+          tenant_id: tenantId as string,
+          round_id: body.round_id,
+          shareholder_name: body.shareholder_name,
+          shareholder_type: body.shareholder_type,
+          shares_count: body.shares_count,
+          share_price: body.share_price,
+          ownership_percentage: body.ownership_percentage,
+          investment_amount: body.investment_amount,
+          vesting_schedule: body.vesting_schedule,
+          notes: body.notes,
+        },
+      });
+
+      return c.json(shareholder, 201);
+    } catch (error) {
+      console.error("Error adding shareholder:", error);
+      return c.json({ error: "Failed to add shareholder" }, 500);
     }
-
-    const shareholder = await prisma.cap_table_shareholders.create({
-      data: {
-        tenant_id: tenantId as string,
-        round_id: body.round_id,
-        shareholder_name: body.shareholder_name,
-        shareholder_type: body.shareholder_type,
-        shares_count: body.shares_count,
-        share_price: body.share_price,
-        ownership_percentage: body.ownership_percentage,
-        investment_amount: body.investment_amount,
-        vesting_schedule: body.vesting_schedule,
-        notes: body.notes,
-      },
-    });
-
-    return c.json(shareholder, 201);
-  } catch (error) {
-    console.error("Error adding shareholder:", error);
-    return c.json({ error: "Failed to add shareholder" }, 500);
-  }
-});
+  },
+);
 
 capTableRoutes.delete("/shareholders/:id", async (c) => {
   const tenantId = c.get("tenantId");
+  const userRole = c.get("userRole");
   const id = c.req.param("id");
+
+  if (!FINANCE_WRITE_ROLES.includes(userRole)) {
+    return c.json(
+      { error: "Insufficient permissions to delete financial records" },
+      403,
+    );
+  }
 
   try {
     await prisma.cap_table_shareholders.delete({

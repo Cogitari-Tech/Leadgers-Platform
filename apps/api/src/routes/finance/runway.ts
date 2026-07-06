@@ -3,6 +3,8 @@ import { prisma } from "../../config/prisma";
 import { PrismaFinanceRepository } from "../../adapters/PrismaFinanceRepository";
 import { authMiddleware } from "../../middleware/auth";
 import { tenancyMiddleware } from "../../middleware/tenancy";
+import { validateBody } from "../../middleware/validate";
+import { runwayProjectionSchema } from "../../schemas";
 import { AppEnv } from "../../types/env";
 
 const runwayRoutes = new Hono<AppEnv>();
@@ -32,10 +34,10 @@ const DEFAULT_SCENARIOS = [
   },
 ];
 
-runwayRoutes.post("/", async (c) => {
-  const body = await c.req.json().catch(() => ({}));
-  const cashBalance = body.cashBalance || 100000;
-  const projectionMonths = body.projectionMonths || 24;
+runwayRoutes.post("/", validateBody(runwayProjectionSchema), async (c) => {
+  const body = c.get("validatedBody");
+  const cashBalance = body.cashBalance;
+  const projectionMonths = body.projectionMonths;
   const scenarios = body.scenarios || DEFAULT_SCENARIOS;
 
   const tenantId = c.get("tenantId");

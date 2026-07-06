@@ -155,28 +155,59 @@ export const createHeadcountSchema = z.object({
 export const updateHeadcountSchema = createHeadcountSchema.partial();
 
 // ─── Cap Table ───────────────────────────────────────────
+// Field names match apps/api/src/routes/finance/cap-table.ts and the
+// cap_table_rounds/cap_table_shareholders Prisma models. tenant_id and
+// created_by are server-derived and deliberately excluded from the client
+// schema (allowlist-by-omission prevents mass assignment).
 
 export const createRoundSchema = z.object({
-  name: safeString(200),
-  round_date: safeString(100),
+  round_name: safeString(200),
+  round_type: safeString(100),
   pre_money_valuation: z.number().nonnegative().max(1_000_000_000_000),
   amount_raised: z.number().nonnegative().max(1_000_000_000_000),
-  share_price: z.number().positive().max(1_000_000),
-  shares_issued: z.number().int().positive().max(1_000_000_000),
-  investor_names: z.array(safeString(200)).max(50).optional(),
+  post_money_valuation: z
+    .number()
+    .nonnegative()
+    .max(1_000_000_000_000)
+    .optional()
+    .nullable(),
+  round_date: z.string().max(100).optional().nullable(),
   notes: safeText(2000).optional().nullable(),
 });
 
+const vestingScheduleSchema = z.object({
+  start_date: z.string().max(100).optional(),
+  cliff_months: z.number().int().min(0).max(120).optional(),
+  duration_months: z.number().int().min(0).max(120).optional(),
+});
+
 export const createShareholderSchema = z.object({
-  name: safeString(200),
-  type: z.enum(["founder", "investor", "employee", "advisor", "other"]),
-  shares: z.number().int().nonnegative().max(1_000_000_000),
-  share_class: safeString(50).optional().default("common"),
-  investment_amount: z.number().nonnegative().max(1_000_000_000_000).optional(),
-  vesting_start_date: z.string().max(100).optional().nullable(),
-  vesting_months: z.number().int().min(0).max(120).optional(),
-  cliff_months: z.number().int().min(0).max(48).optional(),
+  round_id: safeUuid().optional().nullable(),
+  shareholder_name: safeString(200),
+  shareholder_type: safeString(100),
+  shares_count: z.number().nonnegative().max(1_000_000_000),
+  share_price: z.number().nonnegative().max(1_000_000),
+  ownership_percentage: z.number().min(0).max(100),
+  investment_amount: z.number().nonnegative().max(1_000_000_000_000),
+  vesting_schedule: vestingScheduleSchema.optional().nullable(),
   notes: safeText(2000).optional().nullable(),
+});
+
+// ─── Finance Runway ──────────────────────────────────────
+// projectionMonths drives a synchronous simulation loop — capping it stops an
+// attacker-supplied huge value from becoming a DoS.
+
+const runwayScenarioSchema = z.object({
+  label: safeString(50),
+  revenueGrowthRate: z.number().min(-1).max(1),
+  costReductionRate: z.number().min(-1).max(1),
+  color: z.string().max(20).optional(),
+});
+
+export const runwayProjectionSchema = z.object({
+  cashBalance: z.number().nonnegative().max(1_000_000_000_000).default(100000),
+  projectionMonths: z.number().int().positive().max(120).default(24),
+  scenarios: z.array(runwayScenarioSchema).max(10).optional(),
 });
 
 // ─── AI Config ───────────────────────────────────────────
