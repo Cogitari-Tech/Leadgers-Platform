@@ -1,4 +1,4 @@
-# 🏗️ Cogitari Platform - Documentação Completa de Arquitetura
+# 🏗️ Leadgers Platform - Documentação Completa de Arquitetura
 
 **Sistema de Auditoria, Compliance e Gestão Financeira**  
 **Cogitari Tech** (CNPJ: 64.460.886/0001-39)
