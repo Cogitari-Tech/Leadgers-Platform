@@ -18,7 +18,6 @@ interface CalculatedVesting {
   percentage: number;
 }
 
-
 /**
  * Calculates vested/unvested shares based on a vesting schedule.
  * Handles cliff periods, linear vesting, and edge cases.

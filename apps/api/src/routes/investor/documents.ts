@@ -54,6 +54,14 @@ documentsRouter.post(
     const user = c.get("user");
     const body = c.req.valid("json");
 
+    // The client declares file_path, but it must live under this tenant's own
+    // storage prefix — otherwise a caller could register a metadata row that
+    // points at another tenant's stored object.
+    const tenantPrefix = `uploads/${tenantId}/`;
+    if (!body.file_path.startsWith(tenantPrefix)) {
+      return c.json({ error: "file_path outside tenant storage scope" }, 400);
+    }
+
     try {
       const newDoc = await prisma.data_room_documents.create({
         data: {

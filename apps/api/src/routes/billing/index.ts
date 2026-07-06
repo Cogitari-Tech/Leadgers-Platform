@@ -1,52 +1,32 @@
 import { Hono } from "hono";
 import Stripe from "stripe";
 import { supabaseAdmin as supabase } from "../../config/supabase";
+import { authMiddleware } from "../../middleware/auth";
+import { tenancyMiddleware } from "../../middleware/tenancy";
+import type { AppEnv } from "../../types/env";
 
-const billingRoutes = new Hono();
+const billingRoutes = new Hono<AppEnv>();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-12-18.acacia" as any,
 });
 
+const BILLING_ROLES = ["owner", "admin"];
+
+// Auth + tenant isolation for privileged billing routes. The Stripe webhook is
+// mounted separately below and stays unauthenticated (verified via signature).
+billingRoutes.use("/checkout-session", authMiddleware, tenancyMiddleware);
+
 // Endpoint to create a checkout session for a specific tenant
 billingRoutes.post("/checkout-session", async (c) => {
   try {
-    const authHeader = c.req.header("Authorization");
-    const tenantId = c.req.header("x-tenant-id");
+    // tenantId + role come from the authenticated session (tenancyMiddleware),
+    // never from client-controlled input.
+    const user = c.get("user");
+    const tenantId = c.get("tenantId");
+    const userRole = c.get("userRole");
 
-    if (!authHeader || !tenantId) {
-      return c.json({ error: "Missing authentication or tenant context" }, 401);
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
-
-    if (userError || !user) {
-      return c.json({ error: "Invalid user token" }, 401);
-    }
-
-    // Verify user is an owner or admin of the tenant
-    const { data: memberData, error: memberError } = await supabase
-      .from("tenant_members")
-      .select("role:roles!inner(name)")
-      .eq("tenant_id", tenantId)
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle();
-
-    if (
-      memberError ||
-      !memberData ||
-      // In Supabase, the role relationship is returned differently depending on schema. Let's assume an array or direct object.
-      // Easiest is to just allow it to fetch role and check name.
-      !memberData.role ||
-      (Array.isArray(memberData.role)
-        ? !memberData.role.some((r: any) => ["owner", "admin"].includes(r.name))
-        : !["owner", "admin"].includes((memberData.role as any).name))
-    ) {
+    if (!BILLING_ROLES.includes(userRole)) {
       return c.json(
         { error: "Insufficient permissions to manage billing" },
         403,
@@ -118,9 +98,10 @@ billingRoutes.post("/checkout-session", async (c) => {
     });
 
     return c.json({ url: session.url });
-  } catch (err: any) {
+  } catch (err) {
+    // Log the detail server-side; never leak raw Stripe/DB error text to clients.
     console.error("Stripe Checkout Session error:", err);
-    return c.json({ error: err.message }, 500);
+    return c.json({ error: "Failed to create checkout session" }, 500);
   }
 });
 
