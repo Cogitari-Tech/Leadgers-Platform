@@ -2,11 +2,7 @@
   "servers": {
     "filesystem": {
       "command": "E:\\cache\\npm-global\\mcp-server-filesystem.cmd",
-      "args": [
-        "E:\\Dev",
-        "D:\\ai-game-factory",
-        "C:\\Users\\morek"
-      ]
+      "args": ["E:\\Dev", "D:\\ai-game-factory", "C:\\Users\\morek"]
     },
     "github": {
       "command": "E:\\cache\\npm-global\\mcp-server-github.cmd",
@@ -17,10 +13,7 @@
     },
     "supabase": {
       "command": "E:\\cache\\npm-global\\mcp-server-supabase.cmd",
-      "args": [
-        "--access-token",
-        "<SEU_SUPABASE_ACCESS_TOKEN>"
-      ]
+      "args": ["--access-token", "<SEU_SUPABASE_ACCESS_TOKEN>"]
     },
     "memory": {
       "command": "E:\\cache\\npm-global\\mcp-server-memory.cmd",
@@ -28,10 +21,7 @@
     },
     "sequential-thinking": {
       "command": "C:\\Program Files\\nodejs\\npx.cmd",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "context7": {
       "command": "E:\\cache\\npm-global\\context7-mcp.cmd",

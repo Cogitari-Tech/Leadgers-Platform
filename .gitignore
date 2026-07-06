@@ -40,6 +40,10 @@ Thumbs.db
 # Turborepo
 .turbo
 
+# Python (bundled skill scripts)
+__pycache__/
+*.pyc
+
 # Supabase
 supabase/.temp
 supabase/functions/*/deno.lock
@@ -52,6 +56,16 @@ tmp/
 # Vercel
 .vercel
 
+# Project-scoped MCP config (contains Supabase project refs — keep local, never commit)
+.mcp.json
+
 e2e-user-registration.ts
 e2e-audit-menus.ts
 mcp_config.json
+ 
+tmp_backup/
+task.md
+*.map
+.claude/
+.jules/
+.env*
