@@ -131,7 +131,7 @@ export default function SalesPipeline() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
             <DollarSign className="w-6 h-6" />
           </div>
@@ -145,7 +145,7 @@ export default function SalesPipeline() {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
             <Target className="w-6 h-6" />
           </div>
@@ -159,7 +159,7 @@ export default function SalesPipeline() {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
             <TrendingUp className="w-6 h-6" />
           </div>
@@ -186,7 +186,7 @@ export default function SalesPipeline() {
           return (
             <div
               key={stage.key}
-              className="min-w-[280px] flex-1 glass-panel rounded-3xl border border-border/30 p-4 space-y-3"
+              className="min-w-[280px] flex-1 glass-panel rounded-3xl border-border/30 p-4 space-y-3"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 const dealId = e.dataTransfer.getData("dealId");
@@ -256,7 +256,7 @@ export default function SalesPipeline() {
           return (
             <div
               key={status}
-              className="glass-panel rounded-3xl border border-border/30 p-5"
+              className="glass-panel rounded-3xl border-border/30 p-5"
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className={`w-3 h-3 rounded-full ${stageInfo.color}`} />
@@ -295,7 +295,7 @@ export default function SalesPipeline() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleSubmit}
-            className="glass-panel rounded-3xl border border-border/40 p-8 w-full max-w-xl space-y-6 shadow-2xl"
+            className="glass-panel rounded-3xl p-8 w-full max-w-xl space-y-6 shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-black tracking-tight">

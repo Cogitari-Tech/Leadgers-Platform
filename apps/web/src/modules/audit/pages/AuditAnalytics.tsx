@@ -141,7 +141,7 @@ export default function AuditAnalytics() {
         {kpiCards.map((kpi) => (
           <div
             key={kpi.title}
-            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[2.5rem] border border-white/10 hover:-translate-y-2 transition-all"
+            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group dark:bg-black/20 rounded-3xl hover:-translate-y-2 transition-all"
           >
             <div className="flex items-start justify-between mb-6">
               <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] relative z-10">
@@ -164,7 +164,7 @@ export default function AuditAnalytics() {
       {/* Charts Row 1: Risk Donut + Findings Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Risk Distribution Donut */}
-        <div className="glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="p-8 border-b border-white/5">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-primary" />
@@ -234,7 +234,7 @@ export default function AuditAnalytics() {
         </div>
 
         {/* Findings Trend Area Chart */}
-        <div className="lg:col-span-2 glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="p-8 border-b border-white/5 flex justify-between items-center">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-primary" />
@@ -353,7 +353,7 @@ export default function AuditAnalytics() {
       {/* Charts Row 2: Programs by Status + Action Plan Velocity + Findings Status */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Programs by Status */}
-        <div className="glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="p-8 border-b border-white/5">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Programas por Status
@@ -413,7 +413,7 @@ export default function AuditAnalytics() {
         </div>
 
         {/* Action Plan Velocity */}
-        <div className="glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="p-8 border-b border-white/5">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Velocidade dos Planos de Ação
@@ -484,7 +484,7 @@ export default function AuditAnalytics() {
         </div>
 
         {/* Findings by Status */}
-        <div className="glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="p-8 border-b border-white/5">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Achados por Status

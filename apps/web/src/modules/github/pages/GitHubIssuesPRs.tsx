@@ -121,7 +121,7 @@ export default function GitHubIssuesPRs() {
             filteredPRs.map((pr) => (
               <div
                 key={pr.id}
-                className="glass-panel rounded-2xl border border-border/30 p-5 space-y-3 hover:border-primary/20 transition-colors"
+                className="glass-panel rounded-2xl border-border/30 p-5 space-y-3 hover:border-primary/20 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 min-w-0">
@@ -196,7 +196,7 @@ export default function GitHubIssuesPRs() {
             filteredIssues.map((issue) => (
               <div
                 key={issue.id}
-                className="glass-panel rounded-2xl border border-border/30 p-5 space-y-3 hover:border-primary/20 transition-colors"
+                className="glass-panel rounded-2xl border-border/30 p-5 space-y-3 hover:border-primary/20 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 min-w-0">
@@ -268,7 +268,7 @@ export default function GitHubIssuesPRs() {
       {/* Link PR Modal */}
       {linkModalPrId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl">
-          <div className="glass-card bg-white/5 border border-white/10 rounded-[3rem] p-12 max-w-lg w-full shadow-2xl space-y-8 relative scale-up">
+          <div className="glass-card rounded-3xl p-12 max-w-lg w-full shadow-2xl space-y-8 relative scale-up">
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-foreground font-display tracking-tight flex items-center gap-2">
                 <CheckCircle className="w-6 h-6" />

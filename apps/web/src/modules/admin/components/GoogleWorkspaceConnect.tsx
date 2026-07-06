@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   Loader2,
   CheckCircle,
@@ -9,8 +8,7 @@ import {
   Calendar,
   HardDrive,
 } from "lucide-react";
-import { useAuth } from "../../auth/context/AuthContext";
-import { supabase } from "../../../config/supabase";
+import { useGoogleWorkspace } from "../hooks/useGoogleWorkspace";
 
 const GOOGLE_ICON = (
   <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none">
@@ -40,61 +38,21 @@ const FEATURES = [
 ];
 
 export function GoogleWorkspaceConnect() {
-  const { tenant, signInWithGoogle } = useAuth();
-  const [connecting, setConnecting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    async function checkIntegration() {
-      if (!tenant) return;
-      try {
-        const { data, error } = await supabase
-          .from("google_workspace_integrations")
-          .select("id")
-          .eq("tenant_id", tenant.id)
-          .limit(1)
-          .maybeSingle();
-
-        if (!error && data) {
-          setIsConnected(true);
-        } else {
-          setIsConnected(false);
-        }
-      } catch {
-        setIsConnected(false);
-      } finally {
-        setChecking(false);
-      }
-    }
-
-    checkIntegration();
-  }, [tenant]);
+  const { isConnected, checking, connecting, connect, disconnect } =
+    useGoogleWorkspace();
 
   const handleDisconnect = async () => {
-    if (!tenant) return;
     if (
       !confirm(
         "Tem certeza que deseja desconectar o Google Workspace da sua organização?",
       )
     )
       return;
-    setConnecting(true);
     try {
-      const { error } = await supabase
-        .from("google_workspace_integrations")
-        .delete()
-        .eq("tenant_id", tenant.id);
-
-      if (!error) {
-        setIsConnected(false);
-      } else {
-        alert("Erro ao desconectar Google Workspace: " + error.message);
-      }
+      await disconnect();
     } catch (err) {
-      console.error("Erro na desconexão:", err);
-    } finally {
-      setConnecting(false);
+      const message = err instanceof Error ? err.message : "Erro desconhecido";
+      alert("Erro ao desconectar Google Workspace: " + message);
     }
   };
 
@@ -105,7 +63,7 @@ export function GoogleWorkspaceConnect() {
 
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 relative z-10 flex-1">
         <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left flex-1">
-          <div className="w-16 h-16 rounded-[2rem] bg-white flex items-center justify-center flex-shrink-0 shadow-2xl shadow-black/5 group-hover/connector:scale-105 transition-transform duration-500 border border-border/20">
+          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center flex-shrink-0 shadow-2xl shadow-black/5 group-hover/connector:scale-105 transition-transform duration-500 border border-border/20">
             {GOOGLE_ICON}
           </div>
           <div className="space-y-2 max-w-lg">
@@ -152,15 +110,7 @@ export function GoogleWorkspaceConnect() {
             </button>
           ) : (
             <button
-              onClick={async () => {
-                setConnecting(true);
-                try {
-                  await signInWithGoogle();
-                } catch (err) {
-                  console.error(err);
-                  setConnecting(false);
-                }
-              }}
+              onClick={connect}
               disabled={connecting}
               className="w-full md:w-48 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white bg-[#4285F4] hover:bg-[#3367D6] transition-all rounded-2xl disabled:opacity-50 shadow-2xl shadow-[#4285F4]/20 active:scale-95 flex items-center justify-center gap-2"
             >

@@ -89,7 +89,7 @@ export function RoleManagement() {
         </div>
       </div>
 
-      <div className="glass-panel border border-border/40 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-md">
+      <div className="glass-panel rounded-3xl overflow-hidden shadow-2xl backdrop-blur-md">
         <div className="bg-muted/30 border-b border-border/40 px-10 py-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Lock className="w-5 h-5 text-muted-foreground/40" />
@@ -105,7 +105,7 @@ export function RoleManagement() {
         {loading ? (
           <div className="p-24 flex flex-col items-center gap-6">
             <div className="relative">
-              <div className="w-16 h-16 rounded-[2rem] border-4 border-primary/10 border-t-primary animate-spin shadow-xl"></div>
+              <div className="w-16 h-16 rounded-2xl border-4 border-primary/10 border-t-primary animate-spin shadow-xl"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
               </div>

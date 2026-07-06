@@ -149,7 +149,7 @@ export default function Frameworks() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col items-center"
+              className="glass-card soft-shadow p-8 rounded-3xl flex flex-col items-center"
             >
               <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">
                 {stat.label}
@@ -166,7 +166,7 @@ export default function Frameworks() {
         </div>
 
         {/* Progress Bar */}
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
               Taxa de Aderência Global
@@ -184,7 +184,7 @@ export default function Frameworks() {
         </div>
 
         {/* Controls Table */}
-        <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
           <div className="p-8 border-b border-border/40 flex justify-between items-center">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Matriz de Controles ({controls.length})
@@ -281,7 +281,7 @@ export default function Frameworks() {
           frameworks.map((fw) => (
             <div
               key={fw.id}
-              className="glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col cursor-pointer group hover:scale-[1.03] transition-all"
+              className="glass-card soft-shadow p-0 rounded-3xl flex flex-col cursor-pointer group hover:scale-[1.03] transition-all"
               onClick={() => setSelectedFramework(fw.id)}
             >
               <div className="p-10 flex-1">
@@ -342,7 +342,7 @@ export default function Frameworks() {
             </div>
           ))
         ) : (
-          <div className="col-span-full py-20 text-center glass-card soft-shadow bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+          <div className="col-span-full py-20 text-center glass-card soft-shadow rounded-3xl">
             <ShieldCheck className="w-16 h-16 mb-6 mx-auto opacity-10" />
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/40">
               Nenhum framework cadastrado no momento.

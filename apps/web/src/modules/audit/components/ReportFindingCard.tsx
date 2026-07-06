@@ -11,7 +11,9 @@ import {
   Mail,
   X,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/shared/components/ui/Button";
+import { cn } from "@/shared/utils/cn";
 import type {
   ReportFinding,
   Finding5W2H,
@@ -43,61 +45,95 @@ interface ReportFindingCardProps {
   membersLoading?: boolean;
 }
 
-const RISK_LEVELS: { value: FindingRiskLevel; label: string; color: string }[] =
-  [
-    {
-      value: "critical",
-      label: "Crítico",
-      color:
-        "peer-checked:bg-destructive peer-checked:text-destructive-foreground peer-checked:border-destructive",
-    },
-    {
-      value: "high",
-      label: "Alto",
-      color:
-        "peer-checked:bg-orange-500 peer-checked:text-white peer-checked:border-orange-500",
-    },
-    {
-      value: "medium",
-      label: "Médio",
-      color:
-        "peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500",
-    },
-    {
-      value: "low",
-      label: "Baixo",
-      color:
-        "peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500",
-    },
-  ];
+const RISK_LEVELS: {
+  value: FindingRiskLevel;
+  label: string;
+  activeClass: string;
+  inactiveClass: string;
+  activeColor: string;
+}[] = [
+  {
+    value: "critical",
+    label: "Crítico",
+    activeClass:
+      "bg-destructive text-destructive-foreground border-destructive shadow-lg shadow-destructive/20",
+    inactiveClass:
+      "hover:bg-destructive/10 hover:text-destructive border-border bg-muted/20",
+    activeColor: "hsl(var(--destructive))",
+  },
+  {
+    value: "high",
+    label: "Alto",
+    activeClass:
+      "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20",
+    inactiveClass:
+      "hover:bg-primary/10 hover:text-primary border-border bg-muted/20",
+    activeColor: "hsl(var(--primary))",
+  },
+  {
+    value: "medium",
+    label: "Médio",
+    activeClass:
+      "bg-amber-500 text-white border-amber-600 shadow-lg shadow-amber-500/20",
+    inactiveClass:
+      "hover:bg-amber-500/10 hover:text-amber-500 border-border bg-muted/20",
+    activeColor: "#f59e0b",
+  },
+  {
+    value: "low",
+    label: "Baixo",
+    activeClass:
+      "bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-500/20",
+    inactiveClass:
+      "hover:bg-emerald-500/10 hover:text-emerald-500 border-border bg-muted/20",
+    activeColor: "#10b981",
+  },
+];
 
-const STATUS_OPTIONS: { value: FindingStatus; label: string; color: string }[] =
-  [
-    {
-      value: "open",
-      label: "Aberto",
-      color:
-        "peer-checked:bg-muted-foreground/20 peer-checked:text-foreground peer-checked:border-muted-foreground/40",
-    },
-    {
-      value: "in_progress",
-      label: "Em Tratamento",
-      color:
-        "peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:border-primary",
-    },
-    {
-      value: "resolved",
-      label: "Resolvido",
-      color:
-        "peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500",
-    },
-    {
-      value: "accepted",
-      label: "Aceito",
-      color:
-        "peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500",
-    },
-  ];
+const STATUS_OPTIONS: {
+  value: FindingStatus;
+  label: string;
+  activeClass: string;
+  inactiveClass: string;
+  activeColor: string;
+}[] = [
+  {
+    value: "open",
+    label: "Aberto",
+    activeClass:
+      "bg-foreground text-background border-foreground shadow-lg shadow-foreground/10",
+    inactiveClass:
+      "hover:bg-foreground/10 hover:text-foreground border-border bg-muted/20",
+    activeColor: "hsl(var(--foreground))",
+  },
+  {
+    value: "in_progress",
+    label: "Em Tratamento",
+    activeClass:
+      "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20",
+    inactiveClass:
+      "hover:bg-primary/10 hover:text-primary border-border bg-muted/20",
+    activeColor: "hsl(var(--primary))",
+  },
+  {
+    value: "resolved",
+    label: "Resolvido",
+    activeClass:
+      "bg-emerald-600 text-white border-emerald-700 shadow-lg shadow-emerald-500/20",
+    inactiveClass:
+      "hover:bg-emerald-500/10 hover:text-emerald-500 border-border bg-muted/20",
+    activeColor: "#059669",
+  },
+  {
+    value: "accepted",
+    label: "Aceito",
+    activeClass:
+      "bg-muted-foreground text-background border-muted-foreground shadow-lg shadow-muted-foreground/20",
+    inactiveClass:
+      "hover:bg-muted-foreground/10 hover:text-muted-foreground border-border bg-muted/20",
+    activeColor: "hsl(var(--muted-foreground))",
+  },
+];
 
 const TASK_TYPES: { value: TaskCategory; label: string }[] = [
   { value: "Frontend Bug", label: "Interface (Frontend)" },
@@ -420,17 +456,17 @@ function SchedulePicker({
           {detectedDate || deadlineDate ? (
             <div className="flex flex-wrap gap-2 text-xs">
               {detectedDate && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-md border border-blue-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 shadow-sm animate-in fade-in slide-in-from-left-2">
                   <Calendar className="w-3 h-3" />
                   Detecção: {formatDateBR(detectedDate)}
                 </span>
               )}
               {deadlineDate && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm animate-in fade-in slide-in-from-right-2 ${
                     isDeadlinePast(deadlineDate)
-                      ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
-                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      ? "bg-destructive/10 text-destructive border-destructive/20"
+                      : "bg-muted text-muted-foreground border-border"
                   }`}
                 >
                   <Calendar className="w-3 h-3" />
@@ -454,30 +490,68 @@ function SchedulePicker({
           {/* Detection date */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-blue-500" />
+              <Calendar className="w-3 h-3 text-primary" />
               Data de Detecção
             </label>
-            <input
-              type="date"
-              className="w-full text-sm p-2.5 bg-muted/40 border border-border rounded-lg focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none text-foreground"
-              value={detectedDate}
-              onChange={(e) => updateValue(e.target.value, deadlineDate)}
-            />
+            <div className="relative group">
+              <input
+                type="date"
+                className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:light] dark:[color-scheme:dark]"
+                value={detectedDate}
+                onChange={(e) => updateValue(e.target.value, deadlineDate)}
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker();
+                  } catch {}
+                }}
+              />
+              <div className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm transition-all duration-300 group-hover:border-primary/50 group-hover:bg-muted/60 pointer-events-none">
+                <span
+                  className={
+                    detectedDate
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground/40"
+                  }
+                >
+                  {detectedDate ? formatDateBR(detectedDate) : "DD/MM/AAAA"}
+                </span>
+                <Calendar className="w-3 h-3 text-primary transition-transform group-hover:scale-110" />
+              </div>
+            </div>
           </div>
 
           {/* Deadline date */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-emerald-500" />
+              <Calendar className="w-3 h-3 text-primary" />
               Prazo para Resolução
             </label>
-            <input
-              type="date"
-              className="w-full text-sm p-2.5 bg-muted/40 border border-border rounded-lg focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none text-foreground"
-              value={deadlineDate}
-              min={detectedDate || undefined}
-              onChange={(e) => updateValue(detectedDate, e.target.value)}
-            />
+            <div className="relative group">
+              <input
+                type="date"
+                className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:light] dark:[color-scheme:dark]"
+                value={deadlineDate}
+                min={detectedDate || undefined}
+                onChange={(e) => updateValue(detectedDate, e.target.value)}
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker();
+                  } catch {}
+                }}
+              />
+              <div className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm transition-all duration-300 group-hover:border-primary/50 group-hover:bg-muted/60 pointer-events-none">
+                <span
+                  className={
+                    deadlineDate
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground/40"
+                  }
+                >
+                  {deadlineDate ? formatDateBR(deadlineDate) : "DD/MM/AAAA"}
+                </span>
+                <Calendar className="w-3 h-3 text-primary transition-transform group-hover:scale-110" />
+              </div>
+            </div>
           </div>
 
           {/* Quick actions */}
@@ -491,7 +565,7 @@ function SchedulePicker({
             ].map(({ label, days }) => (
               <button
                 key={label}
-                className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-muted/50 hover:bg-primary/10 hover:text-primary border border-border/50 rounded-md transition-colors"
+                className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-muted/40 hover:bg-primary/15 hover:text-primary border border-border text-foreground rounded-md transition-all shadow-sm"
                 onClick={() => {
                   const today = new Date().toISOString().split("T")[0];
                   if (days === 0) {
@@ -585,12 +659,12 @@ export default function ReportFindingCard({
 
   const riskColor =
     finding.risk_level === "critical"
-      ? "border-l-red-600"
+      ? "border-l-destructive"
       : finding.risk_level === "high"
-        ? "border-l-orange-500"
+        ? "border-l-primary"
         : finding.risk_level === "medium"
           ? "border-l-amber-500"
-          : "border-l-green-600";
+          : "border-l-emerald-500";
 
   return (
     <div
@@ -603,11 +677,11 @@ export default function ReportFindingCard({
             Achado #{String(index + 1).padStart(2, "0")}
           </span>
           {finding.risk_level === "critical" && (
-            <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-destructive" />
           )}
         </div>
         <Button variant="ghost" onClick={() => onRemove(finding.id)}>
-          <Trash2 className="w-4 h-4 text-red-400" />
+          <Trash2 className="w-4 h-4 text-destructive/80 hover:text-destructive" />
         </Button>
       </div>
 
@@ -624,7 +698,7 @@ export default function ReportFindingCard({
               </label>
               <textarea
                 rows={2}
-                className="text-sm p-3 border border-border rounded-lg bg-muted/40 w-full focus:bg-card focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none resize-none text-foreground placeholder-muted-foreground/30"
+                className="text-sm p-3 border border-border rounded-lg bg-muted/40 w-full focus:bg-card focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none resize-none text-foreground placeholder-muted-foreground/30"
                 placeholder={field.placeholder}
                 value={finding.analysis[field.key]}
                 onChange={(e) =>
@@ -702,7 +776,7 @@ export default function ReportFindingCard({
                           className={`p-2.5 text-xs rounded-lg cursor-pointer transition-colors flex items-center justify-between ${
                             finding.task_type === t.value
                               ? "bg-primary text-white"
-                              : "hover:bg-muted text-foreground"
+                              : "hover:bg-primary/10 hover:text-primary text-foreground"
                           }`}
                           onClick={() => {
                             onUpdate(finding.id, { task_type: t.value });
@@ -725,56 +799,81 @@ export default function ReportFindingCard({
               )}
             </div>
           </div>
-
           {/* Risk Level */}
           <div>
             <label className="text-[10px] font-bold text-muted-foreground/80 uppercase block mb-1">
               Risco
             </label>
-            <div className="flex gap-1.5">
-              {RISK_LEVELS.map((r) => (
-                <label key={r.value} className="flex-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`risk-${finding.id}`}
-                    className="peer sr-only"
-                    checked={finding.risk_level === r.value}
-                    onChange={() =>
-                      onUpdate(finding.id, { risk_level: r.value })
-                    }
-                  />
-                  <span
-                    className={`block text-center text-[10px] font-bold py-1.5 rounded-lg border border-border text-muted-foreground transition-all hover:bg-foreground/5 ${r.color}`}
+            <div className="grid grid-cols-2 gap-1.5">
+              {RISK_LEVELS.map((r) => {
+                const isActive = finding.risk_level === r.value;
+                return (
+                  <label
+                    key={r.value}
+                    className="relative cursor-pointer group"
                   >
-                    {r.label}
-                  </span>
-                </label>
-              ))}
+                    <input
+                      type="radio"
+                      name={`risk-${finding.id}`}
+                      value={r.value}
+                      className="peer sr-only"
+                      checked={isActive}
+                      onChange={() =>
+                        onUpdate(finding.id, { risk_level: r.value })
+                      }
+                    />
+                    <motion.span
+                      animate={{ scale: isActive ? 1.05 : 1 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={cn(
+                        "block text-center text-[10px] font-bold py-1.5 rounded-lg border text-muted-foreground transition-all",
+                        isActive ? r.activeClass : r.inactiveClass,
+                      )}
+                    >
+                      {r.label}
+                    </motion.span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          {/* Status */}
-          <div>
+          {/* Status Selection */}
+          <div className="flex-1 min-w-[200px]">
             <label className="text-[10px] font-bold text-muted-foreground/80 uppercase block mb-1">
-              Status
+              Status Atual
             </label>
-            <div className="flex gap-1.5">
-              {STATUS_OPTIONS.map((s) => (
-                <label key={s.value} className="flex-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`status-${finding.id}`}
-                    className="peer sr-only"
-                    checked={finding.status === s.value}
-                    onChange={() => onUpdate(finding.id, { status: s.value })}
-                  />
-                  <span
-                    className={`block text-center text-[10px] font-bold py-1.5 rounded-lg border border-border text-muted-foreground transition-all hover:bg-foreground/5 ${s.color}`}
+            <div className="grid grid-cols-2 gap-1.5">
+              {STATUS_OPTIONS.map((s) => {
+                const isActive = finding.status === s.value;
+                return (
+                  <label
+                    key={s.value}
+                    className="relative cursor-pointer group"
                   >
-                    {s.label}
-                  </span>
-                </label>
-              ))}
+                    <input
+                      type="radio"
+                      name={`status-${finding.id}`}
+                      value={s.value}
+                      className="peer sr-only"
+                      checked={isActive}
+                      onChange={() => onUpdate(finding.id, { status: s.value })}
+                    />
+                    <motion.span
+                      animate={{ scale: isActive ? 1.05 : 1 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={cn(
+                        "block text-center text-[10px] font-bold py-1.5 rounded-lg border text-muted-foreground transition-all",
+                        isActive ? s.activeClass : s.inactiveClass,
+                      )}
+                    >
+                      {s.label}
+                    </motion.span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -785,35 +884,52 @@ export default function ReportFindingCard({
             Áreas Impactadas
           </label>
           <div className="flex flex-wrap gap-2">
-            {IMPACT_AREAS.map((area) => (
-              <label key={area} className="cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="peer sr-only"
-                  checked={finding.impacted_areas.includes(area)}
-                  onChange={(e) => {
-                    const next = e.target.checked
-                      ? [...finding.impacted_areas, area]
-                      : finding.impacted_areas.filter((a) => a !== area);
-                    onUpdate(finding.id, { impacted_areas: next });
-                  }}
-                />
-                <span className="block text-center text-[10px] font-bold py-1.5 px-3 rounded-lg border border-border text-muted-foreground transition-all peer-checked:bg-primary/20 peer-checked:text-primary peer-checked:border-primary/50 hover:bg-foreground/5">
-                  {area}
-                </span>
-              </label>
-            ))}
+            {IMPACT_AREAS.map((area) => {
+              const isActive = finding.impacted_areas.includes(area);
+              return (
+                <label key={area} className="cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={isActive}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...finding.impacted_areas, area]
+                        : finding.impacted_areas.filter((a) => a !== area);
+                      onUpdate(finding.id, { impacted_areas: next });
+                    }}
+                  />
+                  <motion.span
+                    animate={{ scale: isActive ? 1.05 : 1 }}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: isActive
+                        ? "hsl(var(--primary))"
+                        : "hsl(var(--primary) / 0.15)",
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    className={cn(
+                      "block text-center text-[10px] font-bold py-1.5 px-3 rounded-lg border transition-all duration-300 shadow-sm",
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                        : "border-border text-muted-foreground bg-muted/20 hover:border-primary/40",
+                    )}
+                  >
+                    {area}
+                  </motion.span>
+                </label>
+              );
+            })}
           </div>
         </div>
 
-        {/* Code Snippet */}
         <div>
           <label className="text-[10px] font-bold text-muted-foreground/80 uppercase block mb-1 flex items-center gap-1">
             <Code2 className="w-3 h-3" /> Trecho de Código / Log
           </label>
           <textarea
             rows={3}
-            className="text-xs font-mono p-3 border border-border rounded-lg bg-black text-emerald-400 w-full resize-none placeholder:text-muted-foreground/30 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+            className="text-xs font-mono p-3 border border-border rounded-lg bg-black text-primary w-full resize-none placeholder:text-muted-foreground/30 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
             placeholder="// Cole seu código ou log aqui..."
             value={finding.code_snippet ?? ""}
             onChange={(e) =>
@@ -843,7 +959,7 @@ export default function ReportFindingCard({
                 )}
                 <input
                   type="url"
-                  className="text-xs flex-1 border border-border px-2 py-1.5 rounded bg-muted/40 text-foreground placeholder:text-muted-foreground/30 focus:bg-card focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                  className="text-xs flex-1 border border-border px-2 py-1.5 rounded bg-muted/40 text-foreground placeholder:text-muted-foreground/30 focus:bg-card focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none"
                   placeholder="https://..."
                   value={link}
                   onChange={(e) => {

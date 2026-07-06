@@ -124,9 +124,10 @@ When user's prompt is NOT in English:
 
 **Mandatory Rule for MCPs:**
 Quando o usuário pedir para configurar, instalar ou testar servidores MCP:
+
 1. **Local do Arquivo:** O Antigravity IDE lê as definições por padrão em `AppData\Roaming\Antigravity\User\mcp.json`. Não adicione/crie arquivos `.antigravity/mcp.json` nas raízes de projeto para evitar conflito de escopo.
 2. **Binários Globais (`.cmd`):** Evite o uso de `npx -y` em servidores pesados (`filesystem`, `github`, `context7`, `supabase`), pois causam timeout recorrente na inicialização pelo Windows. Aconselhe a instalação global via `npm i -g <pacote>` e chame o binário em cache (ex: `E:\cache\npm-global\mcp-server-filesystem.cmd`).
-3. **Refresh Obrigatório:** Modificações de configuração não surtem efeito automático. Após corrigir ou instalar um MCP, você DEVE pedir ao usuário: *"Por favor, clique no botão 'Refresh' na aba 'MCP Servers -> Manage MCP Servers' da sua IDE para aplicar as mudanças."*
+3. **Refresh Obrigatório:** Modificações de configuração não surtem efeito automático. Após corrigir ou instalar um MCP, você DEVE pedir ao usuário: _"Por favor, clique no botão 'Refresh' na aba 'MCP Servers -> Manage MCP Servers' da sua IDE para aplicar as mudanças."_
 4. **Google Cloud e Stitch MCP (DX):** Se houver erros com o `stitch` ou ferramentas Google (ex: "IDNA missing", "ssl module", `print-access-token`), o Python _bundled_ do gcloud CLI pode estar corrompido. Solucione injetando a variável `"CLOUDSDK_PYTHON": "C:\\Caminho\\Para\\PythonNativo\\python.exe"` (ex. v3.12) e `"GOOGLE_CLOUD_PROJECT": "ID_DO_PROJETO"` dentro da tag `env` do Stitch no `mcp.json`, em seguida instigue renovação de credenciais local via `gcloud auth login` e `gcloud auth application-default login`.
 5. **Supabase MCP DB Cleanup (DX & Tests):** Quando limpar usuários de teste do E2E (`mcp_supabase_execute_sql`), comandos básicos falharão em tabelas `tenants` ou `tenant_members` por restrições de "owner ativo". SEMPRE use transações locais com `SET LOCAL session_replication_role = 'replica';` para dar bypass temporário nas triggers e limpar a base suja perfeitamente.
 
@@ -228,8 +229,9 @@ Quando o usuário pedir para configurar, instalar ou testar servidores MCP:
 > 🔴 **Agents & Skills can invoke ANY script** via `python .agent/skills/<skill>/scripts/<script>.py`
 
 ### 🛡️ False Positives & Security Handling (DX)
-- **False Positives em Scripts**: Scripts como `ux_audit.py` podem apontar falso-positivos em arquivos não-visuais (ex: acusar formulários sem `<label>` em roteamentos `module.config.tsx`). Nesses casos, o agente **deve ignorar a falha** e focar nas métricas reais em componentes UI, justificando o *bypass*.
-- **Vazamento de Tokens**: NUNCA commitar e NEM hardcodar tokens VERCEL, `VERCEL_ORG_ID`, chaves Supabase API ou senhas em arquivos trackeados (ex: `apps/*`). Se um token vazar, o agente DEVE agir imediatamente como `security-auditor` para limpá-lo de commits e apagar builds expostos. Empregue *env files* não trackeados sempre.
+
+- **False Positives em Scripts**: Scripts como `ux_audit.py` podem apontar falso-positivos em arquivos não-visuais (ex: acusar formulários sem `<label>` em roteamentos `module.config.tsx`). Nesses casos, o agente **deve ignorar a falha** e focar nas métricas reais em componentes UI, justificando o _bypass_.
+- **Vazamento de Tokens**: NUNCA commitar e NEM hardcodar tokens VERCEL, `VERCEL_ORG_ID`, chaves Supabase API ou senhas em arquivos trackeados (ex: `apps/*`). Se um token vazar, o agente DEVE agir imediatamente como `security-auditor` para limpá-lo de commits e apagar builds expostos. Empregue _env files_ não trackeados sempre.
 
 ### 🎭 Gemini Mode Mapping
 

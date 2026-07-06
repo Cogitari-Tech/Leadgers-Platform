@@ -90,7 +90,7 @@ export function VerifyEmailPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto p-8">
-        <div className="glass-card shadow-2xl rounded-[2.5rem] p-10 text-center space-y-6">
+        <div className="glass-card shadow-2xl rounded-3xl p-10 text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <MailCheck className="w-8 h-8 text-primary" />
           </div>

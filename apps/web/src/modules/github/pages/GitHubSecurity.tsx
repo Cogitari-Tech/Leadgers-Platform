@@ -103,7 +103,7 @@ export default function GitHubSecurity() {
       </div>
 
       {/* Alert List */}
-      <div className="glass-panel rounded-2xl border border-border/30 p-6 space-y-4">
+      <div className="glass-panel rounded-2xl border-border/30 p-6 space-y-4">
         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
           Alertas de Segurança
         </h3>
@@ -226,7 +226,7 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <div className="glass-panel rounded-2xl border border-border/30 p-5 space-y-3">
+    <div className="glass-panel rounded-2xl border-border/30 p-5 space-y-3">
       <div className={`inline-flex p-2 rounded-xl ${color}`}>{icon}</div>
       <div>
         <div className="text-2xl font-black">

@@ -174,7 +174,7 @@ export default function FinanceDashboard() {
         {kpis.map((kpi) => (
           <div
             key={kpi.title}
-            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border transition-all hover:scale-[1.03]"
+            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group rounded-3xl transition-all hover:scale-[1.03]"
           >
             <div className="flex items-start justify-between mb-6">
               <div className="p-3 rounded-2xl bg-foreground/5 text-foreground">
@@ -207,7 +207,7 @@ export default function FinanceDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cash Flow Chart */}
-        <div className="lg:col-span-2 glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 glass-card soft-shadow p-0 rounded-3xl flex flex-col overflow-hidden">
           <div className="p-8 border-b border-border/40 flex justify-between items-center">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Fluxo de Caixa
@@ -287,7 +287,7 @@ export default function FinanceDashboard() {
         </div>
 
         {/* Expense Breakdown */}
-        <div className="glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow p-0 rounded-3xl flex flex-col overflow-hidden">
           <div className="p-8 border-b border-border/40">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Alocação de Recursos
@@ -364,7 +364,7 @@ export default function FinanceDashboard() {
       </div>
 
       {/* Recent Transactions */}
-      <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+      <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
         <div className="p-8 border-b border-border/40 flex justify-between items-center">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
             Transações Recentes

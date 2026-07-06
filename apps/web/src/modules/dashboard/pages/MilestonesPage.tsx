@@ -195,10 +195,7 @@ export default function MilestonesTrackerPage() {
             color: "text-red-500",
           },
         ].map((stat, i) => (
-          <div
-            key={i}
-            className="glass-card p-5 rounded-3xl border border-border/40 text-center"
-          >
+          <div key={i} className="glass-card p-5 rounded-3xl text-center">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
               {stat.label}
             </p>
@@ -238,7 +235,7 @@ export default function MilestonesTrackerPage() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-background border border-border/40 rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden p-8 relative">
+          <div className="bg-background border border-border/40 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden p-8 relative">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-6 right-6 text-muted-foreground hover:text-foreground"

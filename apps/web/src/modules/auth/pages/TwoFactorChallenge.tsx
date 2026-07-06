@@ -123,7 +123,7 @@ export function TwoFactorChallenge() {
           />
         </div>
 
-        <div className="glass-panel border border-border/40 p-10 rounded-[2.5rem] shadow-2xl backdrop-blur-md">
+        <div className="glass-panel p-10 rounded-3xl shadow-2xl backdrop-blur-md">
           <div className="mb-8 flex flex-col items-center text-center">
             <div className="mb-6 rounded-2xl bg-primary/10 p-4 text-primary border border-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
               <ShieldCheck size={32} />

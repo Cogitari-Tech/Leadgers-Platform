@@ -8,10 +8,15 @@ import {
   CheckCircle2,
   AlertCircle,
   Eye,
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/Button";
+import { ModernSelect } from "@/shared/components/ui/ModernSelect";
 import { Input } from "@/shared/components/ui/Input";
-import { Select } from "@/shared/components/ui/Select";
+import { cn } from "@/shared/utils/cn";
 import { useReportGenerator } from "../hooks/useReportGenerator";
 import { useAudit } from "../hooks/useAudit";
 import { useProjects } from "../../projects/services/projects.service";
@@ -27,6 +32,7 @@ export default function ReportBuilder() {
   const {
     report,
     unsavedChanges,
+    syncStatus,
     updateField,
     addFinding,
     addBulkFindings,
@@ -38,6 +44,7 @@ export default function ReportBuilder() {
     validate,
     exportReport,
     resetReport,
+    forceSync,
   } = useReportGenerator();
 
   const { programs } = useAudit();
@@ -67,12 +74,12 @@ export default function ReportBuilder() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shadow-lg shadow-primary/5">
               <FileOutput className="w-5 h-5 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="font-bold text-foreground text-base tracking-tight font-display">
                 Gerador de Relatórios de Auditoria
               </h1>
-              <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-[0.2em]">
-                {report.doc_id}
+              <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-[0.2em] truncate max-w-[280px]">
+                {report.doc_id || "Sem documento"}
               </p>
             </div>
             {unsavedChanges ? (
@@ -87,8 +94,35 @@ export default function ReportBuilder() {
                 key="status-synced"
                 className="flex items-center gap-1.5 text-[10px] text-emerald-500 font-bold uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/20 px-3 py-1 rounded-full"
               >
-                <CheckCircle2 className="w-3 h-3" /> Sincronizado
+                <CheckCircle2 className="w-3 h-3" /> Salvo
               </span>
+            )}
+            {/* Cloud sync indicator */}
+            {syncStatus === "syncing" && (
+              <span className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest bg-primary/5 border border-primary/20 px-3 py-1 rounded-full animate-pulse">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Cloud
+              </span>
+            )}
+            {syncStatus === "synced" && !unsavedChanges && (
+              <span className="flex items-center gap-1.5 text-[10px] text-emerald-500 font-bold uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/20 px-3 py-1 rounded-full">
+                <Cloud className="w-3 h-3" /> Cloud ✓
+              </span>
+            )}
+            {syncStatus === "offline" && (
+              <button
+                onClick={forceSync}
+                className="flex items-center gap-1.5 text-[10px] text-orange-400 font-bold uppercase tracking-widest bg-orange-500/5 border border-orange-500/20 px-3 py-1 rounded-full hover:bg-orange-500/10 transition-colors cursor-pointer"
+              >
+                <CloudOff className="w-3 h-3" /> Offline
+              </button>
+            )}
+            {syncStatus === "error" && (
+              <button
+                onClick={forceSync}
+                className="flex items-center gap-1.5 text-[10px] text-destructive font-bold uppercase tracking-widest bg-destructive/5 border border-destructive/20 px-3 py-1 rounded-full hover:bg-destructive/10 transition-colors cursor-pointer"
+              >
+                <CloudOff className="w-3 h-3" /> Sync Erro
+              </button>
             )}
           </div>
 
@@ -149,31 +183,41 @@ export default function ReportBuilder() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 space-y-12">
         {/* ─── Header Fields ─── */}
-        <section className="glass-card soft-shadow bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border p-10 space-y-8">
+        <section className="glass-card soft-shadow rounded-3xl p-8 md:p-10 space-y-6">
           <div className="space-y-1">
-            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Cabeçalho do Relatório
             </h2>
+            <p className="text-[10px] text-muted-foreground/40">
+              Preencha os dados do relatório de auditoria
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+          {/* Row 1: Doc ID + Programa */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Doc ID <span className="text-destructive">*</span>
               </label>
               <div className="relative">
                 <Input
-                  value={report.doc_id}
+                  value={report.doc_id.slice(0, DOC_ID_MAX_LENGTH)}
                   maxLength={DOC_ID_MAX_LENGTH}
-                  onChange={(e) => updateField("doc_id", e.target.value)}
-                  className={`bg-card/60 border rounded-2xl px-6 py-4 focus:bg-card transition-all font-medium ${
+                  onChange={(e) =>
+                    updateField(
+                      "doc_id",
+                      e.target.value.slice(0, DOC_ID_MAX_LENGTH),
+                    )
+                  }
+                  placeholder="AUD-2026-001"
+                  className={`bg-card/60 border h-14 rounded-2xl px-5 font-mono text-sm tracking-wide focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${
                     report.doc_id.length >= DOC_ID_MAX_LENGTH
                       ? "border-destructive focus:border-destructive"
                       : "border-border"
                   }`}
                 />
                 <span
-                  className={`absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold ${
+                  className={`absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold tabular-nums ${
                     report.doc_id.length >= DOC_ID_MAX_LENGTH
                       ? "text-destructive"
                       : report.doc_id.length > DOC_ID_MAX_LENGTH - 5
@@ -181,187 +225,219 @@ export default function ReportBuilder() {
                         : "text-muted-foreground/30"
                   }`}
                 >
-                  {report.doc_id.length}/{DOC_ID_MAX_LENGTH}
+                  {Math.min(report.doc_id.length, DOC_ID_MAX_LENGTH)}/
+                  {DOC_ID_MAX_LENGTH}
                 </span>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Programa de Auditoria{" "}
                 <span className="text-destructive">*</span>
               </label>
-              <div className="relative">
-                <Select
-                  value={report.program_id}
-                  onChange={(e) => {
-                    const progId = e.target.value;
-                    updateField("program_id", progId);
-                    const prog = programs.find((p) => p.id === progId);
-                    if (prog) {
-                      // Note: We leave project_name alone if a project is selected
-                      // but program also has its name
-                    }
-                  }}
-                  className="bg-card/60 border-border h-[54px] rounded-2xl pr-10"
-                >
-                  <option value="" className="bg-background text-foreground">
-                    Selecione o programa...
-                  </option>
-                  {programs.map((p) => (
-                    <option
-                      key={p.id}
-                      value={p.id}
-                      className="bg-background text-foreground"
-                    >
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
-                <Plus className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none rotate-45" />
-              </div>
+              <ModernSelect
+                options={programs.map((p) => ({ value: p.id, label: p.name }))}
+                value={report.program_id}
+                onChange={(val) => updateField("program_id", val)}
+                placeholder="Selecione o programa..."
+                className="!h-auto"
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+          {/* Row 2: Projeto + Empresa */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Projeto Vinculado{" "}
-                <span className="text-muted-foreground/40 normal-case tracking-normal">
-                  (Auto-preencher)
+                <span className="text-muted-foreground/40 normal-case tracking-normal text-[10px]">
+                  (auto-preencher)
                 </span>
               </label>
-              <div className="relative">
-                <Select
-                  value={report.project_id || ""}
-                  onChange={(e) => {
-                    const projId = e.target.value;
-                    updateField("project_id", projId);
-                    const proj = projects.find((p) => p.id === projId);
-                    if (proj) {
-                      updateField("project_name", proj.name);
-                      if (proj.startDate)
-                        updateField("start_date", proj.startDate.split("T")[0]);
-                      if (proj.endDate)
-                        updateField("end_date", proj.endDate.split("T")[0]);
-                    }
-                  }}
-                  className="bg-card/60 border-border h-[54px] rounded-2xl pr-10"
-                >
-                  <option value="" className="bg-background text-foreground">
-                    Selecione um projeto...
-                  </option>
-                  {projects.map((p) => (
-                    <option
-                      key={p.id}
-                      value={p.id}
-                      className="bg-background text-foreground"
-                    >
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
-                <Plus className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none rotate-45" />
-              </div>
+              <ModernSelect
+                options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                value={report.project_id || ""}
+                onChange={(projId) => {
+                  updateField("project_id", projId);
+                  const proj = projects.find((p) => p.id === projId);
+                  if (proj) {
+                    updateField("project_name", proj.name);
+                    if (proj.startDate)
+                      updateField("start_date", proj.startDate.split("T")[0]);
+                    if (proj.endDate)
+                      updateField("end_date", proj.endDate.split("T")[0]);
+                  }
+                }}
+                placeholder="Selecione um projeto..."
+                className="!h-auto"
+              />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Empresa Cliente <span className="text-destructive">*</span>
               </label>
               <Input
                 placeholder="Ex: Cogitari Tech"
                 value={report.client_name}
+                maxLength={100}
                 onChange={(e) => updateField("client_name", e.target.value)}
-                className={`bg-card/60 border rounded-2xl px-6 py-4 ${
+                className={`bg-card/60 border h-14 rounded-2xl px-5 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${
                   !report.client_name.trim() && validation.errors.length > 0
                     ? "border-destructive/50"
                     : "border-border"
                 }`}
               />
               {!report.client_name.trim() && validation.errors.length > 0 && (
-                <p className="text-[10px] text-destructive font-medium ml-1">
+                <p className="text-[10px] text-destructive font-medium ml-0.5">
                   Campo obrigatório
                 </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+          {/* Row 3: Projeto/Módulo + Datas + Ambiente */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Nome do Projeto / Módulo{" "}
                 <span className="text-destructive">*</span>
               </label>
               <Input
                 placeholder="Ex: Plataforma Leadgers"
                 value={report.project_name}
+                maxLength={120}
                 onChange={(e) => updateField("project_name", e.target.value)}
-                className={`bg-card/60 border rounded-2xl px-6 py-4 ${
+                className={`bg-card/60 border h-14 rounded-2xl px-5 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${
                   !report.project_name.trim() && validation.errors.length > 0
                     ? "border-destructive/50"
                     : "border-border"
                 }`}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Data Início <span className="text-destructive">*</span>
               </label>
-              <Input
-                type="date"
-                value={report.start_date}
-                onChange={(e) => updateField("start_date", e.target.value)}
-                className={`bg-card/60 border rounded-2xl px-6 py-4 ${
-                  !report.start_date && validation.errors.length > 0
-                    ? "border-destructive/50"
-                    : "border-border"
-                }`}
-              />
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={report.start_date}
+                  onChange={(e) => updateField("start_date", e.target.value)}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker();
+                    } catch {}
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:light] dark:[color-scheme:dark]"
+                />
+                <div
+                  className={cn(
+                    "flex w-full h-14 items-center justify-between rounded-2xl border bg-card/60 px-5 text-sm transition-all duration-300 group-hover:border-primary/50 group-hover:bg-card/80 group-focus-within:ring-4 group-focus-within:ring-primary/10",
+                    report.start_date
+                      ? "border-border text-foreground"
+                      : "border-border text-muted-foreground/40",
+                    !report.start_date && validation.errors.length > 0
+                      ? "border-destructive/50"
+                      : "border-border",
+                  )}
+                >
+                  <span className="font-medium">
+                    {report.start_date
+                      ? report.start_date.split("-").reverse().join("/")
+                      : "DD/MM/AAAA"}
+                  </span>
+                  <Calendar className="w-4 h-4 text-primary transition-transform group-hover:scale-110" />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Data Fim <span className="text-destructive">*</span>
               </label>
-              <Input
-                type="date"
-                value={report.end_date}
-                onChange={(e) => updateField("end_date", e.target.value)}
-                className={`bg-card/60 border rounded-2xl px-6 py-4 ${
-                  !report.end_date && validation.errors.length > 0
-                    ? "border-destructive/50"
-                    : "border-border"
-                }`}
-              />
+              <div className="relative group">
+                <input
+                  type="date"
+                  value={report.end_date}
+                  onChange={(e) => updateField("end_date", e.target.value)}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker();
+                    } catch {}
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:light] dark:[color-scheme:dark]"
+                />
+                <div
+                  className={cn(
+                    "flex w-full h-14 items-center justify-between rounded-2xl border bg-card/60 px-5 text-sm transition-all duration-300 group-hover:border-primary/50 group-hover:bg-card/80 group-focus-within:ring-4 group-focus-within:ring-primary/10",
+                    report.end_date
+                      ? "border-border text-foreground"
+                      : "border-border text-muted-foreground/40",
+                    !report.end_date && validation.errors.length > 0
+                      ? "border-destructive/50"
+                      : "border-border",
+                  )}
+                >
+                  <span className="font-medium">
+                    {report.end_date
+                      ? report.end_date.split("-").reverse().join("/")
+                      : "DD/MM/AAAA"}
+                  </span>
+                  <Calendar className="w-4 h-4 text-primary transition-transform group-hover:scale-110" />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Ambiente
               </label>
-              <Input
-                placeholder="Ex: Produção, Staging"
+              <ModernSelect
+                options={[
+                  { value: "Produção", label: "Produção" },
+                  { value: "Staging", label: "Staging" },
+                  { value: "Desenvolvimento", label: "Desenvolvimento" },
+                  { value: "Homologação", label: "Homologação" },
+                ]}
                 value={report.environment}
-                onChange={(e) => updateField("environment", e.target.value)}
-                className="bg-card/60 border border-border rounded-2xl px-6 py-4"
+                onChange={(val) => updateField("environment", val)}
+                className="!h-auto"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">
+          {/* Row 4: Auditor Líder */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest ml-0.5">
                 Auditor Líder <span className="text-destructive">*</span>
               </label>
-              <Input
-                placeholder="Nome do Auditor Líder"
-                value={report.lead_auditor}
-                onChange={(e) => updateField("lead_auditor", e.target.value)}
-                className={`bg-card/60 border rounded-2xl px-6 py-4 ${
-                  !report.lead_auditor.trim() && validation.errors.length > 0
-                    ? "border-destructive/50"
-                    : "border-border"
-                }`}
-              />
+              {membersLoading ? (
+                <div className="h-14 bg-card/60 border border-border rounded-2xl animate-pulse" />
+              ) : tenantMembers.length > 0 ? (
+                <ModernSelect
+                  options={tenantMembers.map((m) => ({
+                    value: m.name,
+                    label: `${m.name} — ${m.role}`,
+                  }))}
+                  value={report.lead_auditor}
+                  onChange={(val) => updateField("lead_auditor", val)}
+                  placeholder="Selecione o auditor..."
+                  className="!h-auto"
+                />
+              ) : (
+                <Input
+                  placeholder="Nome do Auditor Líder"
+                  value={report.lead_auditor}
+                  maxLength={80}
+                  onChange={(e) => updateField("lead_auditor", e.target.value)}
+                  className={`bg-card/60 border h-14 rounded-2xl px-5 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all ${
+                    !report.lead_auditor.trim() && validation.errors.length > 0
+                      ? "border-destructive/50"
+                      : "border-border"
+                  }`}
+                />
+              )}
               {!report.lead_auditor.trim() && validation.errors.length > 0 && (
-                <p className="text-[10px] text-destructive font-medium ml-1">
+                <p className="text-[10px] text-destructive font-medium ml-0.5">
                   Campo obrigatório
                 </p>
               )}
@@ -370,13 +446,13 @@ export default function ReportBuilder() {
         </section>
 
         {/* ─── Executive Summary ─── */}
-        <section className="glass-card soft-shadow bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border p-10 space-y-6">
+        <section className="glass-card soft-shadow rounded-3xl p-10 space-y-6">
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">
             Sumário Executivo
           </h2>
           <textarea
             rows={5}
-            className="w-full text-sm p-8 bg-card/60 border border-border rounded-[2rem] focus:bg-card outline-none transition-all resize-none text-foreground placeholder-muted-foreground/20 font-medium leading-relaxed"
+            className="w-full text-sm p-8 bg-card/60 border border-border rounded-2xl focus:bg-card outline-none transition-all resize-none text-foreground placeholder-muted-foreground/20 font-medium leading-relaxed"
             placeholder="Descreva o contexto, os objetivos e as principais conclusões da auditoria..."
             value={report.executive_summary}
             onChange={(e) => updateField("executive_summary", e.target.value)}
@@ -422,9 +498,9 @@ export default function ReportBuilder() {
             {report.findings.length === 0 ? (
               <div
                 key="empty-findings"
-                className="text-center py-24 glass-card bg-muted/20 dark:bg-card/40 backdrop-blur-sm rounded-[3rem] border border-border soft-shadow"
+                className="text-center py-24 glass-card rounded-3xl soft-shadow"
               >
-                <div className="w-20 h-20 rounded-[2rem] bg-muted/40 flex items-center justify-center mx-auto mb-6 shadow-xl border border-border">
+                <div className="w-20 h-20 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-6 shadow-xl border border-border">
                   <AlertCircle className="w-10 h-10 text-muted-foreground/20" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground/60 mb-8">
@@ -488,13 +564,13 @@ export default function ReportBuilder() {
         </section>
 
         {/* ─── Final Opinion ─── */}
-        <section className="glass-card soft-shadow bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border p-10 space-y-6">
+        <section className="glass-card soft-shadow rounded-3xl p-10 space-y-6">
           <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">
             Parecer Final
           </h2>
           <textarea
             rows={5}
-            className="w-full text-sm p-8 bg-card/60 border border-border rounded-[2rem] focus:bg-card outline-none transition-all resize-none text-foreground placeholder-muted-foreground/20 font-medium leading-relaxed"
+            className="w-full text-sm p-8 bg-card/60 border border-border rounded-2xl focus:bg-card outline-none transition-all resize-none text-foreground placeholder-muted-foreground/20 font-medium leading-relaxed"
             placeholder="Parecer final do auditor sobre o estado geral e as recomendações..."
             value={report.final_opinion}
             onChange={(e) => updateField("final_opinion", e.target.value)}
@@ -551,8 +627,8 @@ export default function ReportBuilder() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             onClick={() => setShowReset(false)}
           />
-          <div className="glass-card bg-card border border-border rounded-[3rem] p-12 max-w-md w-full shadow-2xl space-y-8 relative z-10 text-center scale-up">
-            <div className="w-20 h-20 rounded-[2rem] bg-destructive/10 flex items-center justify-center mx-auto mb-6 shadow-xl border border-destructive/20 group">
+          <div className="glass-card rounded-3xl p-12 max-w-md w-full shadow-2xl space-y-8 relative z-10 text-center scale-up">
+            <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-6 shadow-xl border border-destructive/20 group">
               <RotateCcw className="w-10 h-10 text-destructive group-hover:rotate-[-120deg] transition-all duration-700" />
             </div>
             <div className="space-y-3">

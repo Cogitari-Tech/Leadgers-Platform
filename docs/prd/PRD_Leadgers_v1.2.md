@@ -15,9 +15,9 @@
 
 > 🤖 **Nota de Atualização de Vibe Coding & IA (03/04/2026):**
 > Você está operando no repo `Cogitari-Tech/Leadgers-Platform` Versão 1.2.0-beta. O ecossistema Hono + Vite + Supabase está plenamente modularizado.
-> 
+>
 > **MANDAMENTOS PARA AGENTES DE IA NESTE PROJETO (CUMPRIMENTO OBRIGATÓRIO):**
-> 1. **UX/UI Consistente:** NUNCA recrie componentes base do zero (Botão, Modal, Dropdown, Table). Siga a regra suprema de frontend: use `npx shadcn-ui@latest add [component]` com a estilização já em vigor (`@/shared/components`). 
+> 1. **UX/UI Consistente:** NUNCA recrie componentes base do zero (Botão, Modal, Dropdown, Table). Siga a regra suprema de frontend: use `npx shadcn-ui@latest add [component]` com a estilização já em vigor (`@/shared/components`).
 > 2. **Vercel & Configurações:** O projeto usa Vercel para todos os Deploys. Se precisar verificar ambiente ou re-sincronizar Envs, rode `npx vercel env pull`. Isso baixa o `.env` correto sob demanda em `apps/api` e `apps/web`.
 > 3. **E2E Hono API:** Toda nova rota criada em `apps/api/src/routes/...` precisa de um arquivio `[rota].test.ts`. Use a framework Vitest + Hono Testing (rodar `npm run test --workspace=api`). Sem E2E Test, sua alteração não passa na esteira.
 > 4. **Supabase + Inngest:** Quando criar lógicas longas como "gerar relatórios PDF" ou "Insights de IA", crie endpoints Hono que despachem webhooks para a plataforma local do Inngest (`POST /reports/generate -> 202 Queued`).
@@ -552,37 +552,39 @@ O Leadgers se diferencia de qualquer alternativa existente por quatro pilares in
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Runway Calculator
 
 Cenário: Exibição do runway com três cenários
-  Dado que o usuário está autenticado e possui transações no Fluxo de Caixa
-  E o saldo atual da empresa é R$ 150.000
-  E o burn rate médio dos últimos 3 meses é R$ 25.000/mês
-  Quando o usuário acessa o Runway Calculator
-  Então o sistema deve exibir o cenário base com runway de 6 meses
-  E o cenário pessimista com runway de 5 meses (burn R$ 30.000)
-  E o cenário otimista com runway de 7,05 meses (burn R$ 21.250)
-  E a data de esgotamento de caixa para cada cenário
+Dado que o usuário está autenticado e possui transações no Fluxo de Caixa
+E o saldo atual da empresa é R$ 150.000
+E o burn rate médio dos últimos 3 meses é R$ 25.000/mês
+Quando o usuário acessa o Runway Calculator
+Então o sistema deve exibir o cenário base com runway de 6 meses
+E o cenário pessimista com runway de 5 meses (burn R$ 30.000)
+E o cenário otimista com runway de 7,05 meses (burn R$ 21.250)
+E a data de esgotamento de caixa para cada cenário
 
 Cenário: Alerta automático de runway crítico
-  Dado que o runway calculado no cenário base é de 5 meses
-  Quando o sistema recalcula o runway (diariamente à meia-noite)
-  Então o sistema deve criar uma notificação in-app de alerta vermelho
-  E enviar email para os usuários com papel de Admin ou Finance
-  E exibir o alerta na tela inicial do Health Score
+Dado que o runway calculado no cenário base é de 5 meses
+Quando o sistema recalcula o runway (diariamente à meia-noite)
+Então o sistema deve criar uma notificação in-app de alerta vermelho
+E enviar email para os usuários com papel de Admin ou Finance
+E exibir o alerta na tela inicial do Health Score
 
 Cenário: Simulação de evento futuro
-  Dado que o usuário está no Runway Calculator
-  Quando o usuário adiciona um evento de "Entrada de investimento R$ 500.000 em 15/06/2026"
-  Então o sistema deve recalcular todos os três cenários considerando o evento
-  E exibir a nova data de esgotamento de caixa com o evento incluído
-  E salvar o evento no histórico de simulações
+Dado que o usuário está no Runway Calculator
+Quando o usuário adiciona um evento de "Entrada de investimento R$ 500.000 em 15/06/2026"
+Então o sistema deve recalcular todos os três cenários considerando o evento
+E exibir a nova data de esgotamento de caixa com o evento incluído
+E salvar o evento no histórico de simulações
 
 Cenário: Importação automática do saldo do Fluxo de Caixa
-  Dado que o usuário possui transações registradas no módulo de Fluxo de Caixa
-  Quando o usuário abre o Runway Calculator
-  Então o saldo base deve ser automaticamente populado com o saldo atual do Fluxo de Caixa
-  E exibir a data e hora da última sincronização
+Dado que o usuário possui transações registradas no módulo de Fluxo de Caixa
+Quando o usuário abre o Runway Calculator
+Então o saldo base deve ser automaticamente populado com o saldo atual do Fluxo de Caixa
+E exibir a data e hora da última sincronização
+
 ```
 
 ---
@@ -612,29 +614,31 @@ Cenário: Importação automática do saldo do Fluxo de Caixa
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Cap Table
 
 Cenário: Registro de participação societária
-  Dado que o usuário acessa o módulo Cap Table
-  Quando o usuário adiciona um sócio "Ana Lima" com 25% de ações ordinárias
-  Então o sistema deve recalcular a participação percentual de todos os sócios
-  E a soma total deve continuar sendo 100%
-  E o histórico de alterações deve registrar a entrada com timestamp e usuário responsável
+Dado que o usuário acessa o módulo Cap Table
+Quando o usuário adiciona um sócio "Ana Lima" com 25% de ações ordinárias
+Então o sistema deve recalcular a participação percentual de todos os sócios
+E a soma total deve continuar sendo 100%
+E o histórico de alterações deve registrar a entrada com timestamp e usuário responsável
 
 Cenário: Simulação de rodada de investimento
-  Dado que a cap table atual tem 3 sócios com 100% das ações
-  E o valuation pré-money é R$ 5.000.000
-  Quando o usuário simula uma rodada com aporte de R$ 1.000.000 (novo investidor)
-  Então o sistema deve calcular valuation pós-money de R$ 6.000.000
-  E mostrar participação do novo investidor de 16,67%
-  E mostrar a diluição de cada sócio existente proporcionalmente
-  E a simulação não deve afetar a cap table real até ser confirmada
+Dado que a cap table atual tem 3 sócios com 100% das ações
+E o valuation pré-money é R$ 5.000.000
+Quando o usuário simula uma rodada com aporte de R$ 1.000.000 (novo investidor)
+Então o sistema deve calcular valuation pós-money de R$ 6.000.000
+E mostrar participação do novo investidor de 16,67%
+E mostrar a diluição de cada sócio existente proporcionalmente
+E a simulação não deve afetar a cap table real até ser confirmada
 
 Cenário: Verificação de integridade da cap table
-  Dado que o usuário tenta registrar uma participação que faria a soma ultrapassar 100%
-  Quando o sistema valida a entrada
-  Então o sistema deve exibir erro de validação indicando o percentual disponível restante
-  E não deve salvar a entrada inválida
+Dado que o usuário tenta registrar uma participação que faria a soma ultrapassar 100%
+Quando o sistema valida a entrada
+Então o sistema deve exibir erro de validação indicando o percentual disponível restante
+E não deve salvar a entrada inválida
+
 ```
 
 ---
@@ -663,21 +667,23 @@ Cenário: Verificação de integridade da cap table
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Unit Economics
 
 Cenário: Cálculo automático de LTV/CAC
-  Dado que o sistema possui dados de ARPU (R$ 200), Margem Bruta (70%), Churn (3%) e CAC (R$ 800)
-  Quando o usuário acessa o dashboard de Unit Economics
-  Então o LTV calculado deve ser R$ 200 × 70% ÷ 3% = R$ 4.667
-  E o LTV/CAC deve ser R$ 4.667 ÷ R$ 800 = 5,83x (indicador verde)
-  E o Payback Period deve ser R$ 800 ÷ (R$ 200 × 70%) = 5,7 meses
+Dado que o sistema possui dados de ARPU (R$ 200), Margem Bruta (70%), Churn (3%) e CAC (R$ 800)
+Quando o usuário acessa o dashboard de Unit Economics
+Então o LTV calculado deve ser R$ 200 × 70% ÷ 3% = R$ 4.667
+E o LTV/CAC deve ser R$ 4.667 ÷ R$ 800 = 5,83x (indicador verde)
+E o Payback Period deve ser R$ 800 ÷ (R$ 200 × 70%) = 5,7 meses
 
 Cenário: Alerta de LTV/CAC abaixo do threshold
-  Dado que o LTV/CAC calculado é de 1,8x
-  Quando o sistema recalcula as métricas
-  Então deve exibir um alerta vermelho no dashboard
-  E enviar notificação in-app para o usuário Admin
-  E o Health Score da startup deve ser impactado negativamente na dimensão Comercial
+Dado que o LTV/CAC calculado é de 1,8x
+Quando o sistema recalcula as métricas
+Então deve exibir um alerta vermelho no dashboard
+E enviar notificação in-app para o usuário Admin
+E o Health Score da startup deve ser impactado negativamente na dimensão Comercial
+
 ```
 
 ---
@@ -705,21 +711,23 @@ Cenário: Alerta de LTV/CAC abaixo do threshold
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Burn Rate Dashboard
 
 Cenário: Exibição do Net Burn com breakdown por categoria
-  Dado que o Fluxo de Caixa do mês atual possui entradas de R$ 15.000 e saídas de R$ 45.000
-  Quando o usuário acessa o Burn Rate Dashboard
-  Então o Gross Burn deve ser exibido como R$ 45.000
-  E o Net Burn deve ser exibido como R$ 30.000
-  E um gráfico de donut deve mostrar a distribuição de saídas por categoria
+Dado que o Fluxo de Caixa do mês atual possui entradas de R$ 15.000 e saídas de R$ 45.000
+Quando o usuário acessa o Burn Rate Dashboard
+Então o Gross Burn deve ser exibido como R$ 45.000
+E o Net Burn deve ser exibido como R$ 30.000
+E um gráfico de donut deve mostrar a distribuição de saídas por categoria
 
 Cenário: Configuração de alerta personalizado
-  Dado que o usuário Admin acessa as configurações de alertas do Burn Rate
-  Quando o usuário configura um alerta para runway < 8 meses
-  Então o sistema deve salvar a configuração
-  E passar a emitir alertas quando o runway calculado ficar abaixo de 8 meses
-  E o alerta personalizado deve substituir o alerta padrão de 6 meses para esse workspace
+Dado que o usuário Admin acessa as configurações de alertas do Burn Rate
+Quando o usuário configura um alerta para runway < 8 meses
+Então o sistema deve salvar a configuração
+E passar a emitir alertas quando o runway calculado ficar abaixo de 8 meses
+E o alerta personalizado deve substituir o alerta padrão de 6 meses para esse workspace
+
 ```
 
 ---
@@ -751,26 +759,28 @@ Cenário: Configuração de alerta personalizado
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: OKRs Cascateados
 
 Cenário: Criação de OKR corporativo e cascateamento para time
-  Dado que o Admin está criando o ciclo Q2 2026
-  Quando o Admin cria um Objective "Dobrar o MRR" com KR1 "MRR de R$ 20k para R$ 40k até 30/06"
-  E associa um Team OKR "Aumentar conversão do trial" ao Objective corporativo
-  Então o Team OKR deve aparecer como filho do OKR corporativo na visualização hierárquica
-  E o progress do OKR corporativo deve ser influenciado pelo progress do Team OKR
+Dado que o Admin está criando o ciclo Q2 2026
+Quando o Admin cria um Objective "Dobrar o MRR" com KR1 "MRR de R$ 20k para R$ 40k até 30/06"
+E associa um Team OKR "Aumentar conversão do trial" ao Objective corporativo
+Então o Team OKR deve aparecer como filho do OKR corporativo na visualização hierárquica
+E o progress do OKR corporativo deve ser influenciado pelo progress do Team OKR
 
 Cenário: Notificação de check-in semanal
-  Dado que existem OKRs ativos no ciclo Q2 2026
-  Quando chega a segunda-feira às 09:00 (horário configurado)
-  Então o sistema deve enviar notificação in-app e email para cada responsável de Key Result
-  E a notificação deve conter o link direto para atualização do KR
+Dado que existem OKRs ativos no ciclo Q2 2026
+Quando chega a segunda-feira às 09:00 (horário configurado)
+Então o sistema deve enviar notificação in-app e email para cada responsável de Key Result
+E a notificação deve conter o link direto para atualização do KR
 
 Cenário: OKR em risco identificado automaticamente
-  Dado que um Key Result tem progresso de 20% e restam 3 semanas para o fim do ciclo
-  Quando o sistema recalcula o status do OKR
-  Então o status deve ser alterado para "At Risk" (vermelho)
-  E o COO e o responsável direto devem receber alerta
+Dado que um Key Result tem progresso de 20% e restam 3 semanas para o fim do ciclo
+Quando o sistema recalcula o status do OKR
+Então o status deve ser alterado para "At Risk" (vermelho)
+E o COO e o responsável direto devem receber alerta
+
 ```
 
 ---
@@ -800,23 +810,25 @@ Cenário: OKR em risco identificado automaticamente
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Equity & Vesting Tracker
 
 Cenário: Registro de stock option com cliff e vesting
-  Dado que o Admin registra um grant para "João Silva"
-  Com 10.000 opções, grant date 01/01/2025, cliff 12 meses, vesting 48 meses, grant price R$ 0,10
-  Quando o sistema calcula o cronograma de vesting
-  Então João deve ter 0 opções vestidas até 31/12/2025
-  E em 01/01/2026 deve ter 2.500 opções vestidas (cliff + 12 meses)
-  E após isso deve vestirem 208,33 opções por mês
-  E o dashboard deve mostrar a timeline visual de vesting
+Dado que o Admin registra um grant para "João Silva"
+Com 10.000 opções, grant date 01/01/2025, cliff 12 meses, vesting 48 meses, grant price R$ 0,10
+Quando o sistema calcula o cronograma de vesting
+Então João deve ter 0 opções vestidas até 31/12/2025
+E em 01/01/2026 deve ter 2.500 opções vestidas (cliff + 12 meses)
+E após isso deve vestirem 208,33 opções por mês
+E o dashboard deve mostrar a timeline visual de vesting
 
 Cenário: Verificação do pool de ESOP
-  Dado que o pool total é de 100.000 opções (10% da empresa)
-  E já foram emitidas 60.000 opções para 5 colaboradores
-  Quando o Admin acessa o Equity Tracker
-  Então o sistema deve mostrar 60% do pool utilizado e 40.000 opções disponíveis
-  E emitir alerta se o pool estiver acima de 80% de utilização
+Dado que o pool total é de 100.000 opções (10% da empresa)
+E já foram emitidas 60.000 opções para 5 colaboradores
+Quando o Admin acessa o Equity Tracker
+Então o sistema deve mostrar 60% do pool utilizado e 40.000 opções disponíveis
+E emitir alerta se o pool estiver acima de 80% de utilização
+
 ```
 
 ---
@@ -846,19 +858,21 @@ Cenário: Verificação do pool de ESOP
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Roadmap Visual
 
 Cenário: Sincronização com GitHub Issues
-  Dado que uma issue "Feature: Onboarding guiado" é criada no GitHub com label "roadmap"
-  Quando o webhook de sincronização processa o evento
-  Então a issue deve aparecer automaticamente no Roadmap como card no status "Backlog"
-  E deve exibir o número da issue, título e assignees do GitHub
+Dado que uma issue "Feature: Onboarding guiado" é criada no GitHub com label "roadmap"
+Quando o webhook de sincronização processa o evento
+Então a issue deve aparecer automaticamente no Roadmap como card no status "Backlog"
+E deve exibir o número da issue, título e assignees do GitHub
 
 Cenário: Vinculação de item do roadmap a um OKR
-  Dado que o usuário está editando um item do roadmap "Reduzir time-to-value"
-  Quando o usuário seleciona o OKR "KR2: Time-to-value < 10 min"
-  Então o item deve exibir o badge do OKR vinculado
-  E o progresso do item deve contribuir para o progresso do Key Result vinculado
+Dado que o usuário está editando um item do roadmap "Reduzir time-to-value"
+Quando o usuário seleciona o OKR "KR2: Time-to-value < 10 min"
+Então o item deve exibir o badge do OKR vinculado
+E o progresso do item deve contribuir para o progresso do Key Result vinculado
+
 ```
 
 ---
@@ -886,23 +900,25 @@ Cenário: Vinculação de item do roadmap a um OKR
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Tech Debt Tracker
 
 Cenário: Cálculo do Tech Debt Score
-  Dado que há 15 issues com label "tech-debt" abertas
-  E 8 PRs abertos há mais de 7 dias
-  E 2 alertas de segurança ativos no Dependabot
-  Quando o sistema calcula o Tech Debt Score
-  Então o score deve refletir a degradação técnica em escala de 0-100
-  E deve exibir breakdown por categoria (issues, PRs, segurança)
-  E o Health Score da startup deve ser impactado na dimensão Produto
+Dado que há 15 issues com label "tech-debt" abertas
+E 8 PRs abertos há mais de 7 dias
+E 2 alertas de segurança ativos no Dependabot
+Quando o sistema calcula o Tech Debt Score
+Então o score deve refletir a degradação técnica em escala de 0-100
+E deve exibir breakdown por categoria (issues, PRs, segurança)
+E o Health Score da startup deve ser impactado na dimensão Produto
 
 Cenário: Alerta de degradação de tech debt
-  Dado que o Tech Debt Score era 72 há 2 semanas
-  E hoje está em 58 (queda de 14 pontos)
-  Quando o sistema avalia a tendência semanal
-  Então deve disparar alerta para Marina (CTO) informando a degradação
-  E deve sugerir os top 3 itens prioritários para correção
+Dado que o Tech Debt Score era 72 há 2 semanas
+E hoje está em 58 (queda de 14 pontos)
+Quando o sistema avalia a tendência semanal
+Então deve disparar alerta para Marina (CTO) informando a degradação
+E deve sugerir os top 3 itens prioritários para correção
+
 ```
 
 ---
@@ -932,22 +948,24 @@ Cenário: Alerta de degradação de tech debt
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: MRR/ARR Tracker
 
 Cenário: Cálculo do MRR Waterfall mensal
-  Dado que no mês de março o MRR inicial é R$ 10.000
-  E houve New MRR de R$ 2.000, Expansion de R$ 500, Churned de R$ 800, Contraction de R$ 200
-  Quando o sistema calcula o MRR de fechamento
-  Então o Net New MRR deve ser R$ 1.500
-  E o MRR final deve ser R$ 11.500
-  E o ARR deve ser R$ 138.000
+Dado que no mês de março o MRR inicial é R$ 10.000
+E houve New MRR de R$ 2.000, Expansion de R$ 500, Churned de R$ 800, Contraction de R$ 200
+Quando o sistema calcula o MRR de fechamento
+Então o Net New MRR deve ser R$ 1.500
+E o MRR final deve ser R$ 11.500
+E o ARR deve ser R$ 138.000
 
 Cenário: Análise de cohort de churn
-  Dado que existem clientes adquiridos nos últimos 6 meses
-  Quando o usuário acessa o relatório de cohort
-  Então deve ver uma tabela com cada cohort mensal como linha
-  E as colunas representando os meses subsequentes
-  E cada célula mostrando % do MRR original ainda ativo
+Dado que existem clientes adquiridos nos últimos 6 meses
+Quando o usuário acessa o relatório de cohort
+Então deve ver uma tabela com cada cohort mensal como linha
+E as colunas representando os meses subsequentes
+E cada célula mostrando % do MRR original ainda ativo
+
 ```
 
 ---
@@ -977,26 +995,28 @@ Cenário: Análise de cohort de churn
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Data Room
 
 Cenário: Convite de investidor com acesso controlado
-  Dado que o Admin quer dar acesso apenas à pasta "Financeiro" para o investidor "Fundo XYZ"
-  Quando o Admin cria um convite com permissão restrita a "Financeiro" e expiração em 30 dias
-  Então o investidor recebe email com link único
-  E ao acessar, vê apenas os documentos da pasta "Financeiro"
-  E qualquer tentativa de acessar outras pastas retorna erro 403
+Dado que o Admin quer dar acesso apenas à pasta "Financeiro" para o investidor "Fundo XYZ"
+Quando o Admin cria um convite com permissão restrita a "Financeiro" e expiração em 30 dias
+Então o investidor recebe email com link único
+E ao acessar, vê apenas os documentos da pasta "Financeiro"
+E qualquer tentativa de acessar outras pastas retorna erro 403
 
 Cenário: Log de acesso auditável
-  Dado que o investidor "Fundo XYZ" acessa e visualiza o arquivo "DRE_2025.pdf" por 3 minutos
-  Quando o Admin acessa o log de atividade do Data Room
-  Então deve ver o registro: investidor, documento, data/hora, duração e IP de origem
+Dado que o investidor "Fundo XYZ" acessa e visualiza o arquivo "DRE_2025.pdf" por 3 minutos
+Quando o Admin acessa o log de atividade do Data Room
+Então deve ver o registro: investidor, documento, data/hora, duração e IP de origem
 
 Cenário: Due Diligence Readiness Score
-  Dado que o checklist padrão exige 20 documentos essenciais
-  E apenas 12 foram carregados
-  Quando o Admin acessa o Data Room
-  Então o Readiness Score deve exibir 60%
-  E destacar os 8 documentos faltantes com sugestão de prioridade
+Dado que o checklist padrão exige 20 documentos essenciais
+E apenas 12 foram carregados
+Quando o Admin acessa o Data Room
+Então o Readiness Score deve exibir 60%
+E destacar os 8 documentos faltantes com sugestão de prioridade
+
 ```
 
 ---
@@ -1025,23 +1045,25 @@ Cenário: Due Diligence Readiness Score
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Investor Updates
 
 Cenário: Geração de draft com IA
-  Dado que o usuário acessa o módulo Investor Updates no início do mês
-  E os módulos de MRR, Runway, Produto e People estão populados com dados do mês anterior
-  Quando o usuário clica em "Gerar Draft com IA"
-  Então o sistema deve consumir 5 créditos de IA (Claude Sonnet)
-  E retornar um draft em texto rico com as seções do template preenchidas
-  E o usuário deve poder editar cada seção antes de enviar
+Dado que o usuário acessa o módulo Investor Updates no início do mês
+E os módulos de MRR, Runway, Produto e People estão populados com dados do mês anterior
+Quando o usuário clica em "Gerar Draft com IA"
+Então o sistema deve consumir 5 créditos de IA (Claude Sonnet)
+E retornar um draft em texto rico com as seções do template preenchidas
+E o usuário deve poder editar cada seção antes de enviar
 
 Cenário: Envio de investor update para lista de contatos
-  Dado que o draft foi revisado e aprovado pelo CEO
-  E a lista de destinatários contém 5 investidores
-  Quando o usuário clica em "Enviar Update"
-  Então o sistema deve enviar o email HTML para os 5 destinatários via SMTP/SendGrid
-  E registrar o envio no histórico com timestamp
-  E notificar o usuário sobre a taxa de entrega após 1 hora
+Dado que o draft foi revisado e aprovado pelo CEO
+E a lista de destinatários contém 5 investidores
+Quando o usuário clica em "Enviar Update"
+Então o sistema deve enviar o email HTML para os 5 destinatários via SMTP/SendGrid
+E registrar o envio no histórico com timestamp
+E notificar o usuário sobre a taxa de entrega após 1 hora
+
 ```
 
 ---
@@ -1070,20 +1092,22 @@ Cenário: Envio de investor update para lista de contatos
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Health Score da Startup
 
 Cenário: Cálculo e exibição do Health Score
-  Dado que os sub-scores são: Financeiro=75, Produto=68, Time=80, Comercial=55, Compliance=90
-  Quando o sistema calcula o Health Score
-  Então o score deve ser: (75×0,3) + (68×0,25) + (80×0,2) + (55×0,15) + (90×0,1) = 72,25 ≈ 72
-  E o indicador deve exibir status "Atenção" (amarelo)
-  E cada dimensão deve ter um mini-gráfico de barras com seu sub-score
+Dado que os sub-scores são: Financeiro=75, Produto=68, Time=80, Comercial=55, Compliance=90
+Quando o sistema calcula o Health Score
+Então o score deve ser: (75×0,3) + (68×0,25) + (80×0,2) + (55×0,15) + (90×0,1) = 72,25 ≈ 72
+E o indicador deve exibir status "Atenção" (amarelo)
+E cada dimensão deve ter um mini-gráfico de barras com seu sub-score
 
 Cenário: Drill-down de uma dimensão
-  Dado que o sub-score Comercial é 55 (vermelho)
-  Quando o usuário clica na dimensão Comercial
-  Então deve ver os 3 indicadores que mais puxam o score para baixo
-  E ter links diretos para os módulos correspondentes para resolver cada problema
+Dado que o sub-score Comercial é 55 (vermelho)
+Quando o usuário clica na dimensão Comercial
+Então deve ver os 3 indicadores que mais puxam o score para baixo
+E ter links diretos para os módulos correspondentes para resolver cada problema
+
 ```
 
 ---
@@ -1112,23 +1136,25 @@ Cenário: Drill-down de uma dimensão
 **Critérios de Aceite (Gherkin):**
 
 ```
+
 Funcionalidade: Weekly Digest
 
 Cenário: Geração e envio automático às 08h de segunda-feira
-  Dado que é segunda-feira às 07:55 (horário de Brasília)
-  E o workspace possui dados de pelo menos 7 dias
-  Quando o job semanal de digest é executado
-  Então o sistema deve consumir 5 créditos do workspace
-  E gerar o digest via Claude Sonnet com dados da semana anterior
-  E enviar por email para todos os usuários ativos com notificações habilitadas
-  E criar uma notificação in-app para cada destinatário
+Dado que é segunda-feira às 07:55 (horário de Brasília)
+E o workspace possui dados de pelo menos 7 dias
+Quando o job semanal de digest é executado
+Então o sistema deve consumir 5 créditos do workspace
+E gerar o digest via Claude Sonnet com dados da semana anterior
+E enviar por email para todos os usuários ativos com notificações habilitadas
+E criar uma notificação in-app para cada destinatário
 
 Cenário: Digest com conteúdo personalizado por perfil
-  Dado que o workspace tem uma CTO (Marina) e um CEO (Rafael) cadastrados
-  Quando o digest semanal é gerado
-  Então Marina deve receber uma seção "Saúde da Engenharia" com dados técnicos
-  E Rafael deve receber uma seção "Visão do Negócio" com dados financeiros e comerciais
-  E ambos devem receber as seções comuns (Health Score, alertas críticos)
+Dado que o workspace tem uma CTO (Marina) e um CEO (Rafael) cadastrados
+Quando o digest semanal é gerado
+Então Marina deve receber uma seção "Saúde da Engenharia" com dados técnicos
+E Rafael deve receber uma seção "Visão do Negócio" com dados financeiros e comerciais
+E ambos devem receber as seções comuns (Health Score, alertas críticos)
+
 ```
 
 ---
@@ -1238,23 +1264,25 @@ A arquitetura do Leadgers segue o padrão **Hexagonal (Ports & Adapters)** combi
 **Camadas da arquitetura:**
 
 ```
+
 ┌─────────────────────────────────────────────────────┐
-│                    DOMÍNIO                          │
-│  Entidades, Value Objects, Regras de Negócio         │
-│  (sem dependências externas)                         │
+│ DOMÍNIO │
+│ Entidades, Value Objects, Regras de Negócio │
+│ (sem dependências externas) │
 └─────────────────────┬───────────────────────────────┘
-                      │ Ports (Interfaces)
+│ Ports (Interfaces)
 ┌─────────────────────▼───────────────────────────────┐
-│                  APLICAÇÃO                          │
-│  Use Cases, Application Services, Command Handlers   │
-│  (orquestra o domínio, usa ports)                    │
+│ APLICAÇÃO │
+│ Use Cases, Application Services, Command Handlers │
+│ (orquestra o domínio, usa ports) │
 └─────────────────────┬───────────────────────────────┘
-                      │ Adapters
+│ Adapters
 ┌─────────────────────▼───────────────────────────────┐
-│               INFRAESTRUTURA                        │
-│  Prisma (DB), GitHub API, Anthropic API,             │
-│  SMTP, Open Banking, NF-e                            │
+│ INFRAESTRUTURA │
+│ Prisma (DB), GitHub API, Anthropic API, │
+│ SMTP, Open Banking, NF-e │
 └─────────────────────────────────────────────────────┘
+
 ```
 
 **Bounded Contexts (DDD):**
@@ -1287,72 +1315,72 @@ O isolamento de dados entre tenants é implementado via **Row-Level Security (RL
 
 #### ADR-001: Vite + React SPA para Dashboard Autenticado
 
-**Contexto:** Necessidade de frontend performático para dashboard multi-módulo autenticado (ERP/CRM/BI unificado).  
-**Decisão:** Adotar Vite + React SPA ao invés de Next.js SSR/SSG.  
-**Razão:** O Leadgers é 95% dashboard autenticado — SEO é irrelevante. Vite oferece HMR instantâneo (<300ms), bundle estático servido via CDN (custo mínimo), e menor complexidade arquitetural. Next.js seria over-engineering para um SPA autenticado. O consenso da indústria em 2026 confirma: Vite para dashboards, Next.js para sites públicos com SEO.  
+**Contexto:** Necessidade de frontend performático para dashboard multi-módulo autenticado (ERP/CRM/BI unificado).
+**Decisão:** Adotar Vite + React SPA ao invés de Next.js SSR/SSG.
+**Razão:** O Leadgers é 95% dashboard autenticado — SEO é irrelevante. Vite oferece HMR instantâneo (<300ms), bundle estático servido via CDN (custo mínimo), e menor complexidade arquitetural. Next.js seria over-engineering para um SPA autenticado. O consenso da indústria em 2026 confirma: Vite para dashboards, Next.js para sites públicos com SEO.
 **Consequências:** Necessidade de React Router para roteamento (vs file-system routing do Next.js). Sem SSR — mitigado pelo fato de que nenhuma página precisa de indexação.
 
 #### ADR-002: PostgreSQL com RLS para Multi-tenancy
 
-**Contexto:** Necessidade de isolamento total de dados entre tenants com simplicidade operacional.  
-**Decisão:** Usar Row-Level Security nativo do PostgreSQL (Supabase) ao invés de banco separado por tenant ou schema separado.  
+**Contexto:** Necessidade de isolamento total de dados entre tenants com simplicidade operacional.
+**Decisão:** Usar Row-Level Security nativo do PostgreSQL (Supabase) ao invés de banco separado por tenant ou schema separado.
 **Consequências:** Operação simplificada (1 banco), custo reduzido, isolamento garantido a nível de banco. Requer disciplina no Prisma para sempre incluir organization_id. Todas as functions e views usam SECURITY INVOKER com search_path bloqueado.
 
 #### ADR-003: Multi-LLM via Adapter Pattern com BYOK
 
-**Contexto:** Escolha de LLM para funcionalidades de IA transversal, com possibilidade de clientes trazerem suas próprias chaves.  
-**Decisão:** Implementar padrão Adapter (Port `IAIService` + Adapters `AnthropicAdapter`, `GoogleAdapter`) para suportar múltiplos provedores. Suporte a BYOK (Bring Your Own Key) para clientes que desejam usar suas próprias chaves de API.  
-**Provedores:** Claude (análise narrativa, investor updates) + Gemini (processamento de dados tabulares, classificação).  
-**BYOK:** Chaves do cliente são criptografadas (AES-256) e armazenadas por tenant no Supabase. Descriptografia just-in-time no momento da chamada à API do LLM. Dashboard de uso por chave BYOK para transparência.  
+**Contexto:** Escolha de LLM para funcionalidades de IA transversal, com possibilidade de clientes trazerem suas próprias chaves.
+**Decisão:** Implementar padrão Adapter (Port `IAIService` + Adapters `AnthropicAdapter`, `GoogleAdapter`) para suportar múltiplos provedores. Suporte a BYOK (Bring Your Own Key) para clientes que desejam usar suas próprias chaves de API.
+**Provedores:** Claude (análise narrativa, investor updates) + Gemini (processamento de dados tabulares, classificação).
+**BYOK:** Chaves do cliente são criptografadas (AES-256) e armazenadas por tenant no Supabase. Descriptografia just-in-time no momento da chamada à API do LLM. Dashboard de uso por chave BYOK para transparência.
 **Consequências:** Flexibilidade total de provedores. Clientes enterprise podem usar suas próprias cotas e modelos. Routing inteligente entre provedores baseado no tipo de tarefa.
 
 #### ADR-004: Arquitetura Hexagonal + Clean Architecture
 
-**Contexto:** Necessidade de testabilidade, manutenibilidade e independência de frameworks.  
-**Decisão:** Adotar Hexagonal Architecture com DDD leve (Bounded Contexts).  
+**Contexto:** Necessidade de testabilidade, manutenibilidade e independência de frameworks.
+**Decisão:** Adotar Hexagonal Architecture com DDD leve (Bounded Contexts).
 **Consequências:** Código mais verbose no início, mas lógica de negócio 100% testável sem mocks de infraestrutura. Time precisa de onboarding na arquitetura.
 
 #### ADR-005: npm workspaces para Monorepo
 
-**Contexto:** Múltiplos packages compartilhados (core, ai) e apps (web, api).  
-**Decisão:** Monorepo com npm workspaces nativo ao invés de Turborepo.  
-**Razão:** Para o tamanho atual do projeto (2 apps + 2 packages, equipe 1-3 devs), npm workspaces oferece zero overhead de configuração com funcionalidade adequada. A complexidade do Turborepo não se justifica nesta fase.  
-**Migração planejada:** Quando o time crescer para >3 devs ou o monorepo exceder 5 packages, migrar para pnpm + Turborepo para build caching e prevenção de phantom dependencies.  
+**Contexto:** Múltiplos packages compartilhados (core, ai) e apps (web, api).
+**Decisão:** Monorepo com npm workspaces nativo ao invés de Turborepo.
+**Razão:** Para o tamanho atual do projeto (2 apps + 2 packages, equipe 1-3 devs), npm workspaces oferece zero overhead de configuração com funcionalidade adequada. A complexidade do Turborepo não se justifica nesta fase.
+**Migração planejada:** Quando o time crescer para >3 devs ou o monorepo exceder 5 packages, migrar para pnpm + Turborepo para build caching e prevenção de phantom dependencies.
 **Consequências:** Sem build caching nativo (mitigado pelo tamanho pequeno do projeto). Sem phantom dependency prevention (mitigado por disciplina de equipe).
 
 #### ADR-006: SpecDD para Especificação de Features
 
-**Contexto:** Necessidade de processo estruturado para desenvolvimento de features com agentes de IA.  
-**Decisão:** Adotar Specification-Driven Development (SpecDD): especificação detalhada em Markdown antes de qualquer linha de código.  
+**Contexto:** Necessidade de processo estruturado para desenvolvimento de features com agentes de IA.
+**Decisão:** Adotar Specification-Driven Development (SpecDD): especificação detalhada em Markdown antes de qualquer linha de código.
 **Consequências:** Features mais bem definidas, menos retrabalho, integração natural com Google Antigravity IDE para geração de código via agentes.
 
 #### ADR-007: Hono como Framework Backend (Edge-native)
 
-**Contexto:** Necessidade de framework HTTP performático para API serverless no Vercel.  
-**Decisão:** Adotar Hono ao invés de Fastify ou Express.  
-**Razão:** Hono é construído sobre Web Standards (Request/Response), tem bundle de ~14KB (vs ~500KB+ do Fastify), e oferece cold starts significativamente menores em ambientes serverless. TypeScript-first com capacidades RPC. Perfeito para deploy no Vercel.  
+**Contexto:** Necessidade de framework HTTP performático para API serverless no Vercel.
+**Decisão:** Adotar Hono ao invés de Fastify ou Express.
+**Razão:** Hono é construído sobre Web Standards (Request/Response), tem bundle de ~14KB (vs ~500KB+ do Fastify), e oferece cold starts significativamente menores em ambientes serverless. TypeScript-first com capacidades RPC. Perfeito para deploy no Vercel.
 **Consequências:** Ecossistema menor que Express/Fastify (em crescimento rápido). Menor throughput bruto que Fastify em long-running processes (irrelevante para serverless).
 
 #### ADR-008: Inngest para Background Jobs
 
-**Contexto:** Necessidade de processamento assíncrono (weekly-digest, health-score, alertas preditivos) em ambiente serverless.  
-**Decisão:** Adotar Inngest para background jobs ao invés de BullMQ ou Trigger.dev.  
-**Razão:** Inngest usa step functions duráveis que funcionam nativamente com Vercel serverless (sem workers dedicados). O código vive no seu projeto, não em infraestrutura terceira. Event-driven com retry automático e dead letter queues.  
+**Contexto:** Necessidade de processamento assíncrono (weekly-digest, health-score, alertas preditivos) em ambiente serverless.
+**Decisão:** Adotar Inngest para background jobs ao invés de BullMQ ou Trigger.dev.
+**Razão:** Inngest usa step functions duráveis que funcionam nativamente com Vercel serverless (sem workers dedicados). O código vive no seu projeto, não em infraestrutura terceira. Event-driven com retry automático e dead letter queues.
 **Consequências:** Dependência do serviço Inngest (mitigado: alternativa Trigger.dev disponível). Jobs existentes: `weekly-digest`, `health-score`.
 
 #### ADR-009: Vercel como Plataforma Unificada de Deploy
 
-**Contexto:** Necessidade de deploy simples e escalável para frontend e backend.  
-**Decisão:** Usar Vercel como plataforma única para frontend (static SPA) e backend (Hono serverless functions), eliminando necessidade de Railway ou infra separada.  
-**Razão:** Plataforma única = menor complexidade operacional. Preview deploys automáticos por PR. Auto-scaling built-in. Free tier generoso para early-stage. Hono é otimizado para Vercel.  
+**Contexto:** Necessidade de deploy simples e escalável para frontend e backend.
+**Decisão:** Usar Vercel como plataforma única para frontend (static SPA) e backend (Hono serverless functions), eliminando necessidade de Railway ou infra separada.
+**Razão:** Plataforma única = menor complexidade operacional. Preview deploys automáticos por PR. Auto-scaling built-in. Free tier generoso para early-stage. Hono é otimizado para Vercel.
 **Consequências:** Limitação de timeout em serverless functions (mitigado por Inngest para jobs longos). Se a plataforma atingir escala que torne serverless mais caro que dedicated servers, Railway/Fly.io será avaliado (Fase 5+).
 
 #### ADR-010: Supabase Auth para Autenticação
 
-**Contexto:** Necessidade de autenticação segura com integração nativa ao banco de dados e RLS multi-tenant.  
-**Decisão:** Adotar Supabase Auth ao invés de JWT customizado, Clerk, ou Keycloak.  
-**Razão:** Supabase Auth é bundled com o banco (custo zero adicional), integra nativamente com RLS (token contém `user_id` usado nas policies), suporta social logins, magic links e MFA. Clerk seria um vendor adicional com custos por organização (~$1/org/mês após 100 orgs). Keycloak exigiria self-hosting (Java, infra separada). JWT customizado é risco de segurança sem equipe dedicada.  
-**Migração planejada:** Se clientes enterprise demandarem SAML/SCIM SSO (Fase 5+), avaliar Clerk ou WorkOS como complemento — não substituição — do Supabase Auth.  
+**Contexto:** Necessidade de autenticação segura com integração nativa ao banco de dados e RLS multi-tenant.
+**Decisão:** Adotar Supabase Auth ao invés de JWT customizado, Clerk, ou Keycloak.
+**Razão:** Supabase Auth é bundled com o banco (custo zero adicional), integra nativamente com RLS (token contém `user_id` usado nas policies), suporta social logins, magic links e MFA. Clerk seria um vendor adicional com custos por organização (~$1/org/mês após 100 orgs). Keycloak exigiria self-hosting (Java, infra separada). JWT customizado é risco de segurança sem equipe dedicada.
+**Migração planejada:** Se clientes enterprise demandarem SAML/SCIM SSO (Fase 5+), avaliar Clerk ou WorkOS como complemento — não substituição — do Supabase Auth.
 **Consequências:** Dependência do ecossistema Supabase (mitigado: Supabase é open-source, portável para self-hosted). Auth flow via Bearer token + `supabase.auth.getUser()`.
 
 ---
@@ -1394,6 +1422,7 @@ O isolamento de dados entre tenants é implementado via **Row-Level Security (RL
 ### 10.2 Relacionamentos Principais
 
 ```
+
 Organization (1) ──── (N) User
 Organization (1) ──── (N) FinancialTransaction
 Organization (1) ──── (N) CapTableEntry
@@ -1428,6 +1457,7 @@ AuditLog (N) ──── (1) Organization
 AuditLog (N) ──── (1) User [actor]
 Notification (N) ──── (1) Alert [origin]
 Notification (N) ──── (1) User [recipient]
+
 ```
 
 ---
@@ -1526,19 +1556,21 @@ A IA pode ser configurada em três níveis:
 **Tela de configuração de IA (AI Settings):**
 
 ```
+
 AI Settings
 ────────────────────────────────────────
-🔵 IA Global: [HABILITADO]              Créditos disponíveis: 450/500
+🔵 IA Global: [HABILITADO] Créditos disponíveis: 450/500
 
 Por módulo:
-[✓] Financeiro      Modelo: Haiku (1 crédito)     [Alterar modelo ▼]
-[✓] OKRs            Modelo: Haiku (1 crédito)     [Alterar modelo ▼]
-[✓] GitHub          Modelo: Haiku (1 crédito)     [Alterar modelo ▼]
-[✓] Weekly Digest   Modelo: Sonnet (5 créditos)   [Alterar modelo ▼]
-[ ] Estratégia      Modelo: Opus (20 créditos)    DESABILITADO
-[✓] Investor Rel.   Modelo: Sonnet (5 créditos)   [Alterar modelo ▼]
+[✓] Financeiro Modelo: Haiku (1 crédito) [Alterar modelo ▼]
+[✓] OKRs Modelo: Haiku (1 crédito) [Alterar modelo ▼]
+[✓] GitHub Modelo: Haiku (1 crédito) [Alterar modelo ▼]
+[✓] Weekly Digest Modelo: Sonnet (5 créditos) [Alterar modelo ▼]
+[ ] Estratégia Modelo: Opus (20 créditos) DESABILITADO
+[✓] Investor Rel. Modelo: Sonnet (5 créditos) [Alterar modelo ▼]
 ────────────────────────────────────────
 Histórico de consumo: [Ver extrato completo]
+
 ```
 
 ### 12.4 Estratégia de Custo e Créditos
@@ -1695,17 +1727,19 @@ O Leadgers adota uma estratégia **Product-Led Growth (PLG)** combinada com **Sa
 ### 14.2 Matriz de Priorização (Impacto × Complexidade)
 
 ```
+
 ALTA COMPLEXIDADE
-        │
-Alto    │  Conciliação Bancária  │  Health Score
-Impacto │  Cap Table             │  OKRs Cascateados
-        │  NF-e Integration      │  Weekly Digest (IA)
-        ├────────────────────────┼────────────────────
-Baixo   │  Org Chart             │  Runway Calculator
-Impacto │  Gestão de Férias      │  Burn Rate Dashboard
-        │  Definition of Done    │  North Star Metric
-        │
+│
+Alto │ Conciliação Bancária │ Health Score
+Impacto │ Cap Table │ OKRs Cascateados
+│ NF-e Integration │ Weekly Digest (IA)
+├────────────────────────┼────────────────────
+Baixo │ Org Chart │ Runway Calculator
+Impacto │ Gestão de Férias │ Burn Rate Dashboard
+│ Definition of Done │ North Star Metric
+│
 BAIXA COMPLEXIDADE
+
 ```
 
 ---
@@ -2056,31 +2090,33 @@ O Leadgers tem 9 módulos e dezenas de funcionalidades. Sem um onboarding cuidad
 ### 18.2 Fluxo de Onboarding (Wizard de 5 Passos)
 
 ```
+
 Passo 1 — Perfil da startup (2 min)
-  Nome, segmento, estágio (idea / pre-revenue / revenue / funded)
-  Número de pessoas no time
-  → Adapta os módulos sugeridos ao perfil
+Nome, segmento, estágio (idea / pre-revenue / revenue / funded)
+Número de pessoas no time
+→ Adapta os módulos sugeridos ao perfil
 
 Passo 2 — Financeiro inicial (3 min)
-  Saldo atual em caixa
-  Burn rate médio estimado (ou importação de CSV do banco)
-  → Gera o primeiro Runway Calculator imediatamente
+Saldo atual em caixa
+Burn rate médio estimado (ou importação de CSV do banco)
+→ Gera o primeiro Runway Calculator imediatamente
 
 Passo 3 — Conectar GitHub (opcional, 1 min)
-  OAuth com um clique
-  Selecionar repositórios a monitorar
-  → Puxa issues e PRs em background
+OAuth com um clique
+Selecionar repositórios a monitorar
+→ Puxa issues e PRs em background
 
 Passo 4 — Definir North Star Metric (1 min)
-  Escolher a métrica mais importante agora (MRR, usuários ativos, NPS, ARR)
-  Inserir valor atual
-  → Exibe o primeiro dashboard com o indicador principal
+Escolher a métrica mais importante agora (MRR, usuários ativos, NPS, ARR)
+Inserir valor atual
+→ Exibe o primeiro dashboard com o indicador principal
 
 Passo 5 — Primeiro Health Score
-  Sistema calcula Health Score inicial com os dados inseridos
-  Exibe os 3 principais alertas/oportunidades da startup
-  → "Seu runway atual é de X meses. Veja o que fazer."
-```
+Sistema calcula Health Score inicial com os dados inseridos
+Exibe os 3 principais alertas/oportunidades da startup
+→ "Seu runway atual é de X meses. Veja o que fazer."
+
+````
 
 ### 18.3 Templates por Perfil
 
@@ -2115,7 +2151,7 @@ Cenário: Usuário abandona onboarding no passo 2
   Quando retorna à plataforma no dia seguinte
   Então o sistema deve continuar o wizard do passo 3
   E exibir o Runway Calculator com os dados já inseridos
-```
+````
 
 ---
 

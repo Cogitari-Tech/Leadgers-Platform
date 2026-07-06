@@ -101,12 +101,12 @@ export const AppLayout: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative z-50 h-full flex-shrink-0 border-r border-border/40 bg-background md:bg-background/80 md:backdrop-blur-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`fixed md:relative z-50 h-full flex-shrink-0 border-r border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] md:backdrop-blur-2xl flex flex-col overflow-hidden transition-all duration-300 ${
           isCollapsed ? "w-16" : "w-72"
         } ${isMobileMenuOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
         <div
-          className={`relative z-10 flex ${isCollapsed ? "flex-col gap-4 py-4 px-2 justify-center" : "p-4 justify-between"} items-center border-b border-border/20`}
+          className={`relative z-10 flex ${isCollapsed ? "flex-col gap-4 py-4 px-2 justify-center" : "p-4 justify-between"} items-center border-b border-[hsl(var(--glass-border))]`}
         >
           {isCollapsed ? (
             <Link to="/dashboard" className="flex justify-center flex-shrink-0">
@@ -299,7 +299,7 @@ export const AppLayout: React.FC = () => {
           })}
         </nav>
 
-        <div className="relative z-10 p-3 border-t border-border/20 flex flex-col gap-2">
+        <div className="relative z-10 p-3 border-t border-[hsl(var(--glass-border))] flex flex-col gap-2">
           {/* Manual de Uso */}
           <Link
             to="/dashboard/manual-uso"
@@ -357,7 +357,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col relative overflow-hidden z-10">
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] backdrop-blur-xl">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 -ml-2 hover:bg-muted/50 rounded-xl transition-colors"
@@ -379,7 +379,7 @@ export const AppLayout: React.FC = () => {
           <div className="w-8" />
         </div>
 
-        <div className="hidden md:flex flex-shrink-0 items-center justify-end px-6 py-3 border-b border-border/20 bg-background/50 backdrop-blur-xl gap-4">
+        <div className="hidden md:flex flex-shrink-0 items-center justify-end px-6 py-3 border-b border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] backdrop-blur-xl gap-4">
           <TenantSwitcher />
           <NotificationBell />
         </div>

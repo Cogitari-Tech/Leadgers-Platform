@@ -186,7 +186,7 @@ export default function BalanceSheet() {
     totalValue: number,
     colorClass: string,
   ) => (
-    <div className="glass-card overflow-hidden flex-1 border border-white/20">
+    <div className="glass-card overflow-hidden flex-1 border-white/20">
       <div
         className={`px-6 py-4 border-b border-white/20 dark:border-white/10 flex justify-between items-center ${colorClass} bg-opacity-20 backdrop-blur-md`}
       >
@@ -292,7 +292,7 @@ export default function BalanceSheet() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glass-card p-5 border border-white/20 flex items-center justify-between">
+        <div className="glass-card p-5 border-white/20 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase mb-1">
               Total de Ativos
@@ -305,7 +305,7 @@ export default function BalanceSheet() {
             <Building className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
-        <div className="glass-card p-5 border border-white/20 flex items-center justify-between">
+        <div className="glass-card p-5 border-white/20 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase mb-1">
               Total de Passivos
@@ -318,7 +318,7 @@ export default function BalanceSheet() {
             <Landmark className="w-5 h-5 text-red-600 dark:text-red-400" />
           </div>
         </div>
-        <div className="glass-card p-5 border border-white/20 flex items-center justify-between">
+        <div className="glass-card p-5 border-white/20 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase mb-1">
               Patrimônio Líquido
@@ -331,7 +331,7 @@ export default function BalanceSheet() {
             <Briefcase className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
         </div>
-        <div className="glass-card p-5 border border-white/20 flex items-center justify-between">
+        <div className="glass-card p-5 border-white/20 flex items-center justify-between">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase mb-1">
               Liquidez Corrente
@@ -361,7 +361,7 @@ export default function BalanceSheet() {
           )}
         </div>
       ) : (
-        <div className="glass-card p-12 text-center border border-white/20">
+        <div className="glass-card p-12 text-center border-white/20">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
             <Landmark className="w-8 h-8 text-slate-400 dark:text-slate-500" />
           </div>

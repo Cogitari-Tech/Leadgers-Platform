@@ -58,7 +58,7 @@ export default function GitHubRepositories() {
           {repositories.map((repo) => (
             <div
               key={repo.id}
-              className="glass-panel rounded-2xl border border-border/30 p-5 flex items-center gap-4 hover:border-primary/20 transition-colors"
+              className="glass-panel rounded-2xl border-border/30 p-5 flex items-center gap-4 hover:border-primary/20 transition-colors"
             >
               {/* Health Score */}
               <div

@@ -154,7 +154,7 @@ export default function CapTable() {
         ].map((kpi) => (
           <div
             key={kpi.label}
-            className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border"
+            className="glass-card soft-shadow p-8 rounded-3xl"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 rounded-2xl bg-foreground/5">
@@ -173,7 +173,7 @@ export default function CapTable() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Pie Chart */}
-        <div className="glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow p-0 rounded-3xl flex flex-col overflow-hidden">
           <div className="p-8 border-b border-border/40">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Distribuição Acionária
@@ -241,7 +241,7 @@ export default function CapTable() {
         </div>
 
         {/* Shareholders Table */}
-        <div className="lg:col-span-2 glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="lg:col-span-2 glass-card soft-shadow overflow-hidden rounded-3xl">
           <div className="p-8 border-b border-border/40 flex justify-between items-center">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Quadro Societário
@@ -339,7 +339,7 @@ export default function CapTable() {
 
       {/* Simulation Panel */}
       {showSimulation && (
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
             <TrendingUp className="w-5 h-5 text-primary" /> Simulação de Nova
             Rodada
@@ -438,7 +438,7 @@ export default function CapTable() {
 
       {/* Rounds Timeline */}
       {rounds.length > 0 && (
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">
             Histórico de Rodadas
           </h3>
@@ -497,7 +497,7 @@ export default function CapTable() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             onClick={() => setShowRoundModal(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-2xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-2xl z-10 rounded-3xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold font-display tracking-tight">
                 Nova Rodada
@@ -618,7 +618,7 @@ export default function CapTable() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             onClick={() => setShowShareholderModal(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-2xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-2xl z-10 rounded-3xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold font-display tracking-tight">
                 Novo Acionista

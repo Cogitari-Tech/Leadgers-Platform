@@ -53,7 +53,7 @@ export default function TechDebtTracker() {
       </div>
 
       {/* Hero Debt Score */}
-      <div className="glass-panel p-8 rounded-3xl border border-border/30 flex items-center gap-10">
+      <div className="glass-panel p-8 rounded-3xl border-border/30 flex items-center gap-10">
         <div className="relative">
           <div
             className={`w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${
@@ -85,7 +85,7 @@ export default function TechDebtTracker() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4 hover:border-red-500/30 transition-colors">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4 hover:border-red-500/30 transition-colors">
           <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
             <ShieldAlert className="w-6 h-6" />
           </div>
@@ -99,7 +99,7 @@ export default function TechDebtTracker() {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4 hover:border-amber-500/30 transition-colors">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4 hover:border-amber-500/30 transition-colors">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
             <Clock className="w-6 h-6" />
           </div>
@@ -113,7 +113,7 @@ export default function TechDebtTracker() {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-3xl border border-border/30 flex items-center gap-4 hover:border-blue-500/30 transition-colors">
+        <div className="glass-panel p-5 rounded-3xl border-border/30 flex items-center gap-4 hover:border-blue-500/30 transition-colors">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
             <GitPullRequest className="w-6 h-6" />
           </div>
@@ -134,14 +134,14 @@ export default function TechDebtTracker() {
         </h3>
 
         {data.items.length === 0 ? (
-          <div className="glass-panel p-10 text-center rounded-3xl border border-border/30 flex flex-col items-center gap-3">
+          <div className="glass-panel p-10 text-center rounded-3xl border-border/30 flex flex-col items-center gap-3">
             <ShieldAlert className="w-12 h-12 text-emerald-500 opacity-20" />
             <p className="font-bold text-muted-foreground">
               Nenhuma dívida crítica encontrada! Parabéns.
             </p>
           </div>
         ) : (
-          <div className="glass-panel rounded-3xl border border-border/30 overflow-hidden">
+          <div className="glass-panel rounded-3xl border-border/30 overflow-hidden">
             <div className="divide-y divide-border/20">
               {data.items.map((item) => (
                 <div

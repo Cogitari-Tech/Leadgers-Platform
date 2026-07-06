@@ -1,9 +1,13 @@
 import { Client } from "pg";
 
 async function seed() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("Missing DATABASE_URL environment variable.");
+  }
+
   const client = new Client({
-    connectionString:
-      "postgresql://postgres:leadgers%402026%21Dev@db.grqhnhftseisxsobamju.supabase.co:5432/postgres",
+    connectionString,
   });
 
   await client.connect();

@@ -135,7 +135,7 @@ export default function ComplianceDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Compliance Score Chart */}
-        <div className="glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2rem] border border-border flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow p-0 rounded-2xl flex flex-col overflow-hidden">
           <div className="p-8 border-b border-border/40">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Índice de Conformidade
@@ -227,7 +227,7 @@ export default function ComplianceDashboard() {
         </div>
 
         {/* Frameworks Status */}
-        <div className="lg:col-span-2 glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2rem] border border-border flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 glass-card soft-shadow p-0 rounded-2xl flex flex-col overflow-hidden">
           <div className="p-8 border-b border-border/40">
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
               Status dos Frameworks
@@ -240,7 +240,7 @@ export default function ComplianceDashboard() {
                 {frameworks.map((framework) => (
                   <div
                     key={framework.id}
-                    className="glass-card soft-shadow p-6 rounded-[2rem] border border-border bg-card/60 dark:bg-black/20 backdrop-blur-xl group hover:scale-[1.02] transition-all"
+                    className="glass-card soft-shadow p-6 rounded-2xl bg-card/60 dark:bg-black/20 group hover:scale-[1.02] transition-all"
                   >
                     <div className="flex justify-between items-start mb-6">
                       <div className="p-3 bg-primary/10 rounded-2xl">
@@ -294,7 +294,7 @@ export default function ComplianceDashboard() {
       </div>
 
       {/* Action Items */}
-      <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+      <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
         <div className="p-8 border-b border-border/40 flex justify-between items-center">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
             Prioridades de Intervenção

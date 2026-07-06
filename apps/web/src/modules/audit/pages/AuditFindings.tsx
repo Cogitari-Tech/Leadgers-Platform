@@ -155,7 +155,7 @@ export default function AuditFindings() {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 glass-card bg-white/5 dark:bg-black/20 backdrop-blur-xl p-6 rounded-[2rem] border border-white/5 soft-shadow">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 glass-card dark:bg-black/20 p-6 rounded-2xl border-white/5 soft-shadow">
         <div className="relative flex-1">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30" />
           <Input
@@ -214,8 +214,8 @@ export default function AuditFindings() {
           Sincronizando registros...
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 md:p-24 glass-card bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 soft-shadow text-center">
-          <div className="w-24 h-24 rounded-[2.5rem] bg-foreground/5 flex items-center justify-center mx-auto mb-8 shadow-xl border border-white/5">
+        <div className="flex flex-col items-center justify-center p-8 md:p-24 glass-card dark:bg-black/20 rounded-3xl border-white/5 soft-shadow text-center">
+          <div className="w-24 h-24 rounded-3xl bg-foreground/5 flex items-center justify-center mx-auto mb-8 shadow-xl border border-white/5">
             <AlertTriangle className="w-10 h-10 text-muted-foreground/20" />
           </div>
           <h3 className="text-2xl font-bold text-foreground font-display tracking-tight mb-3">
@@ -241,7 +241,7 @@ export default function AuditFindings() {
           )}
         </div>
       ) : (
-        <div className="glass-card bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 soft-shadow overflow-hidden">
+        <div className="glass-card dark:bg-black/20 rounded-3xl border-white/5 soft-shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -408,7 +408,7 @@ export default function AuditFindings() {
       {/* Create Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl">
-          <div className="glass-card bg-card border border-border rounded-[3rem] p-8 md:p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
+          <div className="glass-card rounded-3xl p-8 md:p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
             <div className="space-y-2">
               <h3 className="text-3xl font-bold text-foreground font-display tracking-tight">
                 {editingFinding ? "Editar Achado" : "Registrar Achado"}
@@ -548,7 +548,7 @@ export default function AuditFindings() {
       {/* GitHub Issue Modal */}
       {showGithubModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl">
-          <div className="glass-card bg-card border border-border rounded-[3rem] p-8 md:p-12 max-w-lg w-full shadow-2xl space-y-8 relative scale-up">
+          <div className="glass-card rounded-3xl p-8 md:p-12 max-w-lg w-full shadow-2xl space-y-8 relative scale-up">
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-foreground font-display tracking-tight flex items-center gap-2">
                 <Github className="w-6 h-6" />

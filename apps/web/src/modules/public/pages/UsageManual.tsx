@@ -91,7 +91,7 @@ export default function UsageManual() {
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-20 font-sans">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-[3rem] bg-foreground/5 p-12 lg:p-16 border border-border/40">
+      <div className="relative overflow-hidden rounded-3xl bg-foreground/5 p-12 lg:p-16 border border-border/40">
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
         <div className="relative z-10 max-w-2xl space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -114,7 +114,7 @@ export default function UsageManual() {
         {sections.map((section) => (
           <div
             key={section.title}
-            className="glass-card soft-shadow rounded-[2rem] p-8 border border-border/40 hover:scale-[1.02] transition-all group relative overflow-hidden"
+            className="glass-card soft-shadow rounded-2xl p-8 hover:scale-[1.02] transition-all group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <section.icon className="w-24 h-24" />
@@ -149,7 +149,7 @@ export default function UsageManual() {
       </div>
 
       {/* Quick Footer */}
-      <div className="flex flex-col md:flex-row items-center justify-between p-10 rounded-[2.5rem] bg-primary/5 border border-primary/10">
+      <div className="flex flex-col md:flex-row items-center justify-between p-10 rounded-3xl bg-primary/5 border border-primary/10">
         <div className="flex items-center gap-6 mb-8 md:mb-0">
           <div className="p-4 bg-primary/20 rounded-2xl shadow-inner">
             <Clock className="w-8 h-8 text-primary" />

@@ -49,7 +49,7 @@ export default function GitHubOrganizations() {
             return (
               <div
                 key={org.id}
-                className="glass-panel rounded-2xl border border-border/30 p-6 space-y-4 hover:border-primary/20 transition-colors"
+                className="glass-panel rounded-2xl border-border/30 p-6 space-y-4 hover:border-primary/20 transition-colors"
               >
                 <div className="flex items-center gap-4">
                   {org.avatar_url ? (

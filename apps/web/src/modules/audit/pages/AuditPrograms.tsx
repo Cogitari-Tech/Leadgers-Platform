@@ -147,8 +147,8 @@ export default function AuditPrograms() {
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         </div>
       ) : programs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-24 glass-card bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 soft-shadow text-center">
-          <div className="w-24 h-24 rounded-[2.5rem] bg-foreground/5 flex items-center justify-center mx-auto mb-8 shadow-xl border border-white/5">
+        <div className="flex flex-col items-center justify-center p-24 glass-card dark:bg-black/20 rounded-3xl border-white/5 soft-shadow text-center">
+          <div className="w-24 h-24 rounded-3xl bg-foreground/5 flex items-center justify-center mx-auto mb-8 shadow-xl border border-white/5">
             <FileText className="w-10 h-10 text-muted-foreground/20" />
           </div>
           <h3 className="text-2xl font-bold text-foreground font-display tracking-tight mb-3">
@@ -172,7 +172,7 @@ export default function AuditPrograms() {
             {programs.map((program) => (
               <div
                 key={program.id}
-                className="glass-card soft-shadow p-8 rounded-[2.5rem] bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all group"
+                className="glass-card soft-shadow p-8 rounded-3xl dark:bg-black/20 border-white/5 hover:bg-white/10 transition-all group"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                   <div className="flex-1 space-y-4">
@@ -279,7 +279,7 @@ export default function AuditPrograms() {
       {/* Create Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl">
-          <div className="glass-card bg-white/5 border border-white/10 rounded-[3rem] p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
+          <div className="glass-card rounded-3xl p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
             <div className="space-y-2">
               <h3 className="text-3xl font-bold text-foreground font-display tracking-tight">
                 Novo Programa

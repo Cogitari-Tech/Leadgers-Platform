@@ -2,10 +2,18 @@ import { Hono } from "hono";
 import { inngest } from "../../jobs/queue";
 import { PrismaClient } from "@prisma/client";
 import { documentsRouter } from "./documents";
+import { authMiddleware } from "../../middleware/auth";
+import { tenancyMiddleware } from "../../middleware/tenancy";
 import { AppEnv } from "../../types/env";
 
 const prisma = new PrismaClient();
 const investorRouter = new Hono<AppEnv>();
+
+// Auth + tenant isolation for ALL investor routes (incl. mounted documentsRouter).
+// Without this, Prisma bypasses RLS and an undefined tenantId drops the tenant_id
+// filter — exposing every tenant's data room to anonymous callers.
+investorRouter.use("*", authMiddleware);
+investorRouter.use("*", tenancyMiddleware);
 
 investorRouter.route("/documents", documentsRouter);
 
@@ -30,7 +38,9 @@ investorRouter.get("/updates", async (c) => {
 
 investorRouter.post("/reports/generate", async (c) => {
   const body = await c.req.json().catch(() => ({}));
-  const tenantId = c.get("tenantId") || body?.tenantId; // fallback se n tiver auth middleware test hook
+  // tenantId comes ONLY from the authenticated session — never from the body,
+  // otherwise an anonymous caller could target any tenant's financial data.
+  const tenantId = c.get("tenantId");
   const documentId = body?.documentId || crypto.randomUUID();
 
   if (!tenantId) {

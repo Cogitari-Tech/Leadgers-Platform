@@ -147,7 +147,7 @@ export default function AuditDashboard() {
         {statCards.map((stat, index) => (
           <div
             key={index}
-            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[2.5rem] border border-white/10 hover:-translate-y-2 transition-all"
+            className="glass-card soft-shadow p-8 flex flex-col justify-between relative overflow-hidden group dark:bg-black/20 rounded-3xl hover:-translate-y-2 transition-all"
           >
             <div className="flex items-start justify-between mb-6">
               <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] relative z-10">
@@ -172,7 +172,7 @@ export default function AuditDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Audits */}
-        <div className="lg:col-span-2 glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between p-10 border-b border-white/5">
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-foreground font-display tracking-tight">
@@ -262,7 +262,7 @@ export default function AuditDashboard() {
         </div>
 
         {/* Recent Findings */}
-        <div className="glass-card soft-shadow bg-white/5 dark:bg-black/20 backdrop-blur-xl rounded-[3rem] border border-white/5 flex flex-col overflow-hidden">
+        <div className="glass-card soft-shadow dark:bg-black/20 rounded-3xl border-white/5 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between p-10 border-b border-white/5">
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-foreground font-display tracking-tight flex items-center gap-2">

@@ -7,24 +7,29 @@
 ## 🚀 v1.2.2 — Core Stability & Security Patches (Abril 2026)
 
 ### 📊 Finance & Export (Dashboard)
+
 - ✅ **Conversão Excel e Formatação:** Correção da métrica financeira no pipeline de exports via biblioteca `xlsx`, substituindo dependências obsoletas e formatando dados complexos que quebravam em loop em Object arrays (`InvoiceCard.tsx` + `Dashboard.tsx`).
 - ✅ **Sanitização Financeira:** Tratamento de verificações `NaN` severas nas pipelines de Billing via `useBilling.ts` ao renderizar o Pending MRR.
 
 ### ⚙️ Integração Storage (Configurações)
+
 - ✅ **Cloudflare S3 Wrapper Integrado:** Implementação do client de Storage focado no R2 da Cloudflare com suporte direto as variáveis de ambiente base (`VITE_R2_ACCESS_KEY_ID`, `VITE_R2_SECRET_ACCESS_KEY`), mitigando erros no wrapper `useCloudflareStorage.ts`.
 - ✅ **Correções de Scope/Context:** Refatoração de hierarquia de Providers (`useTenant`) da tela de configurações para não colapsar com layouts limitados globalmente e reescrita de toasts da UI.
 
 ### 🛡️ Auditoria, Perfomance & Anti-XSS (Audit Framework)
+
 - ✅ **Performance de Render Loop (React Purity):** Identificação e correção cirúrgica de um _deadlock_ render vs state loop na engine do `AuditReportForm/ReportBuilder`. As chamadas síncronas de gravação local foram refatoradas e movidas de dentro de setters funcionais de React para um modelo Observer / `useEffect` focado exclusivamente em gerenciar auto-save através do LocalStorage sem vazar _side-effects_ para a Virtual DOM.
 - ✅ **Limites de Segurança do Frontend (XSS Control):** Introdução de sanitização hard/soft em painéis expostos via input HTML. Atuação forte nos hiperlinks e "Links de Evidências" da matriz 5W2H implementando Regex Filters contra tentativas nativas de XSS via protocolos arbitrários (`javascript:`, `vbscript:`, `data:`). Correção aplicada rigorosamente a tela `ReportFindingCard.tsx` e injetada no Blur Lifecycle.
 
 ### 🎨 Refatoração UI/UX e Estrutural (Layout & Preview)
-- ✅ **Nova Modal de Report Preview:** Reconstrução visual completa do `ReportPreviewModal` sob o ecosistema *Shadcn*, implementando estética macOS-like, badges dinâmicas de status/risco e layout limpo.
+
+- ✅ **Nova Modal de Report Preview:** Reconstrução visual completa do `ReportPreviewModal` sob o ecosistema _Shadcn_, implementando estética macOS-like, badges dinâmicas de status/risco e layout limpo.
 - ✅ **Reestruturação Global de Navegação (Sidebar):** Transição do Avatar de usuário e workspace para o Header da aplicação e ancoragem do `ThemeToggle` junto aos controles nativos do footer da sidebar.
 - ✅ **Sanitização de Interface Inativa:** Limpeza da `TenantSettings`, camuflando componentes dependentes de APIs ainda não prontas (AI Config, Notificações) sob a label inativa e segura "Em breve".
 
 ### 🔒 Segurança, Hardening & DX
-- ✅ **Supressão de Vazamento de Código (Vercel):** Eliminação de *Source Maps* expostos na build de produção e mitigação pesada de *Hardcoded URLs* que apareciam explodidas nos bundles.
+
+- ✅ **Supressão de Vazamento de Código (Vercel):** Eliminação de _Source Maps_ expostos na build de produção e mitigação pesada de _Hardcoded URLs_ que apareciam explodidas nos bundles.
 - ✅ **Padronização e Linting (DX):** Bootstrapping de `.eslintrc.cjs` para a workspace `/apps/web` com enforcing de regras ECMAScript para erradicação de débitos técnicos.
 - ✅ **Virtual Scrolling:** Integração mandatória de `@tanstack/react-virtual` no componente de Report Finding Card, executando offload e ganhos altíssimos de framerate ao popular relatórios volumosos.
 
@@ -33,18 +38,21 @@
 ## 🚀 v1.2.1 — Security & Infra Fixes (Abril 2026)
 
 ### 🎨 UI/UX & Autenticação (Onboarding & Auth)
+
 - ✅ **Refatoração Auth:** Novo layout split-screen para LoginPage e RegisterPage (Desktop/Mobile), garantindo consistência visual Enterprise e remoção de bugs envolvendo dimensões e scrolls da tela.
 - ✅ **Integração GitHub Explicita:** Substituição do emoji antigo pelo ícone oficial do GitHub no Onboarding Wizard, permitindo OAuth com Supabase e conexão imediata da etapa "Integrações".
 - ✅ **Convites de Equipe (Onboarding):** Funcionalidade completa para engatilhar `send-invite` (Edge Function) direto via tela de Setup.
 - ✅ **Compliance & Sec:** Teste em profundidade via puppeteer e devtools certificando que o fluxo não permite loop, travamento nem vazamento de dados críticos via DOM/Console (Padrão OWASP testado via subagents).
 
 ### 🛡️ Segurança e Auditoria
-- ✅ **Histórico Git Limpo:** Remoção de tokens Vercel e chaves de Deploy *hardcoded* (`mcp-github` operations) em branches remotos para prevenir sec-leaks.
-- ✅ **Rate Limit Nativo & Bypass Seguro (RPC):** Implementação de limitador de requisições nativo no PostgreSQL via *Sliding Window* (`rpc_rate_limits`) e encapsulamento de validação de convites públicos via `check_invite_token` (SECURITY DEFINER), contornando limitações do RLS atestando segurança anti-bruteforce no banco `leadgers-beta`.
+
+- ✅ **Histórico Git Limpo:** Remoção de tokens Vercel e chaves de Deploy _hardcoded_ (`mcp-github` operations) em branches remotos para prevenir sec-leaks.
+- ✅ **Rate Limit Nativo & Bypass Seguro (RPC):** Implementação de limitador de requisições nativo no PostgreSQL via _Sliding Window_ (`rpc_rate_limits`) e encapsulamento de validação de convites públicos via `check_invite_token` (SECURITY DEFINER), contornando limitações do RLS atestando segurança anti-bruteforce no banco `leadgers-beta`.
 - ✅ **Vercel Deployments Eliminados:** Antigos deployments que expunham as envs vulneráveis e maps também foram deletados da infra da Vercel.
 - ✅ **Auditoria UX/SEO Resolvida:** Resolução de falsos-positivos na varredura de `seo_checker.py` e customização para tolerância em arquivos `.config.tsx`.
 
 ### ⚡ Vercel Cloud Native
+
 - ✅ **Analytics & Telemetria:** Instalação e integração profunda de `@vercel/analytics` e `@vercel/speed-insights` no entry point do projeto Vite (`main.tsx`).
 - ✅ **Background CRON:** Configuração de agendadores automáticos via `vercel.json` na rota `/api/health` para evitar cold starts excessivos do backend Serverless.
 

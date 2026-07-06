@@ -16,19 +16,22 @@ Este documento descreve o procedimento operacional padrão para a rotação de c
 ### 1. Supabase
 
 #### A. Project API Keys (Anon & Service Role)
+
 1. Acesse o **Dashboard do Supabase** > **Settings** > **API**.
 2. Clique em **"Roll Key"** para a `anon` key ou `service_role` key.
 3. **Impacto**:
    - `anon`: Requer atualização imediata em `apps/web/.env` e redeploy do frontend.
    - `service_role`: Requer atualização imediata em `apps/api/.env` e restart do backend.
 
-#### B. Access Tokens (sbp_...)
+#### B. Access Tokens (sbp\_...)
+
 1. Acesse **Account Settings** > **Access Tokens**.
 2. Delete o token antigo e gere um novo.
 3. Atualize em `apps/api/.env` (`SUPABASE_ACCESS_TOKEN`).
 4. **Impacto**: Afeta ferramentas de CLI e automações de migração.
 
 #### C. Database Password
+
 1. Acesse **Settings** > **Database** > **Database Settings**.
 2. Clique em **"Reset Database Password"**.
 3. **Impacto**: Requer atualização imediata da `DATABASE_URL` e `DIRECT_URL` em `apps/api/.env`.
@@ -72,6 +75,7 @@ Se uma chave foi commitada e está no histórico do Git:
 ---
 
 ## 📋 Checklist de Atualização
+
 - [ ] Atualizar `.env` local.
 - [ ] Atualizar segredos na **Vercel** (Dashboard > Settings > Environment Variables).
 - [ ] Atualizar segredos no **GitHub Actions** (Settings > Secrets and variables > Actions).

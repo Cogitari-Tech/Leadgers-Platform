@@ -118,7 +118,7 @@ export default function GitHubOverview() {
       {/* Two Column Layout */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Repos Health */}
-        <div className="glass-panel rounded-2xl border border-border/30 p-6 space-y-4">
+        <div className="glass-panel rounded-2xl border-border/30 p-6 space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
             Saúde dos Repositórios
           </h3>
@@ -164,7 +164,7 @@ export default function GitHubOverview() {
         </div>
 
         {/* Recent Events */}
-        <div className="glass-panel rounded-2xl border border-border/30 p-6 space-y-4">
+        <div className="glass-panel rounded-2xl border-border/30 p-6 space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
             Eventos Recentes
           </h3>
@@ -249,7 +249,7 @@ function KPICard({
   };
 
   return (
-    <div className="glass-panel rounded-2xl border border-border/30 p-5 space-y-3">
+    <div className="glass-panel rounded-2xl border-border/30 p-5 space-y-3">
       <div className={`inline-flex p-2 rounded-xl ${colors[variant]}`}>
         {icon}
       </div>
@@ -285,7 +285,7 @@ function MiniStat({
   value: number | string;
 }) {
   return (
-    <div className="glass-panel rounded-xl border border-border/20 p-4 flex items-center gap-3">
+    <div className="glass-panel rounded-xl p-4 flex items-center gap-3">
       <div className="p-2 bg-primary/10 rounded-lg text-primary">{icon}</div>
       <div>
         <p className="text-lg font-black">{value}</p>

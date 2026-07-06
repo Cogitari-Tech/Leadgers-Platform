@@ -75,7 +75,7 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const inputClass =
-    "w-full px-4 py-2.5 text-sm bg-background/50 border border-border/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all rounded-xl font-medium placeholder:opacity-40";
+    "glass-input w-full px-4 py-2.5 text-sm transition-all rounded-xl font-medium placeholder:opacity-40";
   const labelClass =
     "text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70";
 
@@ -183,10 +183,10 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
           {accounts.map((account) => (
             <div
               key={account.id}
-              className={`flex items-center justify-between p-4 border rounded-xl transition-colors ${
+              className={`glass-card flex items-center justify-between p-4 rounded-xl transition-all ${
                 account.is_primary
-                  ? "bg-primary/5 border-primary/20"
-                  : "bg-background/50 border-border/20"
+                  ? "ring-2 ring-primary/20 shadow-primary/5"
+                  : ""
               }`}
             >
               <div className="flex items-center gap-3">
@@ -285,8 +285,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
           <div className="grid grid-cols-2 gap-3">
             {/* Bank selection */}
             <div className="col-span-2 space-y-1.5">
-              <label className={labelClass}>Banco</label>
+              <label htmlFor="bankSelect" className={labelClass}>
+                Banco
+              </label>
               <select
+                id="bankSelect"
                 value={form.bank_code}
                 onChange={(e) => handleBankSelect(e.target.value)}
                 className={inputClass}
@@ -303,8 +306,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             {/* Custom bank name (shown if none selected) */}
             {!form.bank_code && (
               <div className="col-span-2 space-y-1.5">
-                <label className={labelClass}>Nome do Banco</label>
+                <label htmlFor="customBankName" className={labelClass}>
+                  Nome do Banco
+                </label>
                 <input
+                  id="customBankName"
                   type="text"
                   required
                   value={form.bank_name}
@@ -318,8 +324,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             )}
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Agência</label>
+              <label htmlFor="agencyNumber" className={labelClass}>
+                Agência
+              </label>
               <input
+                id="agencyNumber"
                 type="text"
                 required
                 value={form.agency}
@@ -332,8 +341,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Conta</label>
+              <label htmlFor="accountNumber" className={labelClass}>
+                Conta
+              </label>
               <input
+                id="accountNumber"
                 type="text"
                 required
                 value={form.account_number}
@@ -346,8 +358,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Tipo</label>
+              <label htmlFor="accountType" className={labelClass}>
+                Tipo
+              </label>
               <select
+                id="accountType"
                 value={form.account_type}
                 onChange={(e) =>
                   setForm((p) => ({
@@ -366,8 +381,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Chave PIX (opcional)</label>
+              <label htmlFor="pixKey" className={labelClass}>
+                Chave PIX (opcional)
+              </label>
               <input
+                id="pixKey"
                 type="text"
                 value={form.pix_key}
                 onChange={(e) =>
@@ -379,8 +397,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Titular</label>
+              <label htmlFor="holderName" className={labelClass}>
+                Titular
+              </label>
               <input
+                id="holderName"
                 type="text"
                 required
                 value={form.holder_name}
@@ -393,8 +414,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>CPF/CNPJ do Titular</label>
+              <label htmlFor="holderDocument" className={labelClass}>
+                CPF/CNPJ do Titular
+              </label>
               <input
+                id="holderDocument"
                 type="text"
                 value={form.holder_document}
                 onChange={(e) =>
@@ -406,8 +430,11 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="col-span-2 space-y-1.5">
-              <label className={labelClass}>Observações (opcional)</label>
+              <label htmlFor="notes" className={labelClass}>
+                Observações (opcional)
+              </label>
               <input
+                id="notes"
                 type="text"
                 value={form.notes}
                 onChange={(e) =>
@@ -419,14 +446,18 @@ export function BankAccountForm({ accounts, onUpdate }: BankAccountFormProps) {
             </div>
 
             <div className="col-span-2">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label
+                htmlFor="isPrimaryAccount"
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
+                  id="isPrimaryAccount"
                   type="checkbox"
                   checked={form.is_primary}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, is_primary: e.target.checked }))
                   }
-                  className="rounded border-border"
+                  className="rounded border-border accent-primary w-4 h-4"
                 />
                 <span className="text-sm text-muted-foreground">
                   Definir como conta principal

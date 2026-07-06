@@ -5,5 +5,6 @@ export type AppEnv = {
     tenantId: string;
     userRole: "owner" | "admin" | "manager" | "member" | "viewer";
     validatedBody: any;
+    validatedFiles: Array<{ name: string; file: File }>;
   };
 };

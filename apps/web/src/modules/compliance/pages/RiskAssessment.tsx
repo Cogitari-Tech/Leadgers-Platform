@@ -179,7 +179,7 @@ export default function RiskAssessment() {
 
       {/* Tab Content */}
       {activeTab === "register" ? (
-        <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
           {/* Table Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 p-8 border-b border-border/40 text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] bg-muted/10">
             <div className="col-span-4">Identificação do Risco</div>
@@ -281,7 +281,7 @@ export default function RiskAssessment() {
         </div>
       ) : (
         /* Heatmap Matrix */
-        <div className="glass-card soft-shadow p-12 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+        <div className="glass-card soft-shadow p-12 rounded-3xl">
           <div className="flex items-end gap-8 overflow-x-auto pb-6">
             {/* Y-axis label */}
             <div className="flex flex-col items-center justify-center py-4">
@@ -399,7 +399,7 @@ export default function RiskAssessment() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl transition-all animate-in fade-in duration-300"
             onClick={() => setShowModal(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-2xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-2xl z-10 rounded-3xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold text-foreground font-display tracking-tight">
@@ -562,7 +562,7 @@ export default function RiskAssessment() {
                 </div>
               </div>
 
-              <div className="p-8 rounded-[2rem] bg-foreground/5 border border-white/5 flex items-center justify-between">
+              <div className="p-8 rounded-2xl bg-foreground/5 border border-white/5 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-1">
                     Impacto Final Calculado

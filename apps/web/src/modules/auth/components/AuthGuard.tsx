@@ -100,7 +100,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[150px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[150px] rounded-full" />
 
-        <div className="flex flex-col items-center gap-6 relative z-10 glass-panel p-10 rounded-[2.5rem] border border-border/40 shadow-2xl">
+        <div className="flex flex-col items-center gap-6 relative z-10 glass-panel p-10 rounded-3xl shadow-2xl">
           <div className="relative">
             <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -127,14 +127,17 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   // Email not confirmed -> verify-email screen
   const supabaseUser = session?.user;
-  const isSetupTestUser =
-    supabaseUser?.email === "teste@leadgers.com" ||
-    supabaseUser?.email === "test_removivel@leadgers.com" ||
-    supabaseUser?.email === "qa_vibe_test@leadgers.com" ||
-    (supabaseUser?.email?.startsWith("onboarding-test") &&
-      supabaseUser?.email?.endsWith("@leadgers.com"));
-
   const isDevEnvironment = import.meta.env.DEV;
+
+  // Seeded QA accounts may skip email confirmation ONLY in dev — never in prod,
+  // where this would be an auth bypass for known email addresses.
+  const isSetupTestUser =
+    isDevEnvironment &&
+    (supabaseUser?.email === "teste@leadgers.com" ||
+      supabaseUser?.email === "test_removivel@leadgers.com" ||
+      supabaseUser?.email === "qa_vibe_test@leadgers.com" ||
+      (supabaseUser?.email?.startsWith("onboarding-test") &&
+        supabaseUser?.email?.endsWith("@leadgers.com")));
   if (
     supabaseUser &&
     !supabaseUser.email_confirmed_at &&
@@ -172,10 +175,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (!tenant.onboarding_completed) {
       // Safety net: If the wizard just completed but React state hasn't propagated yet,
       // do NOT redirect back to onboarding (prevents redirect loop)
-      const justCompleted = sessionStorage.getItem("onboarding_just_completed") === "true";
+      const justCompleted =
+        sessionStorage.getItem("onboarding_just_completed") === "true";
       if (justCompleted) {
-        console.log("[AuthGuard] Onboarding just completed (session flag). Allowing through.");
-        // DO NOT REMOVE the flag here. Let the context catch up. 
+        console.log(
+          "[AuthGuard] Onboarding just completed (session flag). Allowing through.",
+        );
+        // DO NOT REMOVE the flag here. Let the context catch up.
         // When tenant.onboarding_completed becomes true, this block won't run.
       } else {
         console.log(

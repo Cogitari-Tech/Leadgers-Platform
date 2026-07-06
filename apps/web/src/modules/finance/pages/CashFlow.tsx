@@ -153,7 +153,7 @@ export default function CashFlow() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border group hover:-translate-y-2 transition-all">
+        <div className="glass-card soft-shadow p-8 rounded-3xl group hover:-translate-y-2 transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="p-4 bg-emerald-500/10 rounded-3xl">
               <TrendingUp className="w-8 h-8 text-emerald-500" />
@@ -174,7 +174,7 @@ export default function CashFlow() {
           </div>
         </div>
 
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border group hover:-translate-y-2 transition-all">
+        <div className="glass-card soft-shadow p-8 rounded-3xl group hover:-translate-y-2 transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="p-4 bg-destructive/10 rounded-3xl">
               <TrendingDown className="w-8 h-8 text-destructive" />
@@ -195,7 +195,7 @@ export default function CashFlow() {
           </div>
         </div>
 
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border group hover:-translate-y-2 transition-all">
+        <div className="glass-card soft-shadow p-8 rounded-3xl group hover:-translate-y-2 transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="p-4 bg-primary/10 rounded-3xl">
               <DollarSign className="w-8 h-8 text-primary" />
@@ -218,7 +218,7 @@ export default function CashFlow() {
       </div>
 
       {/* Chart */}
-      <div className="glass-card soft-shadow p-10 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow p-10 rounded-3xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-foreground font-display tracking-tight">
@@ -312,7 +312,7 @@ export default function CashFlow() {
       </div>
 
       {/* Transactions Table */}
-      <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
         <div className="p-10 border-b border-border/40 flex items-center justify-between">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-foreground font-display tracking-tight">
@@ -386,7 +386,7 @@ export default function CashFlow() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl transition-all animate-in fade-in duration-300"
             onClick={() => setIsModalOpen(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-2xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-2xl z-10 rounded-3xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold text-foreground font-display tracking-tight">

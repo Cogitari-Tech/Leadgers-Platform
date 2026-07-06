@@ -211,7 +211,7 @@ export function LandingPage() {
       <main>
         {/* ─── 2. HERO SECTION ───────────────────────────────────── */}
         <section className="relative pt-40 pb-32 md:pt-48 md:pb-40 px-6 overflow-hidden flex flex-col items-center justify-center text-center">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background rounded-[100%] opacity-50 blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background rounded-full opacity-50 blur-[100px] pointer-events-none" />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -588,7 +588,7 @@ export function LandingPage() {
               </motion.div>
               <div className="flex-1 w-full max-w-lg relative">
                 <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full" />
-                <div className="relative z-10 w-full h-[350px] rounded-2xl border border-border/50 shadow-2xl overflow-hidden glass-card flex flex-col">
+                <div className="relative z-10 w-full h-[350px] rounded-2xl border-border/50 shadow-2xl overflow-hidden glass-card flex flex-col">
                   <div className="flex items-center border-b border-border/50 p-4 gap-3 bg-muted/40">
                     <GitBranch className="w-5 h-5 text-muted-foreground" />
                     <span className="font-mono text-sm font-medium">

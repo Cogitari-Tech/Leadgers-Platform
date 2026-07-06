@@ -105,7 +105,7 @@ export default function AuditReports() {
       </div>
 
       {/* Toolbar */}
-      <div className="glass-card p-4 rounded-3xl border border-border bg-card/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="glass-card p-4 rounded-3xl bg-card/50 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-96 group">
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
           <Input
@@ -123,7 +123,7 @@ export default function AuditReports() {
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto opacity-50" />
         </div>
       ) : filteredReports.length === 0 ? (
-        <div className="py-24 text-center glass-card border border-white/5 bg-white/5 rounded-[3rem]">
+        <div className="py-24 text-center glass-card border-white/5 rounded-3xl">
           <div className="w-16 h-16 rounded-3xl bg-foreground/5 flex items-center justify-center mx-auto mb-6 shadow-sm border border-white/5">
             <FileText className="w-8 h-8 text-muted-foreground/30" />
           </div>
@@ -140,7 +140,7 @@ export default function AuditReports() {
           {filteredReports.map((report) => (
             <div
               key={report.id}
-              className="glass-card soft-shadow p-6 rounded-[2rem] bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/5 hover:bg-white/10 transition-all group scale-up flex flex-col"
+              className="glass-card soft-shadow p-6 rounded-2xl dark:bg-black/20 border-white/5 hover:bg-white/10 transition-all group scale-up flex flex-col"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
