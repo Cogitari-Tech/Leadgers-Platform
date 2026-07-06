@@ -82,6 +82,31 @@ Regras detalhadas disponíveis em `.claude/rules/`:
 
 ---
 
+## Skills, Subagents e Frameworks Registrados
+
+Instalados globalmente (`~/.claude/skills/`, `~/.claude/plugins/`) — aplicam-se a este projeto automaticamente, sem cópia local necessária.
+
+**Uso obrigatório (regra principal para todas as atividades):**
+
+| Skill | Quando usar |
+| :--- | :--- |
+| **Caveman** (`caveman:*`) | Modo de comunicação padrão da sessão — sempre ativo salvo "stop caveman". |
+| **GSD — Get Shit Done** (`gsd-*`) | Todo trabalho spec-driven multi-sessão: planejar fase, executar fase, verificar, debug sistemático. Preferir `/gsd-quick` ou `/gsd-fast` para tarefas triviais, `/gsd-plan-phase` + `/gsd-execute-phase` para features. |
+| **UI-UX-Pro-Max** (`ui-ux-pro-max:*`) | Qualquer trabalho de UI/UX neste projeto (componentes, páginas, design system) — usar antes de `impeccable` ou `huashu-design` quando o pedido for genérico. |
+
+**Suporte (usar quando o contexto pedir):**
+
+| Skill | Propósito |
+| :--- | :--- |
+| **ECC — Everything Claude Code** (`ecc:*`) | Reviewers por linguagem, build-fix, security-review, TDD, etc. |
+| **Huashu Design** (`huashu-design`) | Protótipos HTML de alta fidelidade, demos interativos, exploração de variantes visuais. |
+| **Impeccable** (`impeccable`) | Crítica/polish de UI existente, auditoria de acessibilidade e hierarquia visual. |
+| **Awesome Design MD** (`awesome-design-md`) | Referência de design tokens reais de marcas (Apple, Linear, Airbnb...) — consultar ao pedir "estilo tipo X"; nunca sobrepõe `.claude/rules/design-system.md`. |
+
+Validado em 2026-07-04: todos os 7 confirmados instalados e funcionais (global, escopo `user`) via `~/.claude/plugins/installed_plugins.json` e `~/.claude/skills/`.
+
+---
+
 ## Estrutura de Módulos
 
 Cada módulo em `apps/web/src/modules/` segue esta convenção:

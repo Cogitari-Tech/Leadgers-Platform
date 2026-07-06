@@ -41,11 +41,12 @@
 **Date:** 2026-03-30
 **Context:** Protect endpoints against NoSQL/SQL injection, structure anomalies, and brute-force via API abuse. Ensure database RLS is correctly enforced.
 **Decision:**
+
 1. **Zod Schemas**: Mandate strict runtime type-checking on all POST/PATCH/PUT actions.
 2. **Rate Limiting**: Enforce global (60/min) and AI (10/min) rate limiting.
 3. **Supabase Functions**: Transition all views and functions interacting with RLS from SECURITY DEFINER to SECURITY INVOKER and lock `search_path`.
 4. **Connection pooling**: Centralize Prisma Client into a singleton to ban memory leaks.
-**Consequences:** Guaranteed type-safety, strong guardrails against enumeration and mass assignment, optimal scaling without database exhaustion.
+   **Consequences:** Guaranteed type-safety, strong guardrails against enumeration and mass assignment, optimal scaling without database exhaustion.
 
 ## 005. Vite + React SPA for Authenticated Dashboard
 
@@ -100,9 +101,10 @@
 **Context:** Need secure authentication with native database integration and RLS multi-tenant enforcement. Evaluated: JWT custom, Clerk, Keycloak, Supabase Auth.
 **Decision:** Use Supabase Auth instead of custom JWT, Clerk, or Keycloak.
 **Rationale:**
+
 - **vs JWT Custom:** Building auth from scratch is a security risk without a dedicated security engineer.
 - **vs Clerk:** Additional vendor with per-organization costs (~$1/org/month after 100 orgs, ~$75/SSO connection). Adds dependency beyond Supabase.
 - **vs Keycloak:** Requires self-hosting Java infrastructure — doesn't fit the Node.js/TypeScript/serverless stack.
 - **Supabase Auth wins:** Bundled with database (zero additional cost), natively integrated with RLS (token contains `user_id` used in policies), supports social logins, magic links, and MFA.
-**Migration path:** If enterprise customers require SAML/SCIM SSO (Phase 5+), evaluate Clerk or WorkOS as a complement — not replacement — of Supabase Auth.
-**Consequences:** Dependency on Supabase ecosystem (mitigated: Supabase is open-source, portable to self-hosted). Auth flow via Bearer token + `supabase.auth.getUser()`.
+  **Migration path:** If enterprise customers require SAML/SCIM SSO (Phase 5+), evaluate Clerk or WorkOS as a complement — not replacement — of Supabase Auth.
+  **Consequences:** Dependency on Supabase ecosystem (mitigated: Supabase is open-source, portable to self-hosted). Auth flow via Bearer token + `supabase.auth.getUser()`.

@@ -23,6 +23,7 @@ A Leadgers Platform é um ecossistema **SaaS B2B Multi-Tenant** que roda integra
 ## 📌 Decisões Chave
 
 As decisões históricas que forjaram a arquitetura estão na pasta `../adrs/`.
+
 - **Supabase para RLS:** Isola clientes por banco, removendo falhas lógicas multilocatário da camada da API.
 - **Hono invés de Express/Nest:** Baixa complexidade e edge-ready.
 - **Vite invés de Next.js Web:** Performance extrema para o painel de administrador focado em Client-side rendering de gráficos pesados.

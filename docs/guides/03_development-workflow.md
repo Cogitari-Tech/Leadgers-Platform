@@ -10,15 +10,16 @@ We use **Husky** and **Lint-Staged** to enforce security and code quality _befor
 
 When you run `git commit`, the following checks execute automatically:
 
-1.  **Secret Scanning**: Scans staged files for potential secrets (API Keys, Tokens, Private Keys).
-2.  **Lint-staged**: Runs ESLint and Prettier exclusively on staged files.
-3.  `.env` leak prevention prevents committing local secrets.
+1.  **Secret Scanning**: Scans staged files for potential secrets using **GitLeaks** preventing API APIs/Keys exposure.
+2.  **Lint-staged**: Runs **ESLint** and Prettier exclusively on staged files enforcing clean code protocols for `apps/web`.
+3.  `.env` leak prevention hooks verifying split configurations.
 
 **❌ If any check fails, the commit is blocked.**
 
 ### Assurance Checks (Pre-push & Post-merge)
 
 Prior to any `git push`, the following occurs (via `pre-push` hook):
+
 1. **Typechecking**: `tsc --noEmit` validates Typescript structures.
 2. **Tests**: `npm run test` executes Vitest suites ensuring no regressions exist.
 3. **Security Audit**: High and critical vulnerabilities check.

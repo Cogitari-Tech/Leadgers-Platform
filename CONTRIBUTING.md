@@ -70,10 +70,10 @@ Abra um **Pull Request** para a branch `develop`.
 
 Para facilitar os testes locais e E2E, utilize as seguintes credenciais de teste (ambientes Beta/Local):
 
-| Usuário | Senha | Tipo | Comportamento |
-| :--- | :--- | :--- | :--- |
-| `teste@leadgers.com` | `Cogitari@2026!Dev` | Admin (Auditoria) | Persistente |
-| `qa_vibe_test@leadgers.com` | `Cogitari@2026!Dev` | Novo Registro | **Auto-Removível** (Limpa ao Sair) |
+| Usuário                       | Senha               | Tipo              | Comportamento                      |
+| :---------------------------- | :------------------ | :---------------- | :--------------------------------- |
+| `teste@leadgers.com`          | `Cogitari@2026!Dev` | Admin (Auditoria) | Persistente                        |
+| `qa_vibe_test@leadgers.com`   | `Cogitari@2026!Dev` | Novo Registro     | **Auto-Removível** (Limpa ao Sair) |
 | `test_removivel@leadgers.com` | `Cogitari@2026!Dev` | Teste de Cadastro | **Auto-Removível** (Limpa ao Sair) |
 
 > 💡 **Dica:** Use `qa_vibe_test@leadgers.com` para testar fluxos de registro e onboarding do zero. O sistema apaga os dados deste usuário e organização ao clicar em "Sair".
