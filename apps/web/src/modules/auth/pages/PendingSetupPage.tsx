@@ -15,7 +15,7 @@ export function PendingSetupPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto p-8">
-        <div className="glass-card shadow-2xl rounded-[2.5rem] p-10 text-center space-y-6 border border-white/5">
+        <div className="glass-card shadow-2xl rounded-3xl p-10 text-center space-y-6 border-white/5">
           <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center relative">
             <Settings className="w-8 h-8 text-amber-500 animate-spin-slow" />
             <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1 border border-border/50">

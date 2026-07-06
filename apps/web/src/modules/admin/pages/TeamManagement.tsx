@@ -194,10 +194,11 @@ export function TeamManagement() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
             <input
               type="text"
+              id="search-team"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nome ou e-mail..."
-              className="w-full pl-11 pr-4 py-3 text-sm bg-background/50 border border-border/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none rounded-2xl font-medium transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3 glass-input"
             />
           </div>
 
@@ -214,7 +215,7 @@ export function TeamManagement() {
               .map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between p-5 bg-background/50 border border-border/20 rounded-2xl hover:border-primary/20 hover:bg-background/80 transition-all soft-shadow glass-panel"
+                  className="flex items-center justify-between p-5 bg-background/50 rounded-2xl hover:border-primary/20 hover:bg-background/80 transition-all soft-shadow glass-panel"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
@@ -370,7 +371,7 @@ export function TeamManagement() {
             accessRequests.map((req) => (
               <div
                 key={req.id}
-                className="p-6 bg-background/50 border border-border/20 rounded-2xl space-y-5 hover:border-primary/20 transition-all glass-panel soft-shadow"
+                className="p-6 bg-background/50 rounded-2xl space-y-5 hover:border-primary/20 transition-all glass-panel soft-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex gap-4">
@@ -407,10 +408,17 @@ export function TeamManagement() {
 
                 {canManageTeam && (
                   <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+                    <label
+                      htmlFor={`assign-role-${req.id}`}
+                      className="sr-only"
+                    >
+                      Atribuir Cargo
+                    </label>
                     <select
+                      id={`assign-role-${req.id}`}
                       value={approveRoleId || ""}
                       onChange={(e) => setApproveRoleId(e.target.value)}
-                      className="flex-1 text-sm bg-background/50 border border-border/40 rounded-xl px-4 py-3 outline-none focus:border-primary font-bold transition-all shadow-sm"
+                      className="flex-1 glass-input py-3 px-4"
                     >
                       <option value="">Atribuir Cargo...</option>
                       {roles
@@ -469,7 +477,7 @@ export function TeamManagement() {
                   <UserPlus className="w-4 h-4" /> Criar Novo Convite
                 </button>
               ) : (
-                <div className="p-8 bg-background/80 border border-primary/20 rounded-[2rem] space-y-6 glass-panel soft-shadow animate-in zoom-in-95 duration-300">
+                <div className="p-8 bg-background/80 border-primary/20 rounded-2xl space-y-6 glass-panel soft-shadow animate-in zoom-in-95 duration-300">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <h3 className="text-xl font-bold">Configurar Convite</h3>
@@ -491,13 +499,17 @@ export function TeamManagement() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
+                      <label
+                        htmlFor="linkRoleId"
+                        className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2"
+                      >
                         Função Atribuída
                       </label>
                       <select
+                        id="linkRoleId"
                         value={linkRoleId}
                         onChange={(e) => setLinkRoleId(e.target.value)}
-                        className="w-full text-sm bg-background border border-border/40 rounded-2xl px-5 py-3.5 outline-none focus:border-primary font-bold shadow-sm"
+                        className="w-full glass-input px-5 py-3.5"
                       >
                         {roles
                           .filter((r) => r.name !== "owner")
@@ -509,47 +521,62 @@ export function TeamManagement() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2 flex justify-between">
+                      <label
+                        htmlFor="linkMaxUses"
+                        className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2 flex justify-between"
+                      >
                         Usos Máximos
                       </label>
                       <input
                         type="number"
+                        id="linkMaxUses"
                         min={1}
                         max={100}
                         value={linkMaxUses}
                         onChange={(e) => setLinkMaxUses(Number(e.target.value))}
-                        className="w-full text-sm bg-background border border-border/40 rounded-2xl px-5 py-3.5 outline-none focus:border-primary font-bold shadow-sm"
+                        className="w-full glass-input px-5 py-3.5"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
+                      <label
+                        htmlFor="linkExpiresDays"
+                        className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2"
+                      >
                         Expiração (Dias)
                       </label>
                       <input
                         type="number"
+                        id="linkExpiresDays"
                         min={1}
                         max={90}
                         value={linkExpiresDays}
                         onChange={(e) =>
                           setLinkExpiresDays(Number(e.target.value))
                         }
-                        className="w-full text-sm bg-background border border-border/40 rounded-2xl px-5 py-3.5 outline-none focus:border-primary font-bold shadow-sm"
+                        className="w-full glass-input px-5 py-3.5"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
+                      <label
+                        htmlFor="linkLabel"
+                        className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2"
+                      >
                         Rótulo Interno
                       </label>
                       <input
                         type="text"
+                        id="linkLabel"
                         value={linkLabel}
                         onChange={(e) => setLinkLabel(e.target.value)}
                         placeholder="Ex: Novos Auditores"
-                        className="w-full text-sm bg-background border border-border/40 rounded-2xl px-5 py-3.5 outline-none focus:border-primary font-bold shadow-sm"
+                        className="w-full glass-input px-5 py-3.5"
                       />
                     </div>
                     <div className="space-y-2 col-span-full">
-                      <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2 flex items-center justify-between">
+                      <label
+                        htmlFor="linkEmail"
+                        className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/60 ml-2 flex items-center justify-between"
+                      >
                         E-mail do Destinatário
                         <span className="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                           Automático
@@ -557,10 +584,11 @@ export function TeamManagement() {
                       </label>
                       <input
                         type="email"
+                        id="linkEmail"
                         value={linkEmail}
                         onChange={(e) => setLinkEmail(e.target.value)}
                         placeholder="exemplo@gmail.com"
-                        className="w-full text-sm bg-background border border-border/40 rounded-2xl px-5 py-3.5 outline-none focus:border-primary font-bold shadow-sm"
+                        className="w-full glass-input px-5 py-3.5"
                       />
                     </div>
                   </div>
@@ -584,6 +612,7 @@ export function TeamManagement() {
                           type="text"
                           readOnly
                           value={generatedLink}
+                          aria-label="Link gerado"
                           className="flex-1 text-[11px] bg-transparent outline-none font-mono font-bold px-3 text-emerald-600 dark:text-emerald-400"
                         />
                         <button
@@ -665,7 +694,7 @@ export function TeamManagement() {
             </div>
           ) : (
             !showCreateLink && (
-              <div className="flex flex-col items-center justify-center py-24 text-center gap-4 bg-muted/10 rounded-[2.5rem] border border-dashed border-border/40">
+              <div className="flex flex-col items-center justify-center py-24 text-center gap-4 bg-muted/10 rounded-3xl border border-dashed border-border/40">
                 <div className="p-6 bg-muted/20 rounded-full">
                   <Link2 className="w-10 h-10 text-muted-foreground/30" />
                 </div>

@@ -165,7 +165,7 @@ export function TwoFactorSetup() {
 
   if (isEnrolled) {
     return (
-      <div className="rounded-[1.5rem] border border-border/40 bg-background/30 backdrop-blur-md p-8 shadow-xl animate-in fade-in duration-500">
+      <div className="p-8 w-full h-full flex flex-col justify-center animate-in fade-in duration-500">
         <div className="flex flex-col items-center text-center gap-6">
           <div className="rounded-2xl bg-primary/10 p-4 text-primary ring-4 ring-primary/5 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
             <CheckCircle2 size={32} />
@@ -200,7 +200,7 @@ export function TwoFactorSetup() {
   }
 
   return (
-    <div className="rounded-[1.5rem] border border-border/40 bg-background/30 backdrop-blur-md p-8 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-8 w-full h-full flex flex-col justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col items-center text-center gap-6">
         <div className="rounded-2xl bg-primary/10 p-4 text-primary ring-4 ring-primary/5">
           <ShieldAlert size={32} />
@@ -243,7 +243,7 @@ export function TwoFactorSetup() {
           </div>
         ) : (
           <div className="w-full flex flex-col gap-8 animate-in zoom-in-95 duration-500">
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl border border-border/40 bg-white/5 shadow-inner">
+            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl glass-card shadow-inner">
               <div className="bg-white p-3 rounded-xl shadow-2xl">
                 <QRCodeSVG value={uri || ""} size={180} />
               </div>
@@ -285,7 +285,7 @@ export function TwoFactorSetup() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setVerifyCode(e.target.value.replace(/\D/g, ""))
                   }
-                  className="text-center text-3xl tracking-[0.6em] font-mono h-20 rounded-2xl bg-background/50 border-2 border-border/40 focus:border-primary/50 focus:ring-0"
+                  className="text-center text-3xl tracking-[0.6em] font-mono h-20 rounded-2xl"
                   required
                   autoFocus
                 />

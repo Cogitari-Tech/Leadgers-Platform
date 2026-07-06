@@ -78,7 +78,7 @@ export default function BusinessModelCanvas() {
           />
         </div>
 
-        <div className="glass-card soft-shadow p-6 rounded-2xl md:col-span-1 md:row-span-2 flex flex-col h-[600px] border-2 border-primary/20 bg-primary/5">
+        <div className="glass-card soft-shadow p-6 rounded-2xl md:col-span-1 md:row-span-2 flex flex-col h-[600px] border-2 border-primary/20">
           <h3 className="text-sm font-bold uppercase mb-2">
             Value Propositions
           </h3>

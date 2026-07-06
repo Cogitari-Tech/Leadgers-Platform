@@ -267,7 +267,7 @@ export default function AuditExecution() {
       )}
 
       {/* Progress */}
-      <div className="glass-card bg-white/5 border border-white/5 p-6 rounded-3xl">
+      <div className="glass-card border-white/5 p-6 rounded-3xl">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
             Progresso Geral

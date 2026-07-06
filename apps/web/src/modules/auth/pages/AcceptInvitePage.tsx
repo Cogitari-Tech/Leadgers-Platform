@@ -248,7 +248,7 @@ export function AcceptInvitePage() {
       </div>
 
       <main className="w-full max-w-md relative z-10 px-6 py-24 sm:py-32">
-        <div className="glass-panel p-8 sm:p-10 rounded-[2rem] soft-shadow w-full border border-white/10 dark:border-white/5 mx-auto">
+        <div className="glass-panel p-8 sm:p-10 rounded-2xl soft-shadow w-full dark:border-white/5 mx-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />

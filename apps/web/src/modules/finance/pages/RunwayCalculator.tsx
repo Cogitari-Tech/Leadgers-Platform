@@ -60,16 +60,20 @@ export default function RunwayCalculator() {
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">
             Parâmetros Globais
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              <label
+                htmlFor="cashBalance"
+                className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+              >
                 Saldo Inicial em Caixa (R$)
               </label>
               <input
+                id="cashBalance"
                 type="number"
                 value={cashBalance}
                 onChange={(e) => setCashBalance(Number(e.target.value))}
@@ -77,10 +81,14 @@ export default function RunwayCalculator() {
               />
             </div>
             <div className="space-y-3">
-              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              <label
+                htmlFor="projectionMonths"
+                className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+              >
                 Meses de Projeção
               </label>
               <input
+                id="projectionMonths"
                 type="range"
                 min={6}
                 max={60}
@@ -96,10 +104,7 @@ export default function RunwayCalculator() {
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             {scenarios.map((scenario, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-3xl border border-border/40 bg-card/30 space-y-4"
-              >
+              <div key={idx} className="glass-panel p-6 rounded-3xl space-y-4">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full"
@@ -108,10 +113,14 @@ export default function RunwayCalculator() {
                   <span className="text-sm font-bold">{scenario.label}</span>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor={`revenueGrowthRate-${idx}`}
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Cresc. Receita Mensal (%)
                   </label>
                   <input
+                    id={`revenueGrowthRate-${idx}`}
                     type="number"
                     step="1"
                     value={Math.round(scenario.revenueGrowthRate * 100)}
@@ -124,10 +133,14 @@ export default function RunwayCalculator() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor={`costReductionRate-${idx}`}
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Redução Custo Mensal (%)
                   </label>
                   <input
+                    id={`costReductionRate-${idx}`}
                     type="number"
                     step="1"
                     value={Math.round(scenario.costReductionRate * 100)}
@@ -150,7 +163,7 @@ export default function RunwayCalculator() {
         {results.map((result, idx) => (
           <div
             key={idx}
-            className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border relative overflow-hidden group hover:scale-[1.02] transition-all"
+            className="glass-card soft-shadow p-8 rounded-3xl relative overflow-hidden group hover:scale-[1.02] transition-all"
           >
             <div className="flex items-start justify-between mb-6">
               <div
@@ -224,7 +237,7 @@ export default function RunwayCalculator() {
       </div>
 
       {/* Chart */}
-      <div className="glass-card soft-shadow p-10 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow p-10 rounded-3xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-foreground font-display tracking-tight">

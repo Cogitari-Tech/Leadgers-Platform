@@ -152,7 +152,7 @@ export function LandingPage() {
               onClick={() => navTo("/register")}
               className="text-sm font-bold bg-primary text-primary-foreground px-5 py-2.5 rounded-xl hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center gap-2"
             >
-              Começar Grátis
+              Solicitar Acesso
             </button>
           </div>
 
@@ -201,7 +201,7 @@ export function LandingPage() {
                 onClick={() => navTo("/register")}
                 className="text-sm font-bold text-center py-3 bg-primary text-primary-foreground rounded-xl"
               >
-                Começar Grátis
+                Solicitar Acesso
               </button>
             </div>
           </div>
@@ -211,7 +211,7 @@ export function LandingPage() {
       <main>
         {/* ─── 2. HERO SECTION ───────────────────────────────────── */}
         <section className="relative pt-40 pb-32 md:pt-48 md:pb-40 px-6 overflow-hidden flex flex-col items-center justify-center text-center">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background rounded-[100%] opacity-50 blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background rounded-full opacity-50 blur-[100px] pointer-events-none" />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -244,7 +244,7 @@ export function LandingPage() {
                 onClick={() => navTo("/register")}
                 className="px-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-sm md:text-base hover:brightness-110 transition-all shadow-xl shadow-primary/20 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 w-full sm:w-auto justify-center"
               >
-                Começar Grátis
+                Solicitar Acesso
               </button>
               <button
                 onClick={() => navTo("#produto")}
@@ -255,11 +255,12 @@ export function LandingPage() {
             </div>
             <p className="text-xs text-muted-foreground mt-4 font-medium flex items-center justify-center gap-4">
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> 14 dias
-                grátis
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Acesso
+                exclusivo B2B
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Sem cartão
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Avaliação
+                de setup inclusa
               </span>
             </p>
           </motion.div>
@@ -294,25 +295,82 @@ export function LandingPage() {
                     <div className="h-8 w-32 bg-primary/10 rounded-full" />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-28 bg-muted/30 border border-border/50 rounded-xl"
-                      />
-                    ))}
+                    <div className="h-28 bg-muted/30 border border-border/50 rounded-xl p-4 flex flex-col justify-between soft-shadow">
+                      <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider">
+                        Compliance Score
+                      </span>
+                      <div className="flex items-end gap-2">
+                        <span className="text-3xl font-display font-black text-emerald-500">
+                          98%
+                        </span>
+                        <span className="text-[10px] text-emerald-500 font-bold mb-1.5 flex items-center bg-emerald-500/10 px-1 py-0.5 rounded">
+                          <ArrowRight className="w-2.5 h-2.5 -rotate-45" />{" "}
+                          +2.4%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-28 bg-muted/30 border border-border/50 rounded-xl p-4 flex flex-col justify-between soft-shadow">
+                      <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider">
+                        Risco Ativo
+                      </span>
+                      <div className="flex items-end gap-2">
+                        <span className="px-2 py-1 mb-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold rounded">
+                          MÉDIO
+                        </span>
+                        <span className="text-sm font-bold text-foreground mb-1">
+                          3 Achados
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-28 bg-muted/30 border border-border/50 rounded-xl p-4 flex flex-col justify-between soft-shadow">
+                      <span className="text-xs font-bold text-muted-foreground/80 uppercase tracking-wider">
+                        Runway
+                      </span>
+                      <div className="flex items-end gap-1">
+                        <span className="text-3xl font-display font-black text-foreground">
+                          18
+                        </span>
+                        <span className="text-xs text-muted-foreground font-medium mb-1.5">
+                          meses
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 bg-muted/20 border border-border/50 rounded-xl flex items-center justify-center relative overflow-hidden">
-                    {/* Synthetic Charts */}
-                    <div className="absolute inset-0 flex items-end justify-between px-10 pb-10 gap-2 opacity-50">
-                      {[40, 60, 45, 80, 50, 90, 70].map((h, j) => (
+                  <div className="flex-1 bg-muted/20 border border-border/50 rounded-xl flex flex-col relative overflow-hidden soft-shadow">
+                    <div className="absolute inset-0 p-5 flex flex-col gap-3 opacity-80">
+                      <div className="flex justify-between items-center text-xs font-bold text-muted-foreground/60 border-b border-border/50 pb-2 uppercase tracking-wide">
+                        <span className="w-24">Doc ID</span>
+                        <span className="flex-1">Programa</span>
+                        <span>Vínculo</span>
+                      </div>
+                      {[
+                        {
+                          id: "AUD-001",
+                          prog: "SOC2 Compliance",
+                          active: true,
+                        },
+                        { id: "SEC-044", prog: "Análise Vuln.", active: true },
+                        { id: "FIN-012", prog: "Fechamento T3", active: false },
+                      ].map((row, j) => (
                         <div
                           key={j}
-                          className="w-full bg-primary/20 rounded-t-sm"
-                          style={{ height: `${h}%` }}
-                        />
+                          className="flex justify-between items-center text-sm font-medium hover:bg-muted/30 p-1.5 -mx-1.5 rounded transition-colors"
+                        >
+                          <span className="font-mono text-xs w-24 text-muted-foreground">
+                            {row.id}
+                          </span>
+                          <span className="text-foreground flex-1">
+                            {row.prog}
+                          </span>
+                          {row.active ? (
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+                          ) : (
+                            <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                          )}
+                        </div>
                       ))}
                     </div>
-                    <div className="relative z-10 glass-card p-4 rounded-xl text-sm font-bold flex items-center gap-2">
+                    <div className="mt-auto relative z-10 glass-card p-4 text-sm font-bold flex items-center justify-center gap-2 border-t border-border/50 text-foreground bg-background/50 backdrop-blur-md">
                       <Activity className="w-4 h-4 text-primary" /> Visualização
                       Real-Time
                     </div>
@@ -324,9 +382,37 @@ export function LandingPage() {
         </section>
 
         {/* ─── 3. SOCIAL PROOF & METRICS ──────────────────────────── */}
-        <section className="py-12 border-y border-border/50 bg-muted/20">
-          <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-center text-sm font-bold tracking-widest uppercase text-muted-foreground/60 mb-8">
+        <section className="py-16 border-y border-border/50 bg-muted/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 pattern-dots pattern-primary pattern-bg-background pattern-size-4 pattern-opacity-5" />
+
+          <div className="max-w-7xl mx-auto px-6 mb-20 relative z-10">
+            <h2 className="text-center text-xs font-bold tracking-[0.2em] uppercase text-muted-foreground mb-10">
+              Governança confiada por empresas inovadoras
+            </h2>
+            <div className="flex flex-wrap items-center justify-center gap-10 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 select-none">
+              <span className="text-xl md:text-2xl font-black tracking-tighter text-foreground flex items-center gap-2 hover:text-primary transition-colors">
+                <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center text-background text-xs font-bold rotate-45 transform">
+                  <span className="-rotate-45">N</span>
+                </div>{" "}
+                NEXUS
+              </span>
+              <span className="text-xl md:text-2xl font-black font-display text-foreground italic flex items-center gap-1.5 hover:text-amber-500 transition-colors">
+                <Zap className="w-6 h-6 fill-current" /> FINTECH LABS
+              </span>
+              <span className="text-xl md:text-2xl font-bold tracking-[0.2em] text-foreground hover:text-emerald-500 transition-colors">
+                ACME.
+              </span>
+              <span className="text-xl md:text-2xl font-black tracking-tighter text-foreground hover:text-indigo-500 transition-colors">
+                AETHER
+              </span>
+              <span className="text-lg md:text-xl font-bold tracking-[0.3em] text-foreground border-2 border-foreground px-3 py-1 hover:text-rose-500 hover:border-rose-500 transition-colors">
+                VORTEX
+              </span>
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <h2 className="text-center text-xs font-bold tracking-[0.2em] uppercase text-muted-foreground/60 mb-8">
               A base da confiança operacional
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
@@ -502,7 +588,7 @@ export function LandingPage() {
               </motion.div>
               <div className="flex-1 w-full max-w-lg relative">
                 <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full" />
-                <div className="relative z-10 w-full h-[350px] rounded-2xl border border-border/50 shadow-2xl overflow-hidden glass-card flex flex-col">
+                <div className="relative z-10 w-full h-[350px] rounded-2xl border-border/50 shadow-2xl overflow-hidden glass-card flex flex-col">
                   <div className="flex items-center border-b border-border/50 p-4 gap-3 bg-muted/40">
                     <GitBranch className="w-5 h-5 text-muted-foreground" />
                     <span className="font-mono text-sm font-medium">
@@ -536,6 +622,46 @@ export function LandingPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ─── 5.5 TESTIMONIAL ────────────────────────────────────── */}
+        <section className="py-32 px-6 border-b border-border/50 overflow-hidden relative bg-card">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto relative z-10 text-center"
+          >
+            <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-muted border border-border/50 overflow-hidden ring-8 ring-primary/5 shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200"
+                alt="Carlos S."
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-display font-medium text-foreground leading-tight md:leading-snug mb-10 relative">
+              <span className="absolute -top-10 -left-6 md:-left-10 text-8xl text-primary/20 font-serif leading-none">
+                "
+              </span>
+              O Leadgers economizou mais de 40 horas no nosso fechamento
+              trimestral. Em vez de perseguir aprovações em planilhas e e-mails
+              caóticos, agora possuímos uma única fonte imutável de verdade,
+              completamente blindada contra falhas de compliance.
+              <span className="absolute -bottom-16 -right-6 md:-right-10 text-8xl text-primary/20 font-serif leading-none">
+                "
+              </span>
+            </h2>
+            <div className="flex flex-col items-center justify-center">
+              <span className="font-bold text-foreground text-lg">
+                Carlos S.
+              </span>
+              <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider mt-1">
+                Diretor de Compliance e Risco, Fintech Labs
+              </span>
+            </div>
+          </motion.div>
         </section>
 
         {/* ─── 6. INTEGRATIONS ────────────────────────────────────── */}
@@ -641,7 +767,7 @@ export function LandingPage() {
               onClick={() => navTo("/register")}
               className="px-10 py-5 bg-primary text-primary-foreground font-bold rounded-xl text-base hover:brightness-110 shadow-2xl shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 mx-auto"
             >
-              Criar Conta <ArrowRight className="w-5 h-5" />
+              Solicitar Acesso <ArrowRight className="w-5 h-5" />
             </button>
             <p className="text-sm text-muted-foreground mt-6 font-medium">
               Acesso exclusivo para convidados corporativos.
@@ -702,7 +828,7 @@ export function LandingPage() {
                 Recursos
               </span>
               <Link
-                to="/manual"
+                to={user ? "/dashboard/manual-uso" : "/login"}
                 className="text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
                 Documentação

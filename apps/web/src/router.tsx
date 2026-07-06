@@ -115,7 +115,7 @@ export const createAppRouter = () =>
               <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[150px] rounded-full" />
             </div>
 
-            <div className="w-full max-w-2xl relative z-10 glass-card p-8 rounded-[2rem] shadow-2xl">
+            <div className="w-full max-w-2xl relative z-10 glass-card p-8 rounded-2xl shadow-2xl">
               <div className="mb-6 text-center">
                 <h2 className="text-2xl font-bold text-foreground">
                   Configuração de Segurança

@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<
   },
   in_progress: {
     label: "Em Andamento",
-    color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+    color: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20",
   },
   completed: {
     label: "Concluído",
@@ -184,8 +184,8 @@ export default function AuditActionPlans() {
           </p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="glass-card bg-card border border-border rounded-[3rem] p-32 flex flex-col items-center text-center space-y-8 backdrop-blur-3xl shadow-2xl">
-          <div className="w-24 h-24 rounded-[2rem] bg-muted flex items-center justify-center border border-border rotate-12 group hover:rotate-0 transition-transform duration-500">
+        <div className="glass-card rounded-3xl p-32 flex flex-col items-center text-center space-y-8 shadow-2xl">
+          <div className="w-24 h-24 rounded-2xl bg-muted flex items-center justify-center border border-border rotate-12 group hover:rotate-0 transition-transform duration-500">
             <ClipboardCheck className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors duration-500" />
           </div>
           <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function AuditActionPlans() {
           {filtered.map((ap) => (
             <div
               key={ap.id}
-              className={`group glass-card relative bg-card border border-border rounded-[2.5rem] p-8 space-y-6 transition-all duration-500 hover:scale-[1.02] hover:bg-muted/50 backdrop-blur-xl ${
+              className={`group glass-card relative bg-card border border-border rounded-3xl p-8 space-y-6 transition-all duration-500 hover:scale-[1.02] hover:bg-muted/50 backdrop-blur-xl ${
                 isOverdue(ap) ? "ring-2 ring-red-500/20" : ""
               }`}
             >
@@ -304,7 +304,7 @@ export default function AuditActionPlans() {
             className="absolute inset-0 bg-black/40 backdrop-blur-xl"
             onClick={() => setShowModal(false)}
           />
-          <div className="glass-card bg-card border border-border rounded-[3rem] p-8 md:p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
+          <div className="glass-card rounded-3xl p-8 md:p-12 max-w-2xl w-full shadow-2xl space-y-10 relative scale-up">
             <div className="space-y-2">
               <h2 className="text-4xl font-black font-outfit uppercase italic tracking-tighter">
                 Novo <span className="text-primary">Plano de Ação</span>

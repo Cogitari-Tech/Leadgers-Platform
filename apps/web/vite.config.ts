@@ -19,7 +19,7 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    sourcemap: "hidden",
+    sourcemap: false, // SEC-02: Disable sourcemaps to prevent exposing code in production
     rollupOptions: {
       output: {
         manualChunks: {

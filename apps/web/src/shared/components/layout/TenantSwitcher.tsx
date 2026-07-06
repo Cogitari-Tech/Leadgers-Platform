@@ -12,7 +12,10 @@ export const TenantSwitcher: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -27,14 +30,14 @@ export const TenantSwitcher: React.FC = () => {
       setIsOpen(false);
       return;
     }
-    
+
     setIsSwitching(true);
     setIsOpen(false);
-    
+
     const { error } = await switchTenant(targetTenantId);
-    
+
     setIsSwitching(false);
-    
+
     if (!error) {
       // Force navigation to dashboard home on tenant switch
       navigate("/dashboard", { replace: true });
@@ -52,7 +55,9 @@ export const TenantSwitcher: React.FC = () => {
         <span className="text-sm font-medium hidden sm:inline-block max-w-[120px] truncate">
           {isSwitching ? "Trocando..." : tenant.name}
         </span>
-        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isOpen && (
@@ -66,17 +71,21 @@ export const TenantSwitcher: React.FC = () => {
                 key={t.id}
                 onClick={() => handleSwitch(t.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors text-left ${
-                  t.id === tenant.id 
-                    ? "bg-primary/5 text-primary" 
+                  t.id === tenant.id
+                    ? "bg-primary/5 text-primary"
                     : "text-foreground hover:bg-muted"
                 }`}
               >
                 <div className="flex-shrink-0 w-8 h-8 rounded-md bg-muted/50 flex items-center justify-center">
-                  <Briefcase className={`w-4 h-4 ${t.id === tenant.id ? "text-primary" : "text-muted-foreground"}`} />
+                  <Briefcase
+                    className={`w-4 h-4 ${t.id === tenant.id ? "text-primary" : "text-muted-foreground"}`}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{t.name}</p>
-                  {t.id === tenant.id && <p className="text-[10px] uppercase">Empresa Atual</p>}
+                  {t.id === tenant.id && (
+                    <p className="text-[10px] uppercase">Empresa Atual</p>
+                  )}
                 </div>
                 {t.id === tenant.id && <Check className="w-4 h-4" />}
               </button>

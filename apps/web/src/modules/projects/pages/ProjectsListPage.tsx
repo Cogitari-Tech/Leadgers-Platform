@@ -130,7 +130,7 @@ export function ProjectsListPage() {
         )}
       </div>
 
-      <div className="glass-panel border border-border/40 rounded-[2.5rem] p-6 lg:p-8 flex flex-col lg:flex-row gap-6 shadow-2xl items-center backdrop-blur-md">
+      <div className="glass-panel rounded-3xl p-6 lg:p-8 flex flex-col lg:flex-row gap-6 shadow-2xl items-center backdrop-blur-md">
         <div className="flex-1 relative w-full group">
           <Search className="w-5 h-5 absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
           <input
@@ -163,7 +163,7 @@ export function ProjectsListPage() {
       {loading && projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-96 gap-6">
           <div className="relative">
-            <div className="w-16 h-16 rounded-[2rem] border-4 border-primary/10 border-t-primary animate-spin shadow-xl"></div>
+            <div className="w-16 h-16 rounded-2xl border-4 border-primary/10 border-t-primary animate-spin shadow-xl"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
             </div>
@@ -173,7 +173,7 @@ export function ProjectsListPage() {
           </p>
         </div>
       ) : error ? (
-        <div className="bg-destructive/5 border border-destructive/20 rounded-[2.5rem] p-12 text-center animate-in zoom-in-95 group">
+        <div className="bg-destructive/5 border border-destructive/20 rounded-3xl p-12 text-center animate-in zoom-in-95 group">
           <div className="w-16 h-16 bg-destructive/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
             <Trash2 className="text-destructive w-8 h-8" />
           </div>
@@ -182,8 +182,8 @@ export function ProjectsListPage() {
           </p>
         </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="glass-panel border border-border/20 border-dashed rounded-[4rem] p-32 text-center flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-12">
-          <div className="w-28 h-28 bg-muted/20 rounded-[3rem] flex items-center justify-center shadow-inner ring-8 ring-muted/5">
+        <div className="glass-panel border-dashed rounded-3xl p-32 text-center flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-12">
+          <div className="w-28 h-28 bg-muted/20 rounded-3xl flex items-center justify-center shadow-inner ring-8 ring-muted/5">
             <Briefcase className="w-12 h-12 text-muted-foreground/20" />
           </div>
           <div className="space-y-3">
@@ -213,7 +213,7 @@ export function ProjectsListPage() {
           {filteredProjects.map((project, idx) => (
             <div
               key={project.id}
-              className="group relative flex flex-col bg-background/30 glass-panel border border-border/40 rounded-[3rem] p-8 hover:border-primary/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-3 transition-all duration-700 animate-in fade-in slide-in-from-bottom-12 backdrop-blur-sm"
+              className="group relative flex flex-col glass-panel rounded-3xl p-8 hover:border-primary/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-3 transition-all duration-700 animate-in fade-in slide-in-from-bottom-12"
               style={{ animationDelay: `${idx * 100}ms` }}
             >
               <div className="flex items-start justify-between mb-10">

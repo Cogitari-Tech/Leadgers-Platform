@@ -288,7 +288,7 @@ export default function AuditApprovalView() {
 
       {/* Overview Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass-card bg-white/5 border border-white/5 p-6 rounded-3xl">
+        <div className="glass-card border-white/5 p-6 rounded-3xl">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
               Taxa de Conformidade
@@ -318,7 +318,7 @@ export default function AuditApprovalView() {
           </p>
         </div>
 
-        <div className="glass-card bg-white/5 border border-white/5 p-6 rounded-3xl">
+        <div className="glass-card border-white/5 p-6 rounded-3xl">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-500" />

@@ -2,17 +2,20 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-export const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+export const API_URL = import.meta.env.VITE_API_URL;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseAnonKey || (import.meta.env.PROD && !API_URL)) {
   console.error(
-    "CRITICAL: Supabase credentials missing. Check your .env file.",
+    "CRITICAL: Required environment variables are missing. Check your .env file.",
   );
-  console.error("Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY");
+  console.error(
+    "Required: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY and VITE_API_URL (in PROD)",
+  );
 
   if (import.meta.env.PROD) {
-    throw new Error("Missing Supabase credentials in production environment.");
+    throw new Error(
+      "Missing required environment variables in production environment.",
+    );
   }
 }
 

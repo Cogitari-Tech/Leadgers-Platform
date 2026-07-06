@@ -103,7 +103,7 @@ export default function HeadcountPlanning() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-panel p-6 rounded-3xl border border-border/30 flex items-center gap-6">
+        <div className="glass-panel p-6 rounded-3xl border-border/30 flex items-center gap-6">
           <div className="w-16 h-16 rounded-full bg-blue-500/10 flex flex-col items-center justify-center text-blue-500 border-4 border-blue-500/20">
             <span className="text-2xl font-black leading-none">
               {activePlans.length}
@@ -119,7 +119,7 @@ export default function HeadcountPlanning() {
           </div>
         </div>
 
-        <div className="glass-panel p-6 rounded-3xl border border-border/30 flex items-center gap-6">
+        <div className="glass-panel p-6 rounded-3xl border-border/30 flex items-center gap-6">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex flex-col items-center justify-center text-red-500 border-4 border-red-500/20">
             <TrendingUp className="w-6 h-6" />
           </div>
@@ -141,7 +141,7 @@ export default function HeadcountPlanning() {
         </div>
       </div>
 
-      <div className="glass-panel rounded-3xl border border-border/30 overflow-hidden">
+      <div className="glass-panel rounded-3xl border-border/30 overflow-hidden">
         <div className="p-6 bg-muted/20 border-b border-border/30 flex justify-between items-center">
           <h3 className="font-black uppercase tracking-widest text-sm text-muted-foreground flex items-center gap-2">
             <CalendarDays className="w-4 h-4" /> Roadmap de Contratações

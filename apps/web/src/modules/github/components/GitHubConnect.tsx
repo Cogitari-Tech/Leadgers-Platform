@@ -76,7 +76,7 @@ export function GitHubConnect() {
 
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 relative z-10 flex-1">
         <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left flex-1">
-          <div className="w-16 h-16 rounded-[2rem] bg-foreground flex items-center justify-center flex-shrink-0 shadow-2xl shadow-foreground/20 group-hover/connector:scale-105 transition-transform duration-500">
+          <div className="w-16 h-16 rounded-2xl bg-foreground flex items-center justify-center flex-shrink-0 shadow-2xl shadow-foreground/20 group-hover/connector:scale-105 transition-transform duration-500">
             <Github className="w-8 h-8 text-background" />
           </div>
           <div className="space-y-2 max-w-lg">

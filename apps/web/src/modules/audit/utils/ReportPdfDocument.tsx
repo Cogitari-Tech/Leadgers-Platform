@@ -6,6 +6,7 @@ import {
   StyleSheet,
   pdf,
   Image,
+  Link,
 } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import type { AuditReport } from "../types/audit.types";
@@ -214,6 +215,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginTop: 8,
     lineHeight: 1.5,
+  },
+
+  linkText: {
+    fontSize: 9,
+    color: BRAND,
+    textDecoration: "underline",
+    marginBottom: 4,
   },
 
   // Signatures
@@ -448,6 +456,32 @@ function ReportPdfDocument({ report }: { report: AuditReport }) {
                     <Text style={styles.codeBlock}>{f.code_snippet}</Text>
                   </View>
                 )}
+
+                {f.evidence_links &&
+                  f.evidence_links.filter(Boolean).length > 0 && (
+                    <View style={styles.w2hItemFull}>
+                      <Text style={styles.w2hLabel}>Links de Evidência</Text>
+                      <View style={{ marginTop: 4 }}>
+                        {f.evidence_links.map((link, idx) => {
+                          let isValid = false;
+                          try {
+                            const parsed = new URL(link);
+                            isValid =
+                              parsed.protocol === "http:" ||
+                              parsed.protocol === "https:";
+                          } catch {
+                            isValid = false;
+                          }
+                          if (!link || !isValid) return null;
+                          return (
+                            <Link key={idx} src={link}>
+                              <Text style={styles.linkText}>{link}</Text>
+                            </Link>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
               </View>
             </View>
           ))}

@@ -8,9 +8,28 @@ import type {
   FindingRiskLevel,
   FindingStatus,
 } from "../types/audit.types";
+import { SupabaseReportRepository } from "../repositories/SupabaseReportRepository";
+import { supabase } from "../../../config/supabase";
 
 const STORAGE_KEY = "leadgers_audit_report";
-const SAVE_DEBOUNCE_MS = 800;
+const LOCAL_SAVE_DEBOUNCE_MS = 800;
+const REMOTE_SAVE_DEBOUNCE_MS = 3000;
+
+// Parse a persisted report from localStorage defensively: corrupt JSON or any
+// non-object payload (null, number, array) yields null instead of throwing or
+// spreading a malformed shape into state.
+function parseStoredReport(raw: string | null): Record<string, unknown> | null {
+  if (!raw) return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    /* ignore corrupt data */
+  }
+  return null;
+}
 
 function createEmptyFinding(findingId: string = ""): ReportFinding {
   return {
@@ -39,6 +58,7 @@ function createEmptyFinding(findingId: string = ""): ReportFinding {
 
 function createEmptyReport(): AuditReport {
   return {
+    id: crypto.randomUUID(),
     program_id: "",
     project_id: "",
     doc_id: "",
@@ -140,31 +160,145 @@ function generateJson(report: AuditReport): string {
   return JSON.stringify(report, null, 2);
 }
 
+// ─── Tenant ID helper ────────────────────────────────────
+
+async function getCurrentTenantId(): Promise<string | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data } = await supabase
+      .from("tenant_members")
+      .select("tenant_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single();
+
+    return data?.tenant_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Sync status ─────────────────────────────────────────
+
+type SyncStatus = "idle" | "syncing" | "synced" | "offline" | "error";
+
 // ─── Hook ────────────────────────────────────────────────
 
 export function useReportGenerator() {
   const [report, setReport] = useState<AuditReport>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...createEmptyReport(),
-          ...parsed,
-          findings: parsed.findings || [createEmptyFinding()],
-          signatures: parsed.signatures || [],
-        };
-      }
-    } catch {
-      /* ignore corrupt data */
+    const parsed = parseStoredReport(localStorage.getItem(STORAGE_KEY));
+    if (parsed) {
+      return {
+        ...createEmptyReport(),
+        ...parsed,
+        findings: Array.isArray(parsed.findings)
+          ? parsed.findings
+          : [createEmptyFinding()],
+        signatures: Array.isArray(parsed.signatures) ? parsed.signatures : [],
+      } as AuditReport;
     }
     return createEmptyReport();
   });
 
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const isFirstRender = useRef(true);
+  const tenantIdRef = useRef<string | null>(null);
+  const remoteSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Auto-save with debounce based on report changes
+  // ─── Initial load: Try Supabase first, localStorage fallback ───
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFromRemote() {
+      const tenantId = await getCurrentTenantId();
+      if (cancelled || !tenantId) {
+        setSyncStatus("offline");
+        return;
+      }
+      tenantIdRef.current = tenantId;
+
+      try {
+        const remoteReport =
+          await SupabaseReportRepository.getLatestByTenant(tenantId);
+
+        if (cancelled) return;
+
+        if (remoteReport) {
+          // Remote data exists: check if local has newer unsaved data
+          const localReport = parseStoredReport(
+            localStorage.getItem(STORAGE_KEY),
+          );
+          if (localReport) {
+            const localHasData =
+              (localReport.client_name as string)?.trim() ||
+              (localReport.findings as ReportFinding[])?.some((f) =>
+                f.analysis?.what?.trim(),
+              );
+
+            // If local has meaningful data and different ID, auto-import it
+            if (localHasData && localReport.id !== remoteReport.id) {
+              // Import local data to remote as a new report
+              const imported = {
+                ...createEmptyReport(),
+                ...localReport,
+                id: crypto.randomUUID(),
+              } as AuditReport;
+              await SupabaseReportRepository.save(imported, tenantId);
+              localStorage.removeItem(STORAGE_KEY);
+            }
+          }
+
+          setReport(remoteReport);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteReport));
+          setSyncStatus("synced");
+        } else {
+          // No remote data: check if we have local data to migrate
+          const localReport = parseStoredReport(
+            localStorage.getItem(STORAGE_KEY),
+          );
+          if (localReport) {
+            const localHasData =
+              (localReport.client_name as string)?.trim() ||
+              (localReport.findings as ReportFinding[])?.some((f) =>
+                f.analysis?.what?.trim(),
+              );
+
+            if (localHasData) {
+              // Auto-migrate local data to Supabase
+              const migrated = {
+                ...createEmptyReport(),
+                ...localReport,
+                id: (localReport.id as string) || crypto.randomUUID(),
+              } as AuditReport;
+              const saved = await SupabaseReportRepository.save(
+                migrated,
+                tenantId,
+              );
+              setReport(saved);
+              setSyncStatus("synced");
+              return;
+            }
+          }
+          setSyncStatus("synced");
+        }
+      } catch {
+        // Network error → stay with localStorage data (offline mode)
+        setSyncStatus("offline");
+      }
+    }
+
+    loadFromRemote();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ─── Auto-save: localStorage (fast, 800ms) ────────────────
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -174,8 +308,36 @@ export function useReportGenerator() {
     const timer = setTimeout(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(report));
       setUnsavedChanges(false);
-    }, SAVE_DEBOUNCE_MS);
+    }, LOCAL_SAVE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
+  }, [report]);
+
+  // ─── Auto-save: Supabase (debounced, 3s) ──────────────────
+  useEffect(() => {
+    if (isFirstRender.current) return;
+
+    if (remoteSaveTimerRef.current) {
+      clearTimeout(remoteSaveTimerRef.current);
+    }
+
+    remoteSaveTimerRef.current = setTimeout(async () => {
+      const tenantId = tenantIdRef.current;
+      if (!tenantId) return;
+
+      try {
+        setSyncStatus("syncing");
+        await SupabaseReportRepository.save(report, tenantId);
+        setSyncStatus("synced");
+      } catch {
+        setSyncStatus("error");
+      }
+    }, REMOTE_SAVE_DEBOUNCE_MS);
+
+    return () => {
+      if (remoteSaveTimerRef.current) {
+        clearTimeout(remoteSaveTimerRef.current);
+      }
+    };
   }, [report]);
 
   // Update a top-level field
@@ -192,6 +354,18 @@ export function useReportGenerator() {
       ...prev,
       findings: [...prev.findings, createEmptyFinding(findingId)],
     }));
+  }, []);
+
+  const addBulkFindings = useCallback((count: number) => {
+    setReport((prev) => {
+      const newFindings = Array.from({ length: count }, () =>
+        createEmptyFinding(),
+      );
+      return {
+        ...prev,
+        findings: [...prev.findings, ...newFindings],
+      };
+    });
   }, []);
 
   const updateFinding = useCallback(
@@ -293,12 +467,41 @@ export function useReportGenerator() {
   );
 
   // Reset
-  const resetReport = useCallback(() => {
+  const resetReport = useCallback(async () => {
     const fresh = createEmptyReport();
     setReport(fresh);
     localStorage.removeItem(STORAGE_KEY);
     setUnsavedChanges(false);
+
+    // Also save the fresh report to Supabase (start a new report)
+    const tenantId = tenantIdRef.current;
+    if (tenantId) {
+      try {
+        await SupabaseReportRepository.save(fresh, tenantId);
+        setSyncStatus("synced");
+      } catch {
+        setSyncStatus("offline");
+      }
+    }
   }, []);
+
+  // Force sync to remote
+  const forceSync = useCallback(async () => {
+    const tenantId = tenantIdRef.current ?? (await getCurrentTenantId());
+    if (!tenantId) {
+      setSyncStatus("offline");
+      return;
+    }
+    tenantIdRef.current = tenantId;
+
+    try {
+      setSyncStatus("syncing");
+      await SupabaseReportRepository.save(report, tenantId);
+      setSyncStatus("synced");
+    } catch {
+      setSyncStatus("error");
+    }
+  }, [report]);
 
   // Warn before closing with unsaved changes
   useEffect(() => {
@@ -315,9 +518,11 @@ export function useReportGenerator() {
   return {
     report,
     unsavedChanges,
+    syncStatus,
 
     updateField,
     addFinding,
+    addBulkFindings,
     updateFinding,
     updateFinding5W2H,
     removeFinding,
@@ -328,5 +533,6 @@ export function useReportGenerator() {
     validate,
     exportReport,
     resetReport,
+    forceSync,
   };
 }

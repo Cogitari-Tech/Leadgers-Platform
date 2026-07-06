@@ -122,7 +122,7 @@ export default function BurnRate() {
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Gauge Card */}
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border flex flex-col items-center">
+        <div className="glass-card soft-shadow p-8 rounded-3xl flex flex-col items-center">
           <div className="relative w-48 h-28 mb-6">
             <svg viewBox="0 0 200 100" className="w-full">
               <path
@@ -177,7 +177,7 @@ export default function BurnRate() {
         </div>
 
         {/* Cash Remaining */}
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <div className="flex items-start justify-between mb-6">
             <div className="p-3 rounded-2xl bg-emerald-500/10">
               <DollarSign className="w-6 h-6 text-emerald-500" />
@@ -206,7 +206,7 @@ export default function BurnRate() {
         </div>
 
         {/* Runway */}
-        <div className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+        <div className="glass-card soft-shadow p-8 rounded-3xl">
           <div className="flex items-start justify-between mb-6">
             <div
               className={`p-3 rounded-2xl ${metrics.runwayMonths <= 6 ? "bg-destructive/10" : "bg-primary/10"}`}
@@ -237,7 +237,7 @@ export default function BurnRate() {
       </div>
 
       {/* Burn Rate Trend Chart */}
-      <div className="glass-card soft-shadow p-10 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow p-10 rounded-3xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-foreground font-display tracking-tight">
@@ -322,7 +322,7 @@ export default function BurnRate() {
       </div>
 
       {/* Alert Config List */}
-      <div className="glass-card soft-shadow overflow-hidden bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border">
+      <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
         <div className="p-8 border-b border-border/40 flex justify-between items-center">
           <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">
             Alertas Configurados
@@ -422,7 +422,7 @@ export default function BurnRate() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             onClick={() => setShowAlertModal(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-xl z-10 rounded-3xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold font-display tracking-tight">
                 Novo Alerta

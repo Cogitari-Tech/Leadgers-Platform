@@ -1,7 +1,14 @@
-import { useState, useEffect, useRef, type FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type FormEvent,
+} from "react";
 import { supabase } from "../../../config/supabase";
 import { apiClient } from "../../../shared/utils/apiClient";
 import { useAuth } from "../../auth/context/AuthContext";
+import type { BankAccount } from "../../auth/types/auth.types";
 import {
   Building2,
   Save,
@@ -15,12 +22,18 @@ import {
   Link2,
   Camera,
   Brain,
+  Landmark,
+  BellRing,
+  ShieldCheck,
   Sparkles,
+  Mail,
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
 import { TwoFactorSetup } from "../../auth/components/TwoFactorSetup";
 import { GitHubConnect } from "../../github/components/GitHubConnect";
+import { GoogleWorkspaceConnect } from "../components/GoogleWorkspaceConnect";
+import { BankAccountForm } from "../components/BankAccountForm";
 
 interface AiSettings {
   proactivity_level: string;
@@ -68,6 +81,26 @@ export function TenantSettings() {
   });
   const [aiSaving, setAiSaving] = useState(false);
   const [aiSaved, setAiSaved] = useState(false);
+
+  // Open Finance — Bank Accounts
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [bankLoading, setBankLoading] = useState(true);
+
+  const fetchBankAccounts = useCallback(async () => {
+    if (!tenant) return;
+    setBankLoading(true);
+    const { data } = await supabase
+      .from("bank_accounts")
+      .select("*")
+      .eq("tenant_id", tenant.id)
+      .order("is_primary", { ascending: false });
+    setBankAccounts(data ?? []);
+    setBankLoading(false);
+  }, [tenant]);
+
+  useEffect(() => {
+    fetchBankAccounts();
+  }, [fetchBankAccounts]);
 
   useEffect(() => {
     apiClient
@@ -134,6 +167,16 @@ export function TenantSettings() {
     setTimeout(() => setSaved(false), 3000);
   };
 
+  const updateTenantSetting = async (key: string, value: any) => {
+    if (!tenant) return;
+    const newSettings = { ...(tenant.settings || {}), [key]: value };
+    await supabase
+      .from("tenants")
+      .update({ settings: newSettings })
+      .eq("id", tenant.id);
+    // Note: Local state update would be better via context but for now we rely on re-fetch or page reload for simple toggles
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-12 animate-in fade-in duration-700">
       <div className="space-y-8">
@@ -151,13 +194,13 @@ export function TenantSettings() {
 
         <form
           onSubmit={handleSave}
-          className="glass-panel rounded-[3rem] p-8 md:p-12 space-y-12 border border-border/40 shadow-2xl relative overflow-hidden group/form transition-all"
+          className="glass-panel rounded-3xl p-8 md:p-12 space-y-12 shadow-2xl relative overflow-hidden group/form transition-all"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/10 via-primary/40 to-primary/10 opacity-40 group-hover/form:opacity-100 transition-opacity" />
 
           <div className="flex flex-col md:flex-row items-center gap-8 pb-12 border-b border-border/40">
             <div className="relative group/logo">
-              <div className="h-32 w-32 rounded-[2.5rem] bg-background/50 border border-border/60 flex items-center justify-center shadow-inner overflow-hidden group-hover/logo:scale-105 transition-all duration-500 relative ring-8 ring-primary/5">
+              <div className="h-32 w-32 rounded-3xl bg-background/50 border border-border/60 flex items-center justify-center shadow-inner overflow-hidden group-hover/logo:scale-105 transition-all duration-500 relative ring-8 ring-primary/5">
                 {logoUrl ? (
                   <img
                     src={logoUrl}
@@ -169,6 +212,7 @@ export function TenantSettings() {
                 )}
                 <button
                   type="button"
+                  aria-label="Fazer upload de logotipo"
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-all duration-300 disabled:cursor-not-allowed backdrop-blur-sm"
                   disabled={uploading}
@@ -211,31 +255,39 @@ export function TenantSettings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-12">
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2">
+              <label
+                htmlFor="companyName"
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2"
+              >
                 Razão Social / Nome Fantasia
               </label>
               <div className="relative group/input">
                 <input
+                  id="companyName"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   placeholder="Nome da Organização"
-                  className="w-full rounded-2xl border border-border/40 bg-background/50 px-6 py-5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all shadow-sm group-hover/input:border-primary/40"
+                  className="glass-input w-full rounded-2xl px-6 py-5 text-sm font-bold text-foreground"
                 />
               </div>
             </div>
 
             <div className="space-y-3 opacity-60 focus-within:opacity-100 transition-opacity">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2">
+              <label
+                htmlFor="companySlug"
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2"
+              >
                 Identificador da Instância (Slug)
               </label>
               <div className="relative">
                 <input
+                  id="companySlug"
                   type="text"
                   value={slug}
                   disabled
-                  className="w-full rounded-2xl border border-border/20 bg-muted/20 px-6 py-5 text-sm font-bold text-muted-foreground cursor-not-allowed italic"
+                  className="glass-input w-full rounded-2xl px-6 py-5 text-sm font-bold text-muted-foreground cursor-not-allowed italic opacity-70"
                 />
                 <Link2 className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/20" />
               </div>
@@ -245,34 +297,42 @@ export function TenantSettings() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2">
+              <label
+                htmlFor="companyDomain"
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2"
+              >
                 Domínio Autorizado
               </label>
               <div className="relative group/input">
                 <input
+                  id="companyDomain"
                   type="text"
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                   placeholder="empresa.com.br"
-                  className="w-full rounded-2xl border border-border/40 bg-background/50 px-6 py-5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all shadow-sm group-hover/input:border-primary/40"
+                  className="glass-input w-full rounded-2xl px-6 py-5 text-sm font-bold text-foreground"
                 />
-                <Globe className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/20 group-hover/input:text-primary transition-colors" />
+                <Globe className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-hover/input:text-primary transition-colors" />
               </div>
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2">
+              <label
+                htmlFor="companyLogoUrl"
+                className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2"
+              >
                 Logotipo Remoto (CDN)
               </label>
               <div className="relative group/input">
                 <input
+                  id="companyLogoUrl"
                   type="url"
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                   placeholder="https://cdn.empresa.com/logo.png"
-                  className="w-full rounded-2xl border border-border/40 bg-background/50 px-6 py-5 text-sm font-bold focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all shadow-sm group-hover/input:border-primary/40"
+                  className="glass-input w-full rounded-2xl px-6 py-5 text-sm font-bold text-foreground"
                 />
-                <FileText className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/20 group-hover/input:text-primary transition-colors" />
+                <FileText className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-hover/input:text-primary transition-colors" />
               </div>
             </div>
           </div>
@@ -320,7 +380,7 @@ export function TenantSettings() {
               Controle de acesso e redundância de proteção
             </p>
           </div>
-          <div className="glass-panel rounded-[2.5rem] border border-border/40 shadow-xl overflow-hidden min-h-[400px]">
+          <div className="glass-panel rounded-3xl shadow-xl overflow-hidden min-h-[400px]">
             <TwoFactorSetup />
           </div>
         </div>
@@ -335,9 +395,48 @@ export function TenantSettings() {
               Integração nativa com Cloud Provider e Repos
             </p>
           </div>
-          <div className="glass-panel rounded-[2.5rem] border border-border/40 shadow-xl overflow-hidden min-h-[400px]">
+          <div className="glass-panel rounded-3xl shadow-xl overflow-hidden min-h-[400px]">
             <GitHubConnect />
           </div>
+        </div>
+      </div>
+
+      {/* Google Workspace Integration */}
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+        <div className="space-y-1 px-4">
+          <h2 className="text-3xl font-black text-foreground font-display flex items-center gap-4">
+            <Globe className="w-8 h-8 text-[#4285F4]" /> Google Workspace
+          </h2>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-60">
+            Integração com Gmail, Calendar e Drive
+          </p>
+        </div>
+        <div className="glass-panel rounded-3xl shadow-xl overflow-hidden min-h-[320px]">
+          <GoogleWorkspaceConnect />
+        </div>
+      </div>
+
+      {/* Open Finance — Bank Accounts */}
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+        <div className="space-y-1 px-4">
+          <h2 className="text-3xl font-black text-foreground font-display flex items-center gap-4">
+            <Landmark className="w-8 h-8 text-primary" /> Open Finance
+          </h2>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-60">
+            Contas bancárias vinculadas à organização
+          </p>
+        </div>
+        <div className="glass-panel rounded-3xl shadow-xl overflow-hidden p-8 md:p-12">
+          {bankLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <BankAccountForm
+              accounts={bankAccounts}
+              onUpdate={fetchBankAccounts}
+            />
+          )}
         </div>
       </div>
 
@@ -346,13 +445,26 @@ export function TenantSettings() {
         <div className="space-y-1 px-4">
           <h2 className="text-3xl font-black text-foreground font-display flex items-center gap-4">
             <Brain className="w-8 h-8 text-primary" /> Inteligência Artificial
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
+              Em breve
+            </span>
           </h2>
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-60">
             Configuração Granular de IA — Proatividade, Tom e Foco
           </p>
         </div>
 
-        <div className="glass-panel rounded-[2.5rem] border border-border/40 shadow-xl overflow-hidden p-8 md:p-12 space-y-10">
+        <div className="glass-panel rounded-3xl shadow-xl overflow-hidden p-8 md:p-12 space-y-10 opacity-50 pointer-events-none select-none relative">
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <div className="bg-card/80 backdrop-blur-sm border border-border/60 rounded-2xl px-8 py-4 shadow-xl">
+              <p className="text-sm font-black text-foreground uppercase tracking-wider">
+                Funcionalidade em desenvolvimento
+              </p>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                Estará disponível em breve
+              </p>
+            </div>
+          </div>
           {/* Proactivity Level */}
           <div className="space-y-4">
             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 ml-2 flex items-center gap-2">
@@ -489,6 +601,91 @@ export function TenantSettings() {
         </div>
       </div>
 
+      {/* Global Notification Policies */}
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+        <div className="space-y-1 px-4 text-center">
+          <h2 className="text-3xl font-black text-foreground font-display flex items-center justify-center gap-4">
+            <BellRing className="w-8 h-8 text-primary" /> Políticas de
+            Notificação
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
+              Em breve
+            </span>
+          </h2>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-60">
+            Governança de comunicação e alertas automáticos
+          </p>
+        </div>
+
+        <div className="glass-panel rounded-3xl shadow-xl overflow-hidden p-8 md:p-12 opacity-50 pointer-events-none select-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                key: "silence_all_emails",
+                label: "Silenciar E-mails Globais",
+                desc: "Desabilita todos os disparos de e-mail automatizados para membros desta organização.",
+                icon: Mail,
+              },
+              {
+                key: "enforce_mfa_alerts",
+                label: "Alertas de Integridade MFA",
+                desc: "Notificar administradores quando usuários acessarem sem blindagem multi-fator.",
+                icon: ShieldCheck,
+              },
+              {
+                key: "activity_digest",
+                label: "Resumo Diário de Atividade",
+                desc: "Enviar um sumário de todas as ações de auditoria nas últimas 24h para os gestores.",
+                icon: FileText,
+              },
+              {
+                key: "security_anomaly_alerts",
+                label: "Alertas de Anomalia",
+                desc: "IA detecta e notifica acessos ou alterações atípicas no padrão de segurança.",
+                icon: Brain,
+              },
+            ].map((policy) => {
+              const isActive = (tenant?.settings as any)?.[policy.key] ?? false;
+              return (
+                <div
+                  key={policy.key}
+                  className="glass-card flex items-center justify-between p-6 rounded-3xl cursor-pointer group/policy hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+                  onClick={() => updateTenantSetting(policy.key, !isActive)}
+                >
+                  <div className="flex items-center gap-4 pr-6">
+                    <div
+                      className={`p-4 rounded-2xl ${isActive ? "bg-primary/20 text-primary" : "bg-muted/30 text-muted-foreground"} border border-current/10 transition-colors`}
+                    >
+                      <policy.icon className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-black text-foreground uppercase tracking-tighter italic">
+                        {policy.label}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-medium leading-relaxed opacity-60">
+                        {policy.desc}
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className={`w-12 h-6 rounded-full transition-all relative flex-shrink-0 ${
+                      isActive
+                        ? "bg-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-1.5 w-3 h-3 rounded-full bg-white transition-all shadow-sm ${
+                        isActive ? "left-7" : "left-2"
+                      }`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* Legal Documentation Section */}
       <div className="space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-600">
         <div className="space-y-1 px-4 text-center">
@@ -526,7 +723,7 @@ export function TenantSettings() {
               key={doc.to}
               to={doc.to}
               target="_blank"
-              className="group relative flex flex-col p-10 rounded-[2.5rem] border border-border/40 bg-background/30 hover:bg-background/50 hover:border-primary/40 hover:shadow-2xl transition-all duration-500 glass-panel"
+              className="glass-card group relative flex flex-col p-10 rounded-3xl hover:-translate-y-2 hover:shadow-2xl transition-all duration-500"
             >
               <div className="flex justify-between items-start mb-6">
                 <span className="text-xl font-black text-foreground group-hover:text-primary transition-colors pr-6 leading-tight">

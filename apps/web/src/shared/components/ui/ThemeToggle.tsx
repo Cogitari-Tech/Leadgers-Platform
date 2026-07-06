@@ -35,17 +35,12 @@ export const ThemeToggle = () => {
     <button
       onClick={toggleTheme}
       aria-label={`Alternar para modo ${theme === "light" ? "escuro" : "claro"}`}
-      className={`relative overflow-hidden rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 border cursor-pointer
-        ${
-          theme === "light"
-            ? "bg-white border-slate-200 shadow-sm hover:bg-amber-50 hover:border-amber-300"
-            : "bg-slate-800 border-slate-600 shadow-md hover:bg-slate-700 hover:border-sky-500/50"
-        }`}
+      className="relative overflow-hidden rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 glass-panel hover:bg-foreground/5 cursor-pointer group"
     >
       {theme === "light" ? (
-        <Moon className="w-5 h-5 text-slate-600 hover:text-slate-800 transition-colors" />
+        <Moon className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
       ) : (
-        <Sun className="w-5 h-5 text-amber-400 hover:text-amber-300 transition-colors" />
+        <Sun className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
       )}
     </button>
   );

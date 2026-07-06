@@ -89,7 +89,7 @@ export default function MrrDashboard() {
       {/* Hero Cards */}
       {latest ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="glass-panel p-6 rounded-3xl border border-border/30 col-span-1 md:col-span-2">
+          <div className="glass-panel p-6 rounded-3xl border-border/30 col-span-1 md:col-span-2">
             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">
               MRR Atual
             </p>
@@ -112,7 +112,7 @@ export default function MrrDashboard() {
             </div>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl border border-border/30">
+          <div className="glass-panel p-6 rounded-3xl border-border/30">
             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">
               ARR
             </p>
@@ -121,7 +121,7 @@ export default function MrrDashboard() {
             </span>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl border border-border/30">
+          <div className="glass-panel p-6 rounded-3xl border-border/30">
             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">
               Net New MRR
             </p>
@@ -136,7 +136,7 @@ export default function MrrDashboard() {
           </div>
         </div>
       ) : (
-        <div className="glass-panel p-10 rounded-3xl border border-border/30 text-center">
+        <div className="glass-panel p-10 rounded-3xl border-border/30 text-center">
           <BarChart3 className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
           <p className="font-bold text-muted-foreground">
             Nenhum snapshot de MRR registrado ainda.
@@ -149,7 +149,7 @@ export default function MrrDashboard() {
 
       {/* MRR Waterfall */}
       {latest && (
-        <div className="glass-panel p-6 rounded-3xl border border-border/30 space-y-4">
+        <div className="glass-panel p-6 rounded-3xl border-border/30 space-y-4">
           <h3 className="text-lg font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             Waterfall — Último Mês
           </h3>
@@ -209,7 +209,7 @@ export default function MrrDashboard() {
 
       {/* MRR Bar Chart */}
       {snapshots.length > 1 && (
-        <div className="glass-panel p-6 rounded-3xl border border-border/30 space-y-4">
+        <div className="glass-panel p-6 rounded-3xl border-border/30 space-y-4">
           <h3 className="text-lg font-black uppercase tracking-widest text-muted-foreground">
             Evolução do MRR
           </h3>

@@ -120,7 +120,7 @@ export default function UnitEconomics() {
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="glass-card soft-shadow p-8 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border relative overflow-hidden group hover:scale-[1.03] transition-all"
+            className="glass-card soft-shadow p-8 rounded-3xl relative overflow-hidden group hover:scale-[1.03] transition-all"
           >
             <div className="flex items-start justify-between mb-6">
               <div className={`p-3 rounded-2xl ${kpi.bgColor}`}>
@@ -144,7 +144,7 @@ export default function UnitEconomics() {
       </div>
 
       {/* Trend Chart */}
-      <div className="glass-card soft-shadow p-10 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow p-10 rounded-3xl">
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-foreground font-display tracking-tight">
@@ -249,7 +249,7 @@ export default function UnitEconomics() {
             className="absolute inset-0 bg-background/80 backdrop-blur-xl"
             onClick={() => setShowForm(false)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-3xl z-10 rounded-[3rem] border border-border animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-3xl z-10 rounded-3xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-2xl font-bold font-display tracking-tight">
@@ -276,10 +276,14 @@ export default function UnitEconomics() {
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor="totalCustomers"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Total Clientes
                   </label>
                   <input
+                    id="totalCustomers"
                     type="number"
                     value={formData.totalCustomers}
                     onChange={(e) =>
@@ -293,10 +297,14 @@ export default function UnitEconomics() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor="newCustomers"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Novos Clientes
                   </label>
                   <input
+                    id="newCustomers"
                     type="number"
                     value={formData.newCustomers}
                     onChange={(e) =>
@@ -310,10 +318,14 @@ export default function UnitEconomics() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor="churnedCustomers"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Churn (Clientes)
                   </label>
                   <input
+                    id="churnedCustomers"
                     type="number"
                     value={formData.churnedCustomers}
                     onChange={(e) =>
@@ -329,10 +341,14 @@ export default function UnitEconomics() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor="marketingSpend"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Gasto Marketing (R$)
                   </label>
                   <input
+                    id="marketingSpend"
                     type="number"
                     value={formData.marketingSpend}
                     onChange={(e) =>
@@ -345,10 +361,14 @@ export default function UnitEconomics() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label
+                    htmlFor="salesSpend"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest"
+                  >
                     Gasto Vendas (R$)
                   </label>
                   <input
+                    id="salesSpend"
                     type="number"
                     value={formData.salesSpend}
                     onChange={(e) =>

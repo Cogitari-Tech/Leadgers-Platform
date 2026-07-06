@@ -212,7 +212,7 @@ export function RegisterPage() {
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[150px] rounded-full" />
         </div>
 
-        <div className="w-full max-w-md glass-panel p-10 rounded-[2.5rem] border border-border/40 shadow-2xl relative z-10 text-center space-y-8 animate-in zoom-in-95 duration-500">
+        <div className="w-full max-w-md glass-panel p-10 rounded-3xl shadow-2xl relative z-10 text-center space-y-8 animate-in zoom-in-95 duration-500">
           <div className="relative mx-auto w-20 h-20">
             <div className="h-20 w-20 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
             <div className="absolute inset-0 flex items-center justify-center">

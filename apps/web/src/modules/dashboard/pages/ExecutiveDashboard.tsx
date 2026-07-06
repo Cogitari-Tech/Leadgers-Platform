@@ -517,7 +517,10 @@ export default function ExecutiveDashboard() {
           <div className="glass-card soft-shadow rounded-2xl p-6 transition-all hover:scale-[1.01] hover:shadow-md relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <SectionTitle icon={Bot} title="AI Analyst" />
-            <div className="space-y-4 relative z-10" aria-label="AI Analysis Section">
+            <div
+              className="space-y-4 relative z-10"
+              aria-label="AI Analysis Section"
+            >
               {digest ? (
                 <div className="space-y-6">
                   {digest.metrics && (

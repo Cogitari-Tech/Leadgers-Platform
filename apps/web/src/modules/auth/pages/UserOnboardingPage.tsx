@@ -107,7 +107,10 @@ export function UserOnboardingPage() {
   const nextStep = () => setStep((s) => s + 1);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center relative overflow-x-hidden font-sans p-6" aria-label="Onboarding Form">
+    <div
+      className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center relative overflow-x-hidden font-sans p-6"
+      aria-label="Onboarding Form"
+    >
       <label className="sr-only">Configuração de Onboarding</label>
       <div className="absolute top-6 right-6 z-50">
         <ThemeToggle />
@@ -119,7 +122,7 @@ export function UserOnboardingPage() {
       </div>
 
       <div className="w-full max-w-xl relative z-10">
-        <div className="glass-card shadow-2xl rounded-[2rem] p-10 border border-white/5 space-y-8">
+        <div className="glass-card shadow-2xl rounded-2xl p-10 border-white/5 space-y-8">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Bem-vindo ao Leadgers

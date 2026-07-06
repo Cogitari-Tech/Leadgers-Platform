@@ -11,9 +11,13 @@ import {
   CheckCircle2,
   Save,
   MailPlus,
+  Globe,
+  Clock,
+  Bell,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../hooks/useProfile";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 import { useTenant } from "../../auth/context/TenantContext";
 
 export default function ProfilePage() {
@@ -42,18 +46,31 @@ export default function ProfilePage() {
   const { availableTenants, switchTenant } = useTenant();
   const [switchingTenant, setSwitchingTenant] = useState<string | null>(null);
 
+  const {
+    preferences,
+    loading: prefsLoading,
+    updatePreferences,
+    saving: prefsSaving,
+  } = useUserPreferences();
+
+  const handleUpdatePref = async (key: string, value: any) => {
+    await updatePreferences({ [key]: value });
+  };
+
   const handleSwitchTenant = async (id: string) => {
     setSwitchingTenant(id);
     await switchTenant(id);
     setSwitchingTenant(null);
   };
 
-  if (loading) {
+  if (loading || prefsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Carregando perfil...</p>
+          <p className="text-sm text-muted-foreground">
+            Carregando perfil e preferências...
+          </p>
         </div>
       </div>
     );
@@ -122,13 +139,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Avatar & Name Card */}
-      <div className="glass-panel rounded-[2.5rem] p-10 border border-border/40 shadow-2xl relative overflow-hidden group/card shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+      <div className="glass-panel rounded-3xl p-10 shadow-2xl relative overflow-hidden group/card shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20 opacity-40" />
 
         <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
           {/* Avatar */}
           <div className="relative group/avatar">
-            <div className="w-32 h-32 rounded-[2.5rem] bg-background/50 border border-border/60 flex items-center justify-center shadow-inner overflow-hidden relative ring-8 ring-primary/5 group-hover/avatar:scale-105 transition-all duration-500">
+            <div className="w-32 h-32 rounded-3xl bg-background/50 border border-border/60 flex items-center justify-center shadow-inner overflow-hidden relative ring-8 ring-primary/5 group-hover/avatar:scale-105 transition-all duration-500">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -141,7 +158,7 @@ export default function ProfilePage() {
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/60 rounded-[2.5rem] flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 disabled:cursor-not-allowed backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 rounded-3xl flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 disabled:cursor-not-allowed backdrop-blur-sm"
             >
               <Camera className="w-8 h-8 text-white" />
             </button>
@@ -253,7 +270,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tenants Info */}
-      <div className="glass-panel rounded-[2.5rem] p-10 border border-border/40 shadow-xl space-y-6">
+      <div className="glass-panel rounded-3xl p-10 shadow-xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Building2 className="w-5 h-5 text-primary" />
@@ -262,7 +279,7 @@ export default function ProfilePage() {
             </h2>
           </div>
         </div>
-        
+
         <div className="space-y-4 pt-4 border-t border-border/40">
           {availableTenants.length === 0 ? (
             <p className="text-sm text-muted-foreground italic opacity-50">
@@ -272,11 +289,11 @@ export default function ProfilePage() {
             availableTenants.map((t) => {
               const isCurrent = t.id === profile.tenantId;
               return (
-                <div 
-                  key={t.id} 
+                <div
+                  key={t.id}
                   className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border transition-all ${
-                    isCurrent 
-                      ? "bg-primary/5 border-primary/20 shadow-sm" 
+                    isCurrent
+                      ? "bg-primary/5 border-primary/20 shadow-sm"
                       : "bg-background/30 border-border/40 hover:bg-background/50 hover:border-border"
                   }`}
                 >
@@ -297,7 +314,7 @@ export default function ProfilePage() {
                       </p>
                     )}
                   </div>
-                  
+
                   {!isCurrent && (
                     <button
                       onClick={() => handleSwitchTenant(t.id)}
@@ -315,7 +332,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Connected Projects */}
-      <div className="glass-panel rounded-[2.5rem] p-10 border border-border/40 shadow-xl space-y-8">
+      <div className="glass-panel rounded-3xl p-10 shadow-xl space-y-8">
         <div className="flex items-center gap-3">
           <FolderOpen className="w-5 h-5 text-primary" />
           <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">
@@ -377,8 +394,119 @@ export default function ProfilePage() {
         )}
       </div>
 
+      {/* Agent Preferences */}
+      <div className="glass-panel rounded-3xl p-10 shadow-xl space-y-10">
+        <div className="flex items-center gap-3">
+          <Globe className="w-5 h-5 text-primary" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">
+            Preferências do Agente
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Localization */}
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/80 flex items-center gap-2">
+              <Clock className="w-4 h-4" /> Localização & Língua
+            </h3>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">
+                  Idioma da Interface
+                </label>
+                <select
+                  value={preferences?.language || "pt-BR"}
+                  onChange={(e) => handleUpdatePref("language", e.target.value)}
+                  disabled={prefsSaving}
+                  className="w-full px-5 py-3 text-xs bg-background/50 border border-border/60 rounded-xl text-foreground focus:outline-none focus:ring-4 focus:ring-primary/5 font-bold appearance-none cursor-pointer"
+                >
+                  <option value="pt-BR">Português (Brasil)</option>
+                  <option value="en-US">English (US)</option>
+                  <option value="es-ES">Español</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">
+                  Fuso Horário (Timezone)
+                </label>
+                <select
+                  value={preferences?.timezone || "America/Sao_Paulo"}
+                  onChange={(e) => handleUpdatePref("timezone", e.target.value)}
+                  disabled={prefsSaving}
+                  className="w-full px-5 py-3 text-xs bg-background/50 border border-border/60 rounded-xl text-foreground focus:outline-none focus:ring-4 focus:ring-primary/5 font-bold appearance-none cursor-pointer"
+                >
+                  <option value="America/Sao_Paulo">Brasília (GMT-3)</option>
+                  <option value="America/New_York">New York (GMT-5)</option>
+                  <option value="Europe/London">London (GMT+0)</option>
+                  <option value="UTC">UTC (Universal)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/80 flex items-center gap-2">
+              <Bell className="w-4 h-4" /> Canais de Notificação
+            </h3>
+            <div className="space-y-4">
+              {[
+                {
+                  key: "notifications_email",
+                  label: "Relatórios via E-mail",
+                  icon: Mail,
+                },
+                {
+                  key: "notifications_push",
+                  label: "Push Notifications (Browser)",
+                  icon: Smartphone,
+                },
+                {
+                  key: "notifications_in_app",
+                  label: "Notificações In-App",
+                  icon: Bell,
+                },
+              ].map((channel) => (
+                <div
+                  key={channel.key}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-background/30 border border-border/40 hover:bg-background/50 transition-all cursor-pointer group/pref"
+                  onClick={() =>
+                    handleUpdatePref(
+                      channel.key,
+                      !(preferences as any)?.[channel.key],
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    <channel.icon className="w-4 h-4 text-muted-foreground group-hover/pref:text-primary transition-colors" />
+                    <span className="text-xs font-bold text-foreground">
+                      {channel.label}
+                    </span>
+                  </div>
+                  <div
+                    className={`w-10 h-5 rounded-full transition-all relative ${
+                      (preferences as any)?.[channel.key]
+                        ? "bg-primary"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${
+                        (preferences as any)?.[channel.key]
+                          ? "left-6"
+                          : "left-1"
+                      }`}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Security Section */}
-      <div className="glass-panel rounded-[2.5rem] p-10 border border-border/40 shadow-2xl space-y-10 mb-12">
+      <div className="glass-panel rounded-3xl p-10 shadow-2xl space-y-10 mb-12">
         <div className="flex items-center gap-3">
           <KeyRound className="w-5 h-5 text-primary" />
           <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">

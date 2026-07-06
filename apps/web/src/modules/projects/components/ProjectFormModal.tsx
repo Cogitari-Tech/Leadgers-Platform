@@ -56,7 +56,7 @@ export function ProjectFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/40 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="glass-panel border border-border/40 rounded-[2.5rem] p-8 w-full max-w-xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
+      <div className="glass-panel rounded-3xl p-8 w-full max-w-xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
         {/* Glow effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/10 via-primary/40 to-primary/10 opacity-40" />
 

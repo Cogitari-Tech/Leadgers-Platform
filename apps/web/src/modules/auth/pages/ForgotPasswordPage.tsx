@@ -110,7 +110,7 @@ export function ForgotPasswordPage() {
 
       {/* Right side: Form Card Section */}
       <div className="flex-1 flex flex-col justify-center p-6 sm:p-12 lg:p-16 relative z-20">
-        <div className="glass-panel p-10 sm:p-12 rounded-[2rem] soft-shadow w-full max-w-md mx-auto space-y-8 border border-white/10 dark:border-white/5">
+        <div className="glass-panel p-10 sm:p-12 rounded-2xl soft-shadow w-full max-w-md mx-auto space-y-8 dark:border-white/5">
           {/* Mobile Logo */}
           <div className="md:hidden flex justify-center mb-8">
             <img

@@ -15,7 +15,7 @@ export function PendingApprovalPage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-500/5 blur-[150px] rounded-full" />
       </div>
 
-      <div className="glass-panel p-10 sm:p-12 rounded-[2rem] soft-shadow w-full max-w-md mx-6 space-y-8 border border-white/10 dark:border-white/5 text-center relative z-10">
+      <div className="glass-panel p-10 sm:p-12 rounded-2xl soft-shadow w-full max-w-md mx-6 space-y-8 dark:border-white/5 text-center relative z-10">
         <div className="flex justify-center mb-4">
           <img
             src="/images/logo-light.webp"

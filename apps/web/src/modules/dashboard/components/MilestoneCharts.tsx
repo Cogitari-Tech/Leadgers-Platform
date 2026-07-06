@@ -52,7 +52,7 @@ export function MilestoneCharts({ milestones }: { milestones: Milestone[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
       {/* Chart 1: Status */}
-      <div className="glass-card p-6 rounded-3xl border border-border/40">
+      <div className="glass-card p-6 rounded-3xl">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-6">
           Status Overview
         </h3>
@@ -89,7 +89,7 @@ export function MilestoneCharts({ milestones }: { milestones: Milestone[] }) {
       </div>
 
       {/* Chart 2: Categories */}
-      <div className="glass-card p-6 rounded-3xl border border-border/40">
+      <div className="glass-card p-6 rounded-3xl">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-6">
           Distribution by Category
         </h3>

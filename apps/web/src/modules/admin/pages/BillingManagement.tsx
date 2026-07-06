@@ -55,7 +55,7 @@ export const BillingManagement: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 md:col-span-2 space-y-6">
-          <div className="glass-card rounded-2xl p-6 border border-border/50 bg-background/50 backdrop-blur-xl relative overflow-hidden">
+          <div className="glass-card rounded-2xl p-6 border-border/50 bg-background/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-32 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
             <div className="flex items-start justify-between relative z-10">

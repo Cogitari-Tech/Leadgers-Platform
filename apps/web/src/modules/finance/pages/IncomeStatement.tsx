@@ -237,7 +237,7 @@ export default function IncomeStatement() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
-        <div className="glass-card p-5 border border-white/20">
+        <div className="glass-card p-5 border-white/20">
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-1">
             Receita Total
           </p>
@@ -247,7 +247,7 @@ export default function IncomeStatement() {
             </h3>
           </div>
         </div>
-        <div className="glass-card p-5 border border-white/20">
+        <div className="glass-card p-5 border-white/20">
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-1">
             Despesas Totais
           </p>
@@ -257,7 +257,7 @@ export default function IncomeStatement() {
             </h3>
           </div>
         </div>
-        <div className="glass-card p-5 border border-white/20">
+        <div className="glass-card p-5 border-white/20">
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-1">
             Margem Líquida
           </p>

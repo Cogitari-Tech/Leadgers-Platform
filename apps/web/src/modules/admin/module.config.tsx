@@ -11,7 +11,9 @@ const TenantSettings = lazy(() =>
   import("./pages/TenantSettings").then((m) => ({ default: m.TenantSettings })),
 );
 const BillingManagement = lazy(() =>
-  import("./pages/BillingManagement").then((m) => ({ default: m.BillingManagement })),
+  import("./pages/BillingManagement").then((m) => ({
+    default: m.BillingManagement,
+  })),
 );
 const ProjectsListPage = lazy(() =>
   import("../projects/pages/ProjectsListPage").then((m) => ({

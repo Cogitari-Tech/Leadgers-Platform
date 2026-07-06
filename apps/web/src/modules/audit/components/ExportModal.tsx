@@ -70,7 +70,26 @@ export default function ExportModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Exportar Relatório">
-      <div className="space-y-4">
+      {exporting && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl">
+          <div className="flex flex-col items-center gap-4 bg-card p-6 rounded-2xl border shadow-xl">
+            <FileText className="w-8 h-8 animate-pulse text-primary" />
+            <div className="space-y-1 text-center">
+              <h3 className="font-bold text-foreground">Gerando Documento</h3>
+              <p className="text-sm text-muted-foreground">
+                Por favor aguarde, processando dados pesados...
+              </p>
+            </div>
+            <div className="w-48 h-2 bg-muted rounded-full overflow-hidden mt-4">
+              <div className="w-full h-full bg-primary animate-pulse origin-left"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`space-y-4 ${exporting ? "opacity-50 pointer-events-none" : ""}`}
+      >
         {/* Validation */}
         {hasErrors && (
           <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg p-3 space-y-1">
@@ -137,12 +156,6 @@ export default function ExportModal({
             </span>
           </button>
         ))}
-
-        {exporting && (
-          <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500">
-            <FileText className="w-4 h-4 animate-pulse" /> Gerando...
-          </div>
-        )}
 
         {/* Google Drive Integration */}
         <div className="pt-4 border-t border-border mt-4">

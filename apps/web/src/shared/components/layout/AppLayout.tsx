@@ -101,12 +101,12 @@ export const AppLayout: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative z-50 h-full flex-shrink-0 border-r border-border/40 bg-background md:bg-background/80 md:backdrop-blur-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        className={`fixed md:relative z-50 h-full flex-shrink-0 border-r border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] md:backdrop-blur-2xl flex flex-col overflow-hidden transition-all duration-300 ${
           isCollapsed ? "w-16" : "w-72"
         } ${isMobileMenuOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
         <div
-          className={`relative z-10 flex ${isCollapsed ? "flex-col gap-4 py-4 px-2 justify-center" : "p-4 justify-between"} items-center border-b border-border/20`}
+          className={`relative z-10 flex ${isCollapsed ? "flex-col gap-4 py-4 px-2 justify-center" : "p-4 justify-between"} items-center border-b border-[hsl(var(--glass-border))]`}
         >
           {isCollapsed ? (
             <Link to="/dashboard" className="flex justify-center flex-shrink-0">
@@ -141,6 +141,26 @@ export const AppLayout: React.FC = () => {
           </button>
         </div>
 
+        {/* User Profile in Sidebar Header */}
+        <Link
+          to="/dashboard/profile"
+          className={`relative z-10 flex items-center gap-3 mx-2 mt-3 mb-1 p-2 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border/30 ${isCollapsed ? "justify-center mx-1" : ""}`}
+        >
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <User className="w-4 h-4 text-primary" />
+          </div>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold truncate">
+                {user?.name || "Perfil"}
+              </p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {user?.role?.display_name || user?.role?.name}
+              </p>
+            </div>
+          )}
+        </Link>
+
         <nav className="relative z-10 flex-1 mt-4 overflow-y-auto custom-scrollbar px-2">
           {/* Strategic Planning Group */}
           <div className="mb-4 space-y-1">
@@ -160,9 +180,9 @@ export const AppLayout: React.FC = () => {
               )}
             </Link>
 
-            <DashboardNavItems 
-              isCollapsed={isCollapsed} 
-              setIsMobileMenuOpen={setIsMobileMenuOpen} 
+            <DashboardNavItems
+              isCollapsed={isCollapsed}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
             />
           </div>
 
@@ -279,7 +299,7 @@ export const AppLayout: React.FC = () => {
           })}
         </nav>
 
-        <div className="relative z-10 p-3 border-t border-border/20 flex flex-col gap-2">
+        <div className="relative z-10 p-3 border-t border-[hsl(var(--glass-border))] flex flex-col gap-2">
           {/* Manual de Uso */}
           <Link
             to="/dashboard/manual-uso"
@@ -296,25 +316,6 @@ export const AppLayout: React.FC = () => {
             )}
           </Link>
 
-          <Link
-            to="/dashboard/profile"
-            className={`flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors ${isCollapsed ? "justify-center" : ""}`}
-          >
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-primary" />
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate">
-                  {user?.name || "Perfil"}
-                </p>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {user?.role?.display_name || user?.role?.name}
-                </p>
-              </div>
-            )}
-          </Link>
-
           <button
             onClick={async () => {
               await signOut();
@@ -328,37 +329,35 @@ export const AppLayout: React.FC = () => {
             {!isCollapsed && <span className="text-xs font-medium">Sair</span>}
           </button>
 
-          <div className="flex justify-center py-2">
-            <ThemeToggle />
-          </div>
-
           <div
-            className={`flex items-center justify-between px-2 mt-1 ${isCollapsed ? "hidden" : ""}`}
+            className={`flex items-center gap-2 px-1 mt-1 ${isCollapsed ? "flex-col" : "justify-between"}`}
           >
-            <span className="text-[10px] font-bold text-muted-foreground/30">
-              Leadgers © 2026
-            </span>
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1 hover:text-primary transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+            {!isCollapsed && (
+              <span className="text-[10px] font-bold text-muted-foreground/30">
+                Leadgers © 2026
+              </span>
+            )}
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="p-1.5 rounded-lg hover:bg-muted/50 hover:text-primary transition-colors text-muted-foreground"
+                title={isCollapsed ? "Expandir menu" : "Minimizar menu"}
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="w-4 h-4" />
+                ) : (
+                  <ChevronLeft className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
-          {isCollapsed && (
-            <button
-              onClick={() => setIsCollapsed(false)}
-              className="flex justify-center p-2 hover:text-primary transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col relative overflow-hidden z-10">
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] backdrop-blur-xl">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 -ml-2 hover:bg-muted/50 rounded-xl transition-colors"
@@ -380,7 +379,7 @@ export const AppLayout: React.FC = () => {
           <div className="w-8" />
         </div>
 
-        <div className="hidden md:flex flex-shrink-0 items-center justify-end px-6 py-3 border-b border-border/20 bg-background/50 backdrop-blur-xl gap-4">
+        <div className="hidden md:flex flex-shrink-0 items-center justify-end px-6 py-3 border-b border-[hsl(var(--glass-border))] bg-[hsl(var(--glass-bg))] backdrop-blur-xl gap-4">
           <TenantSwitcher />
           <NotificationBell />
         </div>

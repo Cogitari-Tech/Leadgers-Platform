@@ -124,7 +124,7 @@ export default function SwotAnalysis() {
           return (
             <div
               key={type}
-              className={`glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2rem] border border-border flex flex-col overflow-hidden`}
+              className={`glass-card soft-shadow p-0 bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-2xl border border-border flex flex-col overflow-hidden`}
             >
               {/* Quadrant Header */}
               <div className="p-8 border-b border-border/40 flex items-center justify-between">
@@ -218,7 +218,7 @@ export default function SwotAnalysis() {
             className="absolute inset-0 bg-background/60 backdrop-blur-md transition-all animate-in fade-in duration-300"
             onClick={() => setShowModal(null)}
           />
-          <div className="relative glass-panel soft-shadow bg-card dark:bg-card/40 p-10 w-full max-w-lg z-10 rounded-[3rem] border border-border/50 animate-in zoom-in-95 duration-300">
+          <div className="relative glass-panel soft-shadow p-10 w-full max-w-lg z-10 rounded-3xl border-border/50 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div className="space-y-1">
                 <h3 className="text-2xl font-bold text-foreground font-display tracking-tight">

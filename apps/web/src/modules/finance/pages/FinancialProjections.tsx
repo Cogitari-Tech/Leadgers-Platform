@@ -158,7 +158,7 @@ export default function FinancialProjections() {
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="glass-card soft-shadow p-10 bg-muted/20 backdrop-blur-3xl rounded-[2.5rem] border border-border animate-in slide-in-from-top-4">
+        <div className="glass-card soft-shadow p-10 rounded-3xl animate-in slide-in-from-top-4">
           <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-8">
             Premissas do Modelo Preditivo
           </h3>
@@ -261,7 +261,7 @@ export default function FinancialProjections() {
       </div>
 
       {/* Chart */}
-      <div className="glass-card soft-shadow p-12 bg-muted/20 backdrop-blur-3xl rounded-[3rem] border border-border relative overflow-hidden group">
+      <div className="glass-card soft-shadow p-12 rounded-3xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
           <ShieldCheck className="w-64 h-64" />
         </div>
@@ -460,7 +460,7 @@ export default function FinancialProjections() {
       </div>
 
       {/* Profit Chart */}
-      <div className="glass-card soft-shadow p-12 bg-muted/20 backdrop-blur-3xl rounded-[3rem] border border-border">
+      <div className="glass-card soft-shadow p-12 rounded-3xl">
         <div className="flex items-center justify-between mb-10">
           <div className="space-y-1">
             <h2 className="text-3xl font-black text-foreground font-display tracking-tight uppercase">
@@ -601,7 +601,7 @@ export default function FinancialProjections() {
 
       {/* Saved Projections */}
       {projections.length > 0 && (
-        <div className="glass-card soft-shadow overflow-hidden bg-muted/20 backdrop-blur-3xl rounded-[3rem] border border-border">
+        <div className="glass-card soft-shadow overflow-hidden rounded-3xl">
           <div className="p-10 border-b border-border/20">
             <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
               Biblioteca de Simulações
@@ -646,7 +646,7 @@ export default function FinancialProjections() {
             className="absolute inset-0 bg-background/90 backdrop-blur-2xl"
             onClick={() => setShowSaveModal(false)}
           />
-          <div className="relative glass-card soft-shadow bg-card p-12 w-full max-w-md z-10 rounded-[3.5rem] border border-border animate-in zoom-in-95 duration-300">
+          <div className="relative glass-card soft-shadow p-12 w-full max-w-md z-10 rounded-3xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-10">
               <h3 className="text-3xl font-black font-display tracking-tight uppercase italic">
                 Salvar Projeção

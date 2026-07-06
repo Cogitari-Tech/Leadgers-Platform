@@ -29,7 +29,7 @@ export default function ReportSignatures({
   };
 
   return (
-    <div className="glass-card soft-shadow bg-muted/20 dark:bg-card/40 backdrop-blur-xl rounded-[2.5rem] border border-border p-10">
+    <div className="glass-card soft-shadow rounded-3xl p-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-primary" />

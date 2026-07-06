@@ -41,7 +41,7 @@ export default function GitHubMetrics() {
       </div>
 
       {/* Governance Score Card */}
-      <div className="glass-panel rounded-2xl border border-border/30 p-8 flex items-center gap-8">
+      <div className="glass-panel rounded-2xl border-border/30 p-8 flex items-center gap-8">
         <div className="relative">
           <div
             className={`w-24 h-24 rounded-full border-4 flex items-center justify-center ${
@@ -174,7 +174,7 @@ export default function GitHubMetrics() {
 
       {/* Snapshot History */}
       {snapshots.length > 0 && (
-        <div className="glass-panel rounded-2xl border border-border/30 p-6 space-y-4">
+        <div className="glass-panel rounded-2xl border-border/30 p-6 space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
             Histórico de Snapshots
           </h3>
@@ -251,7 +251,7 @@ function MetricCard({
   inverted?: boolean;
 }) {
   return (
-    <div className="glass-panel rounded-2xl border border-border/30 p-5 space-y-3">
+    <div className="glass-panel rounded-2xl border-border/30 p-5 space-y-3">
       <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
         {icon}
       </div>
