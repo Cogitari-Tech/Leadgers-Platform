@@ -2,6 +2,8 @@ import { lazy } from "react";
 import type { ModuleConfig } from "../registry";
 
 const InvestorDashboard = lazy(() => import("./pages/InvestorDashboard"));
+const DataRoomPage = lazy(() => import("./pages/DataRoomPage"));
+const InvestorUpdatesPage = lazy(() => import("./pages/InvestorUpdatesPage"));
 
 export const investorModuleConfig: ModuleConfig = {
   id: "investor",
@@ -18,13 +20,33 @@ export const investorModuleConfig: ModuleConfig = {
       element: <InvestorDashboard aria-label="Investor Dashboard Content" />,
       handle: { title: "Investor Dashboard" },
     },
+    {
+      path: "investor/data-room",
+      element: <DataRoomPage />,
+      handle: { title: "Data Room" },
+    },
+    {
+      path: "investor/updates",
+      element: <InvestorUpdatesPage />,
+      handle: { title: "Investor Updates" },
+    },
   ],
 
   navigation: [
     {
-      label: "Investor Updates",
+      label: "Investor Relations",
       path: "investor",
       icon: "LineChart",
+    },
+    {
+      label: "Data Room",
+      path: "investor/data-room",
+      icon: "FolderLock",
+    },
+    {
+      label: "Investor Updates",
+      path: "investor/updates",
+      icon: "Newspaper",
     },
   ],
 

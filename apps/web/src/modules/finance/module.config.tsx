@@ -8,6 +8,7 @@ const FinanceDashboard = lazy(() => import("./pages/FinanceDashboard"));
 const IncomeStatement = lazy(() => import("./pages/IncomeStatement"));
 const RunwayCalculator = lazy(() => import("./pages/RunwayCalculator"));
 const CapTable = lazy(() => import("./pages/CapTable"));
+const EquityTracker = lazy(() => import("./pages/EquityTracker"));
 const HeadcountPlanning = lazy(() => import("./pages/HeadcountPlanning"));
 const UnitEconomics = lazy(() => import("./pages/UnitEconomics"));
 const BurnRate = lazy(() => import("./pages/BurnRate"));
@@ -65,6 +66,11 @@ export const financeModuleConfig: ModuleConfig = {
       handle: { title: "Cap Table" },
     },
     {
+      path: "finance/equity",
+      element: <EquityTracker />,
+      handle: { title: "Equity & Vesting" },
+    },
+    {
       path: "finance/headcount",
       element: <HeadcountPlanning />,
       handle: { title: "Headcount Planning" },
@@ -117,6 +123,11 @@ export const financeModuleConfig: ModuleConfig = {
       label: "Cap Table",
       path: "finance/cap-table",
       icon: "PieChart",
+    },
+    {
+      label: "Equity & Vesting",
+      path: "finance/equity",
+      icon: "Award",
     },
     {
       label: "Headcount",

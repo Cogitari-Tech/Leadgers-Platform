@@ -126,7 +126,7 @@ export const createRoadmapSchema = z.object({
   title: safeString(300),
   description: safeText(2000).optional().nullable(),
   status: z
-    .enum(["planned", "in_progress", "completed", "cancelled"])
+    .enum(["planned", "in_progress", "in_review", "completed", "cancelled"])
     .default("planned"),
   quarter: safeString(10).optional(),
   github_issue_id: z.string().max(100).optional().nullable(),
@@ -190,6 +190,60 @@ export const createShareholderSchema = z.object({
   ownership_percentage: z.number().min(0).max(100),
   investment_amount: z.number().nonnegative().max(1_000_000_000_000),
   vesting_schedule: vestingScheduleSchema.optional().nullable(),
+  notes: safeText(2000).optional().nullable(),
+});
+
+// ─── MRR/ARR Tracker ─────────────────────────────────────
+// total_arr is derived server-side (12 × total_mrr); tenant_id/created_by are
+// server-derived (mass-assignment allowlist).
+
+export const upsertMrrSnapshotSchema = z.object({
+  month_date: z.string().max(100),
+  total_mrr: z.number().nonnegative().max(1_000_000_000_000),
+  new_mrr: z.number().nonnegative().max(1_000_000_000_000).default(0),
+  expansion_mrr: z.number().nonnegative().max(1_000_000_000_000).default(0),
+  churn_mrr: z.number().nonnegative().max(1_000_000_000_000).default(0),
+  contraction_mrr: z.number().nonnegative().max(1_000_000_000_000).default(0),
+  notes: safeText(2000).optional().nullable(),
+});
+
+// ─── Investor Updates ────────────────────────────────────
+// status/published_at are server-controlled (publish endpoint);
+// tenant_id/created_by are server-derived (mass-assignment allowlist).
+
+export const createInvestorUpdateSchema = z.object({
+  title: safeString(300),
+  content_md: safeText(50_000),
+  period: safeString(100),
+});
+
+export const updateInvestorUpdateSchema = z.object({
+  title: safeString(300).optional(),
+  content_md: safeText(50_000).optional(),
+  period: safeString(100).optional(),
+});
+
+// ─── Equity & Vesting (PRD §7.6) ─────────────────────────
+// tenant_id/created_by are server-derived (mass-assignment allowlist).
+
+export const createEquityGrantSchema = z.object({
+  beneficiary_name: safeString(200),
+  beneficiary_email: z.string().email().max(320).optional().nullable(),
+  options_total: z.number().positive().max(1_000_000_000),
+  grant_date: z.string().max(100),
+  cliff_months: z.number().int().min(0).max(120).default(12),
+  vesting_months: z.number().int().positive().max(240).default(48),
+  grant_price: z.number().nonnegative().max(1_000_000).default(0),
+  acceleration: z
+    .enum(["none", "single_trigger", "double_trigger"])
+    .default("none"),
+  exercise_window_days: z.number().int().min(0).max(3650).default(90),
+  notes: safeText(2000).optional().nullable(),
+});
+
+export const upsertEsopPoolSchema = z.object({
+  total_options: z.number().positive().max(1_000_000_000),
+  pool_percentage: z.number().positive().max(100).optional().nullable(),
   notes: safeText(2000).optional().nullable(),
 });
 

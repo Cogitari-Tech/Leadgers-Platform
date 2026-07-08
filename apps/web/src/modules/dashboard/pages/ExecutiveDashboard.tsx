@@ -20,6 +20,7 @@ import { useExecutiveDashboard } from "../hooks/useExecutiveDashboard";
 import { useProjectRiskScores } from "../hooks/useProjectRiskScores";
 import { useWeeklyDigest } from "../hooks/useWeeklyDigest";
 import { useHealthScore } from "../hooks/useHealthScore";
+import { PredictiveAlertsCard } from "../components/PredictiveAlertsCard";
 
 function KPICard({
   title,
@@ -388,6 +389,9 @@ export default function ExecutiveDashboard() {
 
         {/* Right Column — Pending Decisions */}
         <div className="space-y-6">
+          {/* Predictive Alerts */}
+          <PredictiveAlertsCard />
+
           {/* Pending Decisions */}
           {isManager && (
             <div className="glass-card soft-shadow rounded-2xl p-6 transition-all hover:scale-[1.01] hover:shadow-md">

@@ -3,6 +3,7 @@
 // ─── Finance Domain ──────────────────────────────────────
 export * from "./entities/Transaction";
 export * from "./entities/Account";
+export * from "./entities/EquityGrant";
 export * from "./repositories/IFinanceRepository";
 export * from "./usecases/finance/RecordTransaction";
 

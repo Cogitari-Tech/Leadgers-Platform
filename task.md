@@ -1,6 +1,7 @@
 # 📋 Task Board — Backlog de Correções e Análises
 
-> **Última atualização:** 2026-07-04 — TASK-17: Security + Code Review de todo o projeto (2 reviewers paralelos). 6 achados CRÍTICOS abertos — ver seção TASK-17.
+> **Última atualização:** 2026-07-06 — TASK-18: MVP Launch Readiness (spec-driven gap analysis vs PRD v1.2 Must-haves) + 3 novos CRÍTICOS de segurança em produção (advisors Supabase) anexados a TASK-17. **Ver TASK-18 para o que falta lançar o MVP.**
+> **Anterior:** 2026-07-04 — TASK-17: Security + Code Review de todo o projeto (2 reviewers paralelos).
 
 ---
 
@@ -685,3 +686,104 @@ Rodados 2 reviewers em paralelo cobrindo todo o projeto. Contagem: **6 CRÍTICOS
 - `switch-tenant` Edge Function: membership check confirmado presente antes de mutar `app_metadata` (code reviewer suspeitou, security reviewer confirmou OK).
 - RLS habilitado nas 34 tabelas; sem secrets vivos em arquivos rastreados/histórico; `.env*` gitignored; sourcemaps off (`vite.config.ts:22`).
 - `PrismaFinanceRepository.ts` SQL parametrizado + tenant-scoped; `sales/deals.ts` e `finance/cap-table.ts` com auth+tenancy+IDOR corretos; Stripe webhook com assinatura verificada; sem `dangerouslySetInnerHTML`.
+
+---
+
+### 🔴 NOVOS CRÍTICOS em PRODUÇÃO — descobertos 2026-07-06f (Supabase Security Advisor + revisão de migrations)
+
+> Estes 3 são de **camada de banco/DB grants**, não de código nesta branch. `npm run security-check` local passa (654 files) porque o scanner só pega secrets em arquivo — não vê RLS/grants no Postgres. Todos **ABERTOS**.
+
+#### SEC-15: `get_account_balances()` — dump financeiro cross-tenant por usuário anônimo 🔴🔴
+- **Arquivo:** `supabase/migrations/20260304000001_finance_module_tables.sql:378-421`
+- **Vetor:** função `SECURITY DEFINER` (ignora RLS) **sem filtro de tenant** no corpo (`WHERE a.is_analytical = true` apenas). Advisor confirma `EXECUTE` para `anon` + `authenticated` via `POST /rest/v1/rpc/get_account_balances`. Qualquer um com a anon key pública (que é embarcada no bundle) puxa plano de contas + saldos de **todos** os tenants.
+- [ ] Adicionar filtro `tenant_id` (via `tenant_members`/`auth.uid()`) dentro da função.
+- [ ] `REVOKE EXECUTE ON FUNCTION public.get_account_balances FROM anon;`
+
+#### SEC-16: `approve_access_request()` — takeover de tenant self-service 🔴🔴
+- **Arquivo:** `supabase/migrations/20260228000001_multitenant_onboarding.sql:415-446`
+- **Vetor:** `SECURITY DEFINER`, **zero checagem de autorização do caller**; `anon`+`authenticated` têm EXECUTE. Cadeia: policy `ar_insert_own` deixa qualquer usuário autenticado INSERIR `access_request` para **qualquer** `tenant_id` → atacante chama `approve_access_request` na própria request passando `role_id` de owner → vira `tenant_members` ativo + grava `app_metadata.tenant_id`. `reject_access_request` (`:449-456`) tem a mesma exposição (DoS de solicitações alheias).
+- [ ] Dentro da função, exigir que `auth.uid()` seja owner/admin de `v_request.tenant_id` antes de aprovar; senão `RAISE EXCEPTION`.
+- [ ] `REVOKE EXECUTE` de `anon` nas duas funções.
+
+#### SEC-17: RLS baseado em `user_metadata` — cross-tenant em Data Room + Investor Updates 🔴 (Advisor ERROR ×10)
+- **Arquivo:** `supabase/migrations/20260410000000_fix_investor_rls_and_shares.sql` (policies de `investor_updates`, `data_room_documents`, `data_room_shares`, `data_room_access_logs`)
+- **Vetor:** policies usam `auth.jwt() -> 'user_metadata' ->> 'tenant_id'`. `user_metadata` é **editável pelo próprio usuário** via `supabase.auth.updateUser({ data })` → forjar `tenant_id` = ler/escrever data room e investor updates de outro tenant. Supabase marca como ERROR (não WARN).
+- [ ] Nova migration trocando todas essas policies para join em `tenant_members`/`get_my_tenant_ids()` (nunca `user_metadata`).
+
+#### SEC-18 (WARN, endurecer antes de escalar): superfície RPC de `SECURITY DEFINER`
+- [ ] 14 funções `SECURITY DEFINER` expostas via `/rest/v1/rpc/*` a `anon`/`authenticated`, incluindo triggers que nunca deveriam ser chamáveis diretamente (`handle_new_user_registration`, `enforce_owner_constraint`, `validate_role_change`, `trigger_auto_create_finding`, `update_audit_programs_updated_at`). `REVOKE EXECUTE ... FROM anon, authenticated` nas internas.
+- [ ] `cleanup_test_user(p_email)` **existe em prod mas não tem definição em lugar nenhum do repo** — inspecionar via dashboard e dropar se for resíduo de teste (dropa dados de usuário → perigoso exposto a anon).
+- [ ] `update_updated_at_column` (backfill `20260323230000`) + `create_user_preferences` sem `SET search_path` — adicionar `SET search_path = public`.
+
+#### SEC-19: Drift de schema no ambiente **beta** 🟠
+- [ ] Histórico de migrations do beta para em `20260424202108` com linhagem divergente (renomeada). Faltam no beta: `security_hardening`, WITH CHECK policies, data_room, google_workspace, north_star backfill. Beta desatualizado vs prod/repo → reconciliar antes de usar beta como staging real.
+
+#### Ações manuais de segurança ainda pendentes (herdadas)
+- [ ] SEC-07: ativar Leaked Password Protection (Supabase → Auth → Settings → HaveIBeenPwned). Advisor ainda acusa desabilitado.
+- [ ] SEC-11: rotacionar senha de `teste@leadgers.com`.
+- [ ] Rotacionar senha do **beta DB** (vazou hardcoded no histórico de `scripts/seed-stress-audit.ts`; já removida do working tree, mas válida até rotação).
+- [ ] Data Room storage: **não existe SELECT policy funcional** no bucket `data_room` — a policy original (`20260404000000_data_room_storage.sql`) referenciava colunas inexistentes (`cap_table_shareholders.user_id/.email`) e foi aplicada sem ela. Ninguém lê arquivos do data room via essa RLS. Decidir vínculo (tenant_members ou `data_room_documents.tenant_id`) e criar policy.
+
+---
+
+## TASK-18 · MVP Launch Readiness — Gap Analysis Spec-Driven (PRD v1.2) 🔴 EM ABERTO
+
+**Prioridade:** 🔴 Crítico (define o que falta para lançar)
+**Tipo:** Análise de Produto + Engenharia
+**Área:** Todo o produto
+**Status:** 🔴 Análise concluída 2026-07-06 — 5 gaps de feature Must-have + blockers de segurança + qualidade
+**Método:** Cruzamento das features **Must** do PRD (§6 MoSCoW + §14 Roadmap Fases 1–2) contra o estado real do código (`apps/api/src/routes/*`, `apps/web/src/modules/*/pages/*`, migrations aplicadas).
+
+### Contexto — O que é o produto
+Leadgers = ERP SaaS all-in-one multi-tenant para startups tech brasileiras (1–20 pessoas). 3 níveis: Estratégico (BMC, OKRs, North Star), Tático (roadmap, headcount, fundraising), Operacional (PRs/issues, caixa, contratos). Diferencial = camada de IA contextual (Claude Haiku/Sonnet/Opus). Arquitetura: Clean/Hexagonal, Hono Edge API + Supabase (Auth/PG/RLS/Storage) + React SPA + Inngest (jobs). **Meta MVP (PRD §14):** Fase 1 (MVP Core) + Fase 2 (Monetização/IR) = 100% dos Must até Q3 2026; beta fechado 50 startups.
+
+### 18.1 — Status das Features **Must-Have** (PRD §14 Fases 1 e 2)
+
+| # | Feature (Must) | Fase | Backend | Frontend | Status MVP |
+|---|----------------|------|---------|----------|------------|
+| ✅ | Runway Calculator | 1 | `finance/runway.ts` | `RunwayCalculator.tsx` | ✅ Completo (cap de `projectionMonths=120` já aplicado) |
+| ✅ | Burn Rate Dashboard | 1 | `finance/burn-rate.ts` | `BurnRate.tsx` | ✅ Completo |
+| ✅ | Unit Economics | 1 | `finance/unit-economics.ts` | `UnitEconomics.tsx` | ✅ Completo |
+| ✅ | OKRs Cascateados | 1 | `strategic/okrs.ts` | `OkrsPage.tsx` | ✅ Presente — validar cascateamento + check-in cron (RN-06) |
+| ✅ | Business Model Canvas | 1 | `strategic/bmc.ts` | `BusinessModelCanvas.tsx` | ✅ Completo |
+| ✅ | North Star Metric | 1 | `strategic/north-star.ts` | `NorthStarMetric.tsx` | ✅ Backfill de tabela aplicado (migration `20260416500000`) |
+| 🟠 | **Roadmap Visual** | 1 | `product/roadmap.ts` | — sem página Kanban dedicada | 🟠 **PARCIAL** — backend existe, falta UI Kanban/timeline linkada a GitHub Issues (RN §7.7) |
+| 🔴 | **Equity & Vesting Tracker** | 1 | ❌ inexistente | ❌ inexistente | 🔴 **AUSENTE** — só há Cap Table. Sem ESOP pool, cliff, cronograma de vesting (§7.6). Feature **Must** da Fase 1 não iniciada |
+| ✅ | Cap Table | 2 | `finance/cap-table.ts` | `CapTable.tsx` | ✅ Completo (RBAC + schemas corrigidos em `557fca6`) |
+| ✅ | Health Score | 2 | `strategic/health-score.ts` | `HealthScoreDashboard.tsx` | ✅ Presente — validar sub-scores compostos por área |
+| ✅ | Weekly Digest (IA) | 2 | `ai/weekly-digest.ts` | hook `useWeeklyDigest` | ✅ Backend presente — validar agendamento Inngest cron |
+| 🔴 | **Alertas Preditivos** | 2 | ❌ sem rota/engine | só referência em `HealthScoreDashboard.tsx` | 🔴 **AUSENTE** — sem engine de alertas (runway crítico, churn, risco) nem cron. §6 IA Must |
+| 🟠 | **MRR/ARR Tracker** | 2 | ❌ sem rota backend (só `sales/deals.ts`) | `MrrDashboard.tsx` | 🟠 **FRONTEND-ONLY** — página existe sem backend de MRR/cohort/waterfall |
+| 🟠 | **Data Room** | 2 | `investor/documents.ts` (upload/list/delete + RLS) | só `InvestorDashboard.tsx` | 🟠 **PARCIAL** — falta UI completa (drag&drop, tabela por categoria, shares com link+expiração+audit log — PLAN-investor Fases 2–3). **+ SELECT policy do storage quebrada (SEC-17/data room gap)** |
+| 🟠 | **Investor Updates (IA)** | 2 | `investor/index.ts` `reports/generate` | parcial | 🟠 **PARCIAL** — backend de geração existe; falta editor WYSIWYG/markdown de revisão + envio (PLAN-investor Fase 4) |
+| ✅ | Stripe (billing) | 2 | `billing/index.ts` (webhook sig-verified) | `BillingManagement.tsx` | ✅ Presente — resolver auth inline (TASK-17 medium) + doc multi-company billing |
+
+### 18.2 — Blockers para lançar o MVP (ordem de execução recomendada)
+
+**P0 — Segurança de produção (não lançar com isto aberto):**
+- [ ] SEC-15: filtrar tenant + REVOKE anon em `get_account_balances` (dump financeiro cross-tenant).
+- [ ] SEC-16: authz em `approve_access_request`/`reject_access_request` + REVOKE anon (takeover de tenant).
+- [ ] SEC-17: migrar 10 policies de `user_metadata` → `tenant_members` (data room + investor updates cross-tenant).
+- [ ] SEC-07: ativar Leaked Password Protection; rotacionar `teste@leadgers.com` + beta DB pw.
+
+**P1 — Features Must-Have faltantes (escopo de produto do MVP):**
+- [ ] Equity & Vesting Tracker (Fase 1 Must) — feature inteira: schema ESOP + cronograma de vesting/cliff + página. Ver spec §7.6 (RN-01..08, Gherkin).
+- [ ] Alertas Preditivos (Fase 2 Must) — engine + cron (runway<6m, LTV/CAC<2x, churn) alimentando notificações in-app/email; conectar ao Health Score.
+- [ ] Roadmap Visual (Fase 1 Must) — página Kanban/timeline consumindo `product/roadmap.ts` + link a GitHub Issues (§7.7).
+- [ ] MRR/ARR Tracker — backend de MRR (cohorts, waterfall, NRR) para alimentar `MrrDashboard.tsx`.
+
+**P2 — Completar features parciais Must:**
+- [ ] Data Room: UI completa (drag&drop upload, tabela por categoria, shares com link/expiração/audit log) + corrigir SELECT policy do storage.
+- [ ] Investor Updates: editor de revisão (WYSIWYG/markdown) + fluxo de envio.
+- [ ] Validar comportamento spec-driven das features "presentes": OKRs check-in cron (RN-06), Weekly Digest agendamento Inngest, Health Score sub-scores compostos.
+
+**P3 — Qualidade / KRs do PRD (§3.2 Objetivo 2):**
+- [ ] Cobertura de testes críticos ≥ 80% (KR3) — hoje há testes de api (~120–139) e core (~55); medir cobertura real de multi-tenancy/financeiro.
+- [ ] Time-to-value < 10 min pós-onboarding (KR4) — validar wizard de onboarding + templates.
+- [ ] Uptime ≥ 99,5% (KR2) — sem monitoramento/alerta de uptime configurado (feature "Uptime & Incidents" é Fase 3, mas o KR é Fase 2).
+- [ ] TASK-17 mediums abertos: metadata magic-byte check (`investor/documents.ts:28-41`), `useReportGenerator` localStorage parse/`.single()` multi-tenant, billing inline auth + leak de `err.message`, higiene de `console.error`.
+
+### 18.3 — Observações spec-driven
+- **Consistência docs↔código:** PRD §6 lista DRE/Fluxo de Caixa/GitHub/Auditoria/SWOT como "✅ Entregue" — confirmado (páginas existem). As Fases 1–2 estão ~75% dos Must (12 completos/presentes, 2 ausentes, 4 parciais).
+- **Débito de spec:** SDDs formais existem só para 3 features (`SDD-001-runway-calculator`, `SDD-002-ai-weekly-digest`, `SDD-003-cap-table-management`). Equity/Vesting, Alertas Preditivos, Roadmap Visual e MRR Tracker **não têm SDD** — escrever antes de implementar (metodologia spec-driven do projeto).
+- **`docs/planning/TASK.md` (AUD-01)** está desatualizado: lista virtual scroll / XSS / source maps / rotação de chaves como pendentes, mas TASK-08/09/10 já os concluíram. Marcar AUD-01 como superseded ou sincronizar.

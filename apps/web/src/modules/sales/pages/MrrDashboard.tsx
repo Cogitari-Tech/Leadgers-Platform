@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { apiClient } from "../../../shared/utils/apiClient";
 import {
   BarChart3,
   TrendingUp,
@@ -7,34 +5,115 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
+  Trash2,
 } from "lucide-react";
+import { useAuth } from "../../auth/context/AuthContext";
+import { useMrrSnapshots, type MrrSnapshot } from "../hooks/useMrrSnapshots";
+import { MrrSnapshotForm } from "../components/MrrSnapshotForm";
 
-interface MrrSnapshot {
-  id: string;
-  month_date: string;
-  total_mrr: number;
-  total_arr: number;
-  new_mrr: number;
-  expansion_mrr: number;
-  churn_mrr: number;
-  contraction_mrr: number;
+const formatCurrency = (val: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+  }).format(val);
+
+const formatMonth = (iso: string) =>
+  new Date(iso).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+function SnapshotHistoryTable({
+  snapshots,
+  canManage,
+  onDelete,
+}: {
+  snapshots: MrrSnapshot[];
+  canManage: boolean;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const handleDelete = async (snap: MrrSnapshot) => {
+    const confirmed = window.confirm(
+      `Excluir o snapshot de ${formatMonth(snap.month_date)}? Esta ação não pode ser desfeita.`,
+    );
+    if (confirmed) await onDelete(snap.id);
+  };
+
+  return (
+    <div className="glass-panel p-6 rounded-3xl border-border/30 space-y-4">
+      <h3 className="text-lg font-black uppercase tracking-widest text-muted-foreground">
+        Histórico
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border/30">
+              <th className="py-2 pr-4">Mês</th>
+              <th className="py-2 pr-4 text-right">MRR</th>
+              <th className="py-2 pr-4 text-right">ARR</th>
+              <th className="py-2 pr-4 text-right">Novo</th>
+              <th className="py-2 pr-4 text-right">Expansão</th>
+              <th className="py-2 pr-4 text-right">Churn</th>
+              <th className="py-2 pr-4 text-right">Contração</th>
+              {canManage && <th className="py-2 w-10" aria-label="Ações" />}
+            </tr>
+          </thead>
+          <tbody>
+            {[...snapshots].reverse().map((snap) => (
+              <tr
+                key={snap.id}
+                className="border-b border-border/10 last:border-0 hover:bg-muted/20 transition-colors"
+              >
+                <td className="py-2.5 pr-4 font-semibold text-foreground capitalize whitespace-nowrap">
+                  {formatMonth(snap.month_date)}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums font-bold">
+                  {formatCurrency(Number(snap.total_mrr))}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
+                  {formatCurrency(Number(snap.total_arr))}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums text-emerald-500">
+                  {formatCurrency(Number(snap.new_mrr))}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums text-blue-500">
+                  {formatCurrency(Number(snap.expansion_mrr))}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums text-red-500">
+                  {formatCurrency(Number(snap.churn_mrr))}
+                </td>
+                <td className="py-2.5 pr-4 text-right tabular-nums text-amber-500">
+                  {formatCurrency(Number(snap.contraction_mrr))}
+                </td>
+                {canManage && (
+                  <td className="py-2.5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(snap)}
+                      aria-label={`Excluir snapshot de ${formatMonth(snap.month_date)}`}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export default function MrrDashboard() {
-  const [snapshots, setSnapshots] = useState<MrrSnapshot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { hasRole } = useAuth();
+  const { snapshots, loading, saving, error, saveSnapshot, deleteSnapshot } =
+    useMrrSnapshots();
 
-  useEffect(() => {
-    apiClient
-      .get<MrrSnapshot[]>("/sales/mrr")
-      .then((data) => {
-        setSnapshots(data);
-        setError(null);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const canManage = hasRole("owner") || hasRole("admin");
 
   if (loading) {
     return (
@@ -54,13 +133,6 @@ export default function MrrDashboard() {
     );
   }
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 0,
-    }).format(val);
-
   const latest = snapshots[snapshots.length - 1];
   const previous = snapshots[snapshots.length - 2];
   const mrrGrowth =
@@ -76,14 +148,17 @@ export default function MrrDashboard() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black tracking-tighter flex items-center gap-3">
-          <BarChart3 className="w-8 h-8 text-primary" />
-          MRR / ARR Tracker
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 uppercase tracking-widest font-bold opacity-60">
-          Receita recorrente mensal e anual com breakdown de movimentações
-        </p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter flex items-center gap-3">
+            <BarChart3 className="w-8 h-8 text-primary" />
+            MRR / ARR Tracker
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 uppercase tracking-widest font-bold opacity-60">
+            Receita recorrente mensal e anual com breakdown de movimentações
+          </p>
+        </div>
+        {canManage && <MrrSnapshotForm saving={saving} onSave={saveSnapshot} />}
       </div>
 
       {/* Hero Cards */}
@@ -142,7 +217,9 @@ export default function MrrDashboard() {
             Nenhum snapshot de MRR registrado ainda.
           </p>
           <p className="text-sm text-muted-foreground/60 mt-1">
-            Cadastre os dados mensais para começar a acompanhar.
+            {canManage
+              ? "Use o botão “Registrar mês” para cadastrar o primeiro snapshot."
+              : "Cadastre os dados mensais para começar a acompanhar."}
           </p>
         </div>
       )}
@@ -218,7 +295,7 @@ export default function MrrDashboard() {
               const height = (Number(snap.total_mrr) / maxMrr) * 100;
               const month = new Date(snap.month_date).toLocaleDateString(
                 "pt-BR",
-                { month: "short" },
+                { month: "short", timeZone: "UTC" },
               );
               return (
                 <div
@@ -240,6 +317,15 @@ export default function MrrDashboard() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Snapshot History */}
+      {snapshots.length > 0 && (
+        <SnapshotHistoryTable
+          snapshots={snapshots}
+          canManage={canManage}
+          onDelete={deleteSnapshot}
+        />
       )}
     </div>
   );
