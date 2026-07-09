@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { authMiddleware } from "../../middleware/auth";
 import { tenancyMiddleware } from "../../middleware/tenancy";
@@ -106,6 +107,12 @@ mrrRoutes.delete("/:id", async (c) => {
     });
     return c.json({ success: true });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return c.json({ error: "MRR snapshot not found" }, 404);
+    }
     console.error("Error deleting MRR snapshot:", error);
     return c.json({ error: "Failed to delete MRR snapshot" }, 500);
   }

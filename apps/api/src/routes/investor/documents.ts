@@ -2,7 +2,11 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { prisma } from "../../config/prisma";
-import { fileUploadGuard } from "../../middleware/file-upload";
+import {
+  fileUploadGuard,
+  ALLOWED_MIME_TYPES,
+  ALLOWED_EXTENSIONS,
+} from "../../middleware/file-upload";
 import { uploadBodyLimit } from "../../middleware/body-limit";
 import { AppEnv } from "../../types/env";
 
@@ -42,9 +46,21 @@ documentsRouter.post(
     "json",
     z.object({
       name: z.string().min(1).max(300).trim(),
-      file_path: z.string().min(1).max(1000),
+      file_path: z
+        .string()
+        .min(1)
+        .max(1000)
+        .refine((path) => ALLOWED_EXTENSIONS.has(safeExtension(path)), {
+          message: "file_path extension is not allowed",
+        }),
       file_size: z.number().int().positive().max(10_485_760),
-      mime_type: z.string().min(1).max(100),
+      mime_type: z
+        .string()
+        .min(1)
+        .max(100)
+        .refine((mime) => ALLOWED_MIME_TYPES.has(mime), {
+          message: "mime_type is not allowed",
+        }),
       category: z.string().max(100).optional(),
       description: z.string().max(2000).optional(),
     }),

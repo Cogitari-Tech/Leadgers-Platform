@@ -21,9 +21,9 @@ const MAGIC_BYTES: Record<string, { bytes: number[]; offset?: number }[]> = {
   "text/plain": [],
 };
 
-const ALLOWED_MIME_TYPES = new Set(Object.keys(MAGIC_BYTES));
+export const ALLOWED_MIME_TYPES = new Set(Object.keys(MAGIC_BYTES));
 
-const ALLOWED_EXTENSIONS = new Set([
+export const ALLOWED_EXTENSIONS = new Set([
   ".pdf",
   ".png",
   ".jpg",

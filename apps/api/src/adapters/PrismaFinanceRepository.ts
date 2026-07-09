@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import {
   IFinanceRepository,
   AccountBalanceDTO,
@@ -123,6 +123,45 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     return isDebit
       ? Number(raw[0].total_debit) - Number(raw[0].total_credit)
       : Number(raw[0].total_credit) - Number(raw[0].total_debit);
+  }
+
+  /**
+   * Batch variant of {@link getAccountBalance}: computes debit/credit totals for
+   * many accounts as of `date` in a single query, avoiding the N+1 pattern where
+   * a caller loops over accounts calling getAccountBalance (2 queries each).
+   * Callers apply account nature (isDebitNature) to derive the signed balance.
+   */
+  async getRawBalancesForAccounts(
+    accountIds: string[],
+    date: Date,
+  ): Promise<Map<string, { debit: number; credit: number }>> {
+    const result = new Map<string, { debit: number; credit: number }>();
+    if (accountIds.length === 0) return result;
+
+    const dateStr = date.toISOString().split("T")[0];
+    const idList = Prisma.join(accountIds.map((id) => Prisma.sql`${id}::uuid`));
+
+    const raw = await this.prisma.$queryRaw<any[]>`
+      SELECT acc.id AS account_id,
+        COALESCE(SUM(CASE WHEN t.account_debit_id = acc.id THEN t.amount ELSE 0 END), 0) AS total_debit,
+        COALESCE(SUM(CASE WHEN t.account_credit_id = acc.id THEN t.amount ELSE 0 END), 0) AS total_credit
+      FROM accounts acc
+      LEFT JOIN transactions t
+        ON (t.account_debit_id = acc.id OR t.account_credit_id = acc.id)
+        AND t.tenant_id = ${this.tenantId}::uuid
+        AND t.date <= ${dateStr}::date
+      WHERE acc.tenant_id = ${this.tenantId}::uuid
+        AND acc.id IN (${idList})
+      GROUP BY acc.id
+    `;
+
+    for (const row of raw) {
+      result.set(String(row.account_id), {
+        debit: Number(row.total_debit),
+        credit: Number(row.total_credit),
+      });
+    }
+    return result;
   }
 
   async getTrialBalance(_date: Date): Promise<TrialBalanceEntry[]> {

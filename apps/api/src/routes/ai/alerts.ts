@@ -40,16 +40,26 @@ async function buildFinanceAlerts(
   const cashAccounts = accounts.filter((a) =>
     CASH_ACCOUNT_TYPES.includes(a.type),
   );
-  const balances = await Promise.all(
-    cashAccounts.map((a) => repo.getAccountBalance(a.id, today)),
+  // Single batch query instead of one balance lookup per cash account (N+1).
+  const rawBalances = await repo.getRawBalancesForAccounts(
+    cashAccounts.map((a) => a.id),
+    today,
   );
-  const totalCash = balances.reduce((sum, b) => sum + b, 0);
+  const totalCash = cashAccounts.reduce((sum, account) => {
+    const entry = rawBalances.get(account.id);
+    if (!entry) return sum;
+    const signed = account.isDebitNature()
+      ? entry.debit - entry.credit
+      : entry.credit - entry.debit;
+    return sum + signed;
+  }, 0);
 
   const start = new Date(today.getFullYear(), today.getMonth() - 3, 1);
   const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const WINDOW_MONTHS = 4; // start..end spans 4 calendar months inclusive.
   const incomeStatement = await repo.getIncomeStatement(start, end);
   const monthlyNetBurn =
-    (incomeStatement.expenses - incomeStatement.revenue) / 3;
+    (incomeStatement.expenses - incomeStatement.revenue) / WINDOW_MONTHS;
 
   if (monthlyNetBurn > 0 && totalCash > 0) {
     const runwayMonths = totalCash / monthlyNetBurn;

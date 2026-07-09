@@ -122,6 +122,28 @@ export class EquityGrant {
   }
 
   /**
+   * Soma meses a uma data preservando o dia quando possível.
+   * setMonth() puro estoura pra frente quando o dia de origem (29-31) não
+   * existe no mês de destino (ex.: 31 jan + 1 mês vira 3 mar, não 28/29 fev).
+   * Aqui o resultado é grampeado no último dia do mês de destino.
+   */
+  private static addMonthsClamped(date: Date, monthsToAdd: number): Date {
+    const day = date.getDate();
+    const firstOfTargetMonth = new Date(
+      date.getFullYear(),
+      date.getMonth() + monthsToAdd,
+      1,
+    );
+    const daysInTargetMonth = new Date(
+      firstOfTargetMonth.getFullYear(),
+      firstOfTargetMonth.getMonth() + 1,
+      0,
+    ).getDate();
+    firstOfTargetMonth.setDate(Math.min(day, daysInTargetMonth));
+    return firstOfTargetMonth;
+  }
+
+  /**
    * Opções vestidas na data informada.
    * accelerationEvent = M&A/IPO ocorreu (RN-04); involuntaryTermination
    * combinada ao evento cobre o double trigger (RN-05).
@@ -162,9 +184,7 @@ export class EquityGrant {
     const elapsed = this.monthsElapsed(at);
     if (elapsed >= this.vestingMonths || this.status !== "active") return null;
     const nextMonth = Math.max(this.cliffMonths, elapsed + 1);
-    const next = new Date(this.grantDate);
-    next.setMonth(next.getMonth() + nextMonth);
-    return next;
+    return EquityGrant.addMonthsClamped(this.grantDate, nextMonth);
   }
 
   /** Timeline de marcos de vesting para os próximos N meses (RN-08). */
@@ -172,8 +192,7 @@ export class EquityGrant {
     const milestones: VestingMilestone[] = [];
     let previous = -1;
     for (let i = 0; i <= months; i++) {
-      const date = new Date(from);
-      date.setMonth(date.getMonth() + i);
+      const date = EquityGrant.addMonthsClamped(from, i);
       const cumulativeVested = this.vestedOptions(date);
       if (cumulativeVested !== previous) {
         milestones.push({ date, cumulativeVested });

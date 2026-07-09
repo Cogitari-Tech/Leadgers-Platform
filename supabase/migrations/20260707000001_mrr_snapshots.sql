@@ -1,6 +1,12 @@
 -- MRR/ARR Tracker backend (PRD: MRR/ARR Tracker Must — sales module).
 -- One snapshot per tenant per month. total_arr is stored denormalized
 -- (12 × total_mrr) so the existing MrrDashboard reads it directly.
+--
+-- Reconciling migration: prod already has an older mrr_snapshots table
+-- (no notes/created_by, no defaults on total_mrr/total_arr, no unique
+-- constraint, no CHECKs) and beta already has the new shape with the RLS
+-- policies applied. Every statement below is idempotent so the same file
+-- converges all three states (old prod, new beta, fresh envs).
 
 CREATE TABLE IF NOT EXISTS public.mrr_snapshots (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -19,6 +25,57 @@ CREATE TABLE IF NOT EXISTS public.mrr_snapshots (
   UNIQUE (tenant_id, month_date)
 );
 
+-- Columns missing from the old prod shape.
+ALTER TABLE public.mrr_snapshots ADD COLUMN IF NOT EXISTS notes text;
+ALTER TABLE public.mrr_snapshots ADD COLUMN IF NOT EXISTS created_by uuid;
+
+-- Defaults missing from the old prod shape.
+ALTER TABLE public.mrr_snapshots ALTER COLUMN total_mrr SET DEFAULT 0;
+ALTER TABLE public.mrr_snapshots ALTER COLUMN total_arr SET DEFAULT 0;
+
+-- Constraints (Postgres has no ADD CONSTRAINT IF NOT EXISTS).
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.mrr_snapshots'::regclass
+      AND conname = 'mrr_snapshots_tenant_id_month_date_key'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.mrr_snapshots'::regclass
+      AND contype = 'u'
+  ) THEN
+    ALTER TABLE public.mrr_snapshots
+      ADD CONSTRAINT mrr_snapshots_tenant_id_month_date_key
+      UNIQUE (tenant_id, month_date);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.mrr_snapshots'::regclass
+      AND contype = 'f'
+      AND confrelid = 'public.tenants'::regclass
+  ) THEN
+    ALTER TABLE public.mrr_snapshots
+      ADD CONSTRAINT mrr_snapshots_tenant_id_fkey
+      FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.mrr_snapshots'::regclass
+      AND contype = 'c'
+  ) THEN
+    ALTER TABLE public.mrr_snapshots
+      ADD CONSTRAINT mrr_snapshots_amounts_nonnegative
+      CHECK (
+        total_mrr >= 0 AND total_arr >= 0 AND new_mrr >= 0
+        AND expansion_mrr >= 0 AND churn_mrr >= 0 AND contraction_mrr >= 0
+      );
+  END IF;
+END;
+$$;
+
 CREATE INDEX IF NOT EXISTS idx_mrr_snapshots_tenant_month
   ON public.mrr_snapshots (tenant_id, month_date);
 
@@ -29,10 +86,12 @@ CREATE TRIGGER trg_mrr_snapshots_updated_at
 
 ALTER TABLE public.mrr_snapshots ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "mrr_select_tenant" ON public.mrr_snapshots;
 CREATE POLICY "mrr_select_tenant" ON public.mrr_snapshots
   FOR SELECT TO authenticated
   USING (tenant_id IN (SELECT public.get_my_active_tenant_ids()));
 
+DROP POLICY IF EXISTS "mrr_write_tenant_admins" ON public.mrr_snapshots;
 CREATE POLICY "mrr_write_tenant_admins" ON public.mrr_snapshots
   FOR ALL TO authenticated
   USING (

@@ -4,7 +4,7 @@ import { AppEnv } from "../../types/env";
 
 const {
   mockGetAllAccounts,
-  mockGetAccountBalance,
+  mockGetRawBalancesForAccounts,
   mockGetIncomeStatement,
   mockPoolFindUnique,
   mockGrantsFindMany,
@@ -12,7 +12,7 @@ const {
   mockRoadmapCount,
 } = vi.hoisted(() => ({
   mockGetAllAccounts: vi.fn(),
-  mockGetAccountBalance: vi.fn(),
+  mockGetRawBalancesForAccounts: vi.fn(),
   mockGetIncomeStatement: vi.fn(),
   mockPoolFindUnique: vi.fn(),
   mockGrantsFindMany: vi.fn(),
@@ -38,7 +38,7 @@ vi.mock("../../middleware/tenancy", () => ({
 vi.mock("../../adapters/PrismaFinanceRepository", () => ({
   PrismaFinanceRepository: class MockRepo {
     getAllAccounts = mockGetAllAccounts;
-    getAccountBalance = mockGetAccountBalance;
+    getRawBalancesForAccounts = mockGetRawBalancesForAccounts;
     getIncomeStatement = mockGetIncomeStatement;
   },
 }));
@@ -59,7 +59,7 @@ import alertsRoutes from "./alerts";
 
 function primeCalmScenario() {
   mockGetAllAccounts.mockResolvedValue([]);
-  mockGetAccountBalance.mockResolvedValue(0);
+  mockGetRawBalancesForAccounts.mockResolvedValue(new Map());
   mockGetIncomeStatement.mockResolvedValue({
     revenue: 10000,
     expenses: 5000,
@@ -91,11 +91,15 @@ describe("Predictive Alerts API", () => {
   });
 
   it("should emit critical runway alert when cash covers under 6 months", async () => {
-    mockGetAllAccounts.mockResolvedValue([{ id: "a1", type: "checking" }]);
-    mockGetAccountBalance.mockResolvedValue(50000);
+    mockGetAllAccounts.mockResolvedValue([
+      { id: "a1", type: "checking", isDebitNature: () => true },
+    ]);
+    mockGetRawBalancesForAccounts.mockResolvedValue(
+      new Map([["a1", { debit: 50000, credit: 0 }]]),
+    );
     mockGetIncomeStatement.mockResolvedValue({
       revenue: 0,
-      expenses: 30000, // net burn 10000/month -> runway 5 months
+      expenses: 40000, // window spans 4 months -> net burn 10000/month -> runway 5 months
       details: {},
     });
 

@@ -5,6 +5,36 @@ import { useAuth } from "../../auth/context/AuthContext";
 
 export const MAX_FILE_SIZE = 10_485_760; // 10MB — same cap as the API schema
 
+// Mirrors the API allowlist (apps/api/src/middleware/file-upload.ts). Kept in
+// sync manually since the web app cannot import from the API package. The API
+// re-validates on registration, so this is a fail-fast UX guard, not the gate.
+const ALLOWED_EXTENSIONS = new Set([
+  ".pdf",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".zip",
+  ".xlsx",
+  ".docx",
+  ".csv",
+  ".txt",
+]);
+
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "application/zip",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/csv",
+  "text/plain",
+]);
+
 export const DOCUMENT_CATEGORIES = {
   general: "Geral",
   financeiro: "Financeiro",
@@ -70,6 +100,16 @@ export function useDataRoom() {
         throw new Error("Arquivo excede o limite de 10MB");
       }
 
+      const ext = fileExtension(file.name);
+      if (!ALLOWED_EXTENSIONS.has(ext)) {
+        throw new Error(
+          "Tipo de arquivo não permitido. Use PDF, imagem, planilha, documento, CSV ou TXT.",
+        );
+      }
+      if (file.type && !ALLOWED_MIME_TYPES.has(file.type)) {
+        throw new Error("Tipo de arquivo não permitido.");
+      }
+
       setUploading(true);
       try {
         const storagePath = `uploads/${tenant.id}/${crypto.randomUUID()}${fileExtension(file.name)}`;
@@ -89,7 +129,15 @@ export function useDataRoom() {
           });
         } catch (registerError) {
           // Metadata failed — remove the orphaned object to keep storage clean.
-          await supabase.storage.from("data_room").remove([storagePath]);
+          const { error: rollbackError } = await supabase.storage
+            .from("data_room")
+            .remove([storagePath]);
+          if (rollbackError) {
+            console.error(
+              `Failed to roll back orphaned data_room object at ${storagePath}:`,
+              rollbackError.message,
+            );
+          }
           throw registerError;
         }
 
@@ -113,7 +161,15 @@ export function useDataRoom() {
 
   const deleteDocument = useCallback(async (doc: DataRoomDocument) => {
     await apiClient.delete(`/investor/documents/${doc.id}`);
-    await supabase.storage.from("data_room").remove([doc.file_path]);
+    const { error: removeError } = await supabase.storage
+      .from("data_room")
+      .remove([doc.file_path]);
+    if (removeError) {
+      console.error(
+        `Failed to remove data_room object at ${doc.file_path}:`,
+        removeError.message,
+      );
+    }
     setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
   }, []);
 
