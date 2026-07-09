@@ -12,6 +12,11 @@ import { AppEnv } from "../../types/env";
 
 export const documentsRouter = new Hono<AppEnv>();
 
+// Data room documents are sensitive investor-facing records — same write
+// roles as the cap table and equity routes (owner/admin only). Read stays
+// open to every active tenant member.
+const DOCUMENT_WRITE_ROLES = ["owner", "admin"];
+
 // Derive a storage-safe extension from a client filename. Strips path separators
 // and traversal sequences; the stored object name itself is a server-generated
 // UUID, so a malicious `file.name` can never influence the storage path.
@@ -68,7 +73,15 @@ documentsRouter.post(
   async (c) => {
     const tenantId = c.get("tenantId");
     const user = c.get("user");
+    const userRole = c.get("userRole");
     const body = c.req.valid("json");
+
+    if (!DOCUMENT_WRITE_ROLES.includes(userRole)) {
+      return c.json(
+        { error: "Insufficient permissions to manage data room documents" },
+        403,
+      );
+    }
 
     // The client declares file_path, but it must live under this tenant's own
     // storage prefix — otherwise a caller could register a metadata row that
@@ -108,9 +121,17 @@ documentsRouter.post(
   async (c) => {
     const tenantId = c.get("tenantId");
     const user = c.get("user");
+    const userRole = c.get("userRole");
     const validatedFiles = c.get("validatedFiles") as
       | Array<{ name: string; file: File }>
       | undefined;
+
+    if (!DOCUMENT_WRITE_ROLES.includes(userRole)) {
+      return c.json(
+        { error: "Insufficient permissions to manage data room documents" },
+        403,
+      );
+    }
 
     if (!validatedFiles || validatedFiles.length === 0) {
       return c.json({ error: "No files provided" }, 400);
@@ -147,7 +168,15 @@ documentsRouter.post(
 
 documentsRouter.delete("/:id", async (c) => {
   const tenantId = c.get("tenantId");
+  const userRole = c.get("userRole");
   const docId = c.req.param("id");
+
+  if (!DOCUMENT_WRITE_ROLES.includes(userRole)) {
+    return c.json(
+      { error: "Insufficient permissions to manage data room documents" },
+      403,
+    );
+  }
 
   try {
     const existing = await prisma.data_room_documents.findFirst({

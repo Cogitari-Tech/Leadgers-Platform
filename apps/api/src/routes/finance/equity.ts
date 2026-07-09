@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { Prisma } from "@prisma/client";
 import { EquityGrant } from "@leadgers/core";
 import { prisma } from "../../config/prisma";
 import { authMiddleware } from "../../middleware/auth";
@@ -193,6 +194,13 @@ equityRoutes.delete("/grants/:id", async (c) => {
     });
     return c.json({ success: true });
   } catch (error) {
+    // P2025 = no row matched {id, tenant_id} — missing or another tenant's.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return c.json({ error: "Grant not found" }, 404);
+    }
     console.error("Error deleting equity grant:", error);
     return c.json({ error: "Failed to delete equity grant" }, 500);
   }

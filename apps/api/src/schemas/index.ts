@@ -229,7 +229,7 @@ export const updateInvestorUpdateSchema = z.object({
 export const createEquityGrantSchema = z.object({
   beneficiary_name: safeString(200),
   beneficiary_email: z.string().email().max(320).optional().nullable(),
-  options_total: z.number().positive().max(1_000_000_000),
+  options_total: z.number().int().positive().max(1_000_000_000),
   grant_date: z.string().max(100),
   cliff_months: z.number().int().min(0).max(120).default(12),
   vesting_months: z.number().int().positive().max(240).default(48),
@@ -242,7 +242,7 @@ export const createEquityGrantSchema = z.object({
 });
 
 export const upsertEsopPoolSchema = z.object({
-  total_options: z.number().positive().max(1_000_000_000),
+  total_options: z.number().int().positive().max(1_000_000_000),
   pool_percentage: z.number().positive().max(100).optional().nullable(),
   notes: safeText(2000).optional().nullable(),
 });

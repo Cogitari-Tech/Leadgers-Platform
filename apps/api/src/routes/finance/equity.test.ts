@@ -37,7 +37,21 @@ vi.mock("../../middleware/tenancy", () => ({
   },
 }));
 
+// Mirrors Prisma's known-request error shape so the route's P2025 guard
+// (`error instanceof Prisma.PrismaClientKnownRequestError`) works in tests.
+const { MockPrismaKnownError } = vi.hoisted(() => {
+  class MockPrismaKnownError extends Error {
+    code: string;
+    constructor(code: string) {
+      super(`Prisma error ${code}`);
+      this.code = code;
+    }
+  }
+  return { MockPrismaKnownError };
+});
+
 vi.mock("@prisma/client", () => ({
+  Prisma: { PrismaClientKnownRequestError: MockPrismaKnownError },
   PrismaClient: class MockPrismaClient {
     equity_grants = {
       findMany: mockFindManyGrants,
@@ -146,6 +160,17 @@ describe("Equity & Vesting API", () => {
       expect(mockCreateGrant).not.toHaveBeenCalled();
     });
 
+    it("should reject fractional options_total", async () => {
+      const res = await app.request("/grants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...validGrantBody, options_total: 5000.5 }),
+      });
+
+      expect(res.status).toBe(400);
+      expect(mockCreateGrant).not.toHaveBeenCalled();
+    });
+
     it("should reject cliff greater than vesting duration", async () => {
       const res = await app.request("/grants", {
         method: "POST",
@@ -242,6 +267,16 @@ describe("Equity & Vesting API", () => {
       expect(mockDeleteGrant).toHaveBeenCalledWith({
         where: { id: "grant-1", tenant_id: "tenant-123" },
       });
+    });
+
+    it("should return 404 when the grant does not exist (P2025)", async () => {
+      mockDeleteGrant.mockRejectedValue(new MockPrismaKnownError("P2025"));
+
+      const res = await app.request("/grants/missing", { method: "DELETE" });
+
+      expect(res.status).toBe(404);
+      const body = (await res.json()) as any;
+      expect(body.error).toBe("Grant not found");
     });
   });
 

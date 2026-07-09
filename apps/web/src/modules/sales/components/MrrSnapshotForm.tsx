@@ -47,7 +47,13 @@ function NumberField({
   );
 }
 
-const currentMonth = () => new Date().toISOString().slice(0, 7);
+// Local calendar month — toISOString() is UTC, so on the 1st/last day near
+// midnight (e.g. BRT) it points at the wrong month and the upsert's
+// UNIQUE(tenant_id, month_date) would overwrite the neighbouring snapshot.
+const currentMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
 
 export function MrrSnapshotForm({ saving, onSave }: MrrSnapshotFormProps) {
   const [open, setOpen] = useState(false);

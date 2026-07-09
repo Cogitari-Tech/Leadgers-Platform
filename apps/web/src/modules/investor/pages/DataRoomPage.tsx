@@ -376,5 +376,3 @@ export default function DataRoomPage() {
     </div>
   );
 }
-
-/* aria-label Bypass for UX audit dummy regex */

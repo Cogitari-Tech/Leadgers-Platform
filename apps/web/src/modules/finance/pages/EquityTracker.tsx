@@ -42,11 +42,18 @@ const ACCELERATION_LABELS: Record<string, string> = {
 const INPUT_CLASS =
   "glass-input w-full px-4 py-3 rounded-xl bg-muted/40 border border-border/40 text-foreground text-sm outline-none figma-focus";
 
+// Local calendar date — toISOString() is UTC and would yield yesterday/tomorrow
+// for users near a day boundary (e.g. BRT evenings), storing a wrong grant_date.
+const todayLocalIso = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 const EMPTY_GRANT_FORM: CreateGrantInput = {
   beneficiary_name: "",
   beneficiary_email: "",
   options_total: 0,
-  grant_date: new Date().toISOString().split("T")[0],
+  grant_date: todayLocalIso(),
   cliff_months: 12,
   vesting_months: 48,
   grant_price: 0,

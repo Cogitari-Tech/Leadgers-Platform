@@ -24,7 +24,11 @@ vi.mock("../../jobs/queue", () => ({
   },
 }));
 
-// Mock auth middleware so tenantId / user are set in context
+const { authState } = vi.hoisted(() => ({
+  authState: { role: "owner" },
+}));
+
+// Mock auth middleware so tenantId / user / role are set in context
 vi.mock("../../middleware/auth", () => ({
   authMiddleware: async (c: any, next: any) => {
     c.set("tenantId", "test-tenant");
@@ -33,7 +37,8 @@ vi.mock("../../middleware/auth", () => ({
   },
 }));
 vi.mock("../../middleware/tenancy", () => ({
-  tenancyMiddleware: async (_c: any, next: any) => {
+  tenancyMiddleware: async (c: any, next: any) => {
+    c.set("userRole", authState.role);
     await next();
   },
 }));
@@ -52,6 +57,7 @@ describe("Investor Routes", () => {
       await next();
     });
     app.route("/investor", investorRouter);
+    authState.role = "owner";
   });
 
   it("GET /investor/updates should return investor updates", async () => {
@@ -73,10 +79,68 @@ describe("Investor Routes", () => {
     expect(json).toHaveProperty("reportId");
   });
 
+  it("POST /investor/reports/generate should reject non-admin roles", async () => {
+    authState.role = "viewer";
+
+    const res = await app.request("/investor/reports/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "monthly" }),
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("POST /investor/reports/generate should reject unknown byokProvider", async () => {
+    const res = await app.request("/investor/reports/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "monthly",
+        byokKey: "a".repeat(40),
+        byokProvider: "evil-provider",
+      }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST /investor/reports/generate should reject byokKey without provider", async () => {
+    const res = await app.request("/investor/reports/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "monthly", byokKey: "a".repeat(40) }),
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("GET /investor/documents should return documents list", async () => {
     const res = await app.request("/investor/documents");
     expect(res.status).toBe(200);
     const json = (await res.json()) as any;
     expect(json).toHaveProperty("documents");
+  });
+
+  it("DELETE /investor/documents/:id should reject non-admin roles", async () => {
+    authState.role = "viewer";
+
+    const res = await app.request("/investor/documents/doc-1", {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("POST /investor/documents should reject non-admin roles", async () => {
+    authState.role = "member";
+
+    const res = await app.request("/investor/documents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "doc.pdf",
+        file_path: "uploads/test-tenant/doc.pdf",
+        file_size: 1000,
+        mime_type: "application/pdf",
+      }),
+    });
+    expect(res.status).toBe(403);
   });
 });

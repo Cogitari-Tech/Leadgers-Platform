@@ -61,10 +61,19 @@ BEGIN
       FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
   END IF;
 
+  -- Guard by name, not "any CHECK exists": an unrelated future CHECK on this
+  -- table would otherwise silently skip adding the non-negative guard. Fresh
+  -- envs get equivalent column-level CHECKs from CREATE TABLE above (named
+  -- mrr_snapshots_<column>_check by Postgres), so both names are probed.
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conrelid = 'public.mrr_snapshots'::regclass
+      AND conname = 'mrr_snapshots_amounts_nonnegative'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.mrr_snapshots'::regclass
       AND contype = 'c'
+      AND conname LIKE 'mrr\_snapshots\_%\_check'
   ) THEN
     ALTER TABLE public.mrr_snapshots
       ADD CONSTRAINT mrr_snapshots_amounts_nonnegative

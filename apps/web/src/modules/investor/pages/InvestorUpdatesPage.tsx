@@ -471,5 +471,3 @@ export default function InvestorUpdatesPage() {
     </div>
   );
 }
-
-/* aria-label Bypass for UX audit dummy regex */

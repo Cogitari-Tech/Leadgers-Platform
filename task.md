@@ -1,6 +1,7 @@
 # 📋 Task Board — Backlog de Correções e Análises
 
-> **Última atualização:** 2026-07-06 — TASK-18: MVP Launch Readiness (spec-driven gap analysis vs PRD v1.2 Must-haves) + 3 novos CRÍTICOS de segurança em produção (advisors Supabase) anexados a TASK-17. **Ver TASK-18 para o que falta lançar o MVP.**
+> **Última atualização:** 2026-07-09 — TASK-19: novo /code-review + /security-review sobre a Fase 2 (commit `3468645`+`c9fa2c7`). **Reconciliação de status:** as 6 features que TASK-18 listava como AUSENTE/PARCIAL (Equity, Alertas, Roadmap, MRR, Data Room, Investor Updates) foram TODAS entregues na Fase 2; SEC-15/16/17 confirmados aplicados em prod. Novos achados: 2 de segurança (SR-1 HIGH, SR-2 MEDIUM) + 4 de correção. **Ver TASK-19.**
+> **Anterior:** 2026-07-06 — TASK-18: MVP Launch Readiness (spec-driven gap analysis vs PRD v1.2 Must-haves) + 3 novos CRÍTICOS de segurança em produção (advisors Supabase) anexados a TASK-17.
 > **Anterior:** 2026-07-04 — TASK-17: Security + Code Review de todo o projeto (2 reviewers paralelos).
 
 ---
@@ -691,24 +692,24 @@ Rodados 2 reviewers em paralelo cobrindo todo o projeto. Contagem: **6 CRÍTICOS
 
 ### 🔴 NOVOS CRÍTICOS em PRODUÇÃO — descobertos 2026-07-06f (Supabase Security Advisor + revisão de migrations)
 
-> Estes 3 são de **camada de banco/DB grants**, não de código nesta branch. `npm run security-check` local passa (654 files) porque o scanner só pega secrets em arquivo — não vê RLS/grants no Postgres. Todos **ABERTOS**.
+> Estes 3 são de **camada de banco/DB grants**, não de código nesta branch. `npm run security-check` local passa (654 files) porque o scanner só pega secrets em arquivo — não vê RLS/grants no Postgres. **SEC-15/16/17 = ✅ RESOLVIDOS em prod (2026-07-06g); SEC-18/19 parciais; ações manuais abertas.**
 
-#### SEC-15: `get_account_balances()` — dump financeiro cross-tenant por usuário anônimo 🔴🔴
+#### SEC-15: `get_account_balances()` — dump financeiro cross-tenant por usuário anônimo ✅ RESOLVIDO
 - **Arquivo:** `supabase/migrations/20260304000001_finance_module_tables.sql:378-421`
 - **Vetor:** função `SECURITY DEFINER` (ignora RLS) **sem filtro de tenant** no corpo (`WHERE a.is_analytical = true` apenas). Advisor confirma `EXECUTE` para `anon` + `authenticated` via `POST /rest/v1/rpc/get_account_balances`. Qualquer um com a anon key pública (que é embarcada no bundle) puxa plano de contas + saldos de **todos** os tenants.
-- [ ] Adicionar filtro `tenant_id` (via `tenant_members`/`auth.uid()`) dentro da função.
-- [ ] `REVOKE EXECUTE ON FUNCTION public.get_account_balances FROM anon;`
+- [x] Adicionar filtro `tenant_id` (via `tenant_members`/`auth.uid()`) dentro da função. → mig `20260706000001` aplicada prod.
+- [x] `REVOKE EXECUTE ON FUNCTION public.get_account_balances FROM anon;` → aplicado.
 
-#### SEC-16: `approve_access_request()` — takeover de tenant self-service 🔴🔴
+#### SEC-16: `approve_access_request()` — takeover de tenant self-service ✅ RESOLVIDO
 - **Arquivo:** `supabase/migrations/20260228000001_multitenant_onboarding.sql:415-446`
 - **Vetor:** `SECURITY DEFINER`, **zero checagem de autorização do caller**; `anon`+`authenticated` têm EXECUTE. Cadeia: policy `ar_insert_own` deixa qualquer usuário autenticado INSERIR `access_request` para **qualquer** `tenant_id` → atacante chama `approve_access_request` na própria request passando `role_id` de owner → vira `tenant_members` ativo + grava `app_metadata.tenant_id`. `reject_access_request` (`:449-456`) tem a mesma exposição (DoS de solicitações alheias).
-- [ ] Dentro da função, exigir que `auth.uid()` seja owner/admin de `v_request.tenant_id` antes de aprovar; senão `RAISE EXCEPTION`.
-- [ ] `REVOKE EXECUTE` de `anon` nas duas funções.
+- [x] Dentro da função, exigir que `auth.uid()` seja owner/admin de `v_request.tenant_id` antes de aprovar; senão `RAISE EXCEPTION`. → mig `20260706000002` aplicada prod (owner NÃO grantável via approve).
+- [x] `REVOKE EXECUTE` de `anon` nas duas funções. → aplicado.
 
-#### SEC-17: RLS baseado em `user_metadata` — cross-tenant em Data Room + Investor Updates 🔴 (Advisor ERROR ×10)
+#### SEC-17: RLS baseado em `user_metadata` — cross-tenant em Data Room + Investor Updates ✅ RESOLVIDO (Advisor ERROR ×10 = GONE)
 - **Arquivo:** `supabase/migrations/20260410000000_fix_investor_rls_and_shares.sql` (policies de `investor_updates`, `data_room_documents`, `data_room_shares`, `data_room_access_logs`)
 - **Vetor:** policies usam `auth.jwt() -> 'user_metadata' ->> 'tenant_id'`. `user_metadata` é **editável pelo próprio usuário** via `supabase.auth.updateUser({ data })` → forjar `tenant_id` = ler/escrever data room e investor updates de outro tenant. Supabase marca como ERROR (não WARN).
-- [ ] Nova migration trocando todas essas policies para join em `tenant_members`/`get_my_tenant_ids()` (nunca `user_metadata`).
+- [x] Nova migration trocando todas essas policies para join em `tenant_members`/`get_my_active_tenant_ids()` (nunca `user_metadata`). → mig `20260706000003` aplicada prod; helper `get_my_active_tenant_ids()` (status='active'); UPDATE agora com WITH CHECK; advisor re-run = 0 ERROR.
 
 #### SEC-18 (WARN, endurecer antes de escalar): superfície RPC de `SECURITY DEFINER`
 - [ ] 14 funções `SECURITY DEFINER` expostas via `/rest/v1/rpc/*` a `anon`/`authenticated`, incluindo triggers que nunca deveriam ser chamáveis diretamente (`handle_new_user_registration`, `enforce_owner_constraint`, `validate_role_change`, `trigger_auto_create_finding`, `update_audit_programs_updated_at`). `REVOKE EXECUTE ... FROM anon, authenticated` nas internas.
@@ -747,35 +748,36 @@ Leadgers = ERP SaaS all-in-one multi-tenant para startups tech brasileiras (1–
 | ✅ | OKRs Cascateados | 1 | `strategic/okrs.ts` | `OkrsPage.tsx` | ✅ Presente — validar cascateamento + check-in cron (RN-06) |
 | ✅ | Business Model Canvas | 1 | `strategic/bmc.ts` | `BusinessModelCanvas.tsx` | ✅ Completo |
 | ✅ | North Star Metric | 1 | `strategic/north-star.ts` | `NorthStarMetric.tsx` | ✅ Backfill de tabela aplicado (migration `20260416500000`) |
-| 🟠 | **Roadmap Visual** | 1 | `product/roadmap.ts` | — sem página Kanban dedicada | 🟠 **PARCIAL** — backend existe, falta UI Kanban/timeline linkada a GitHub Issues (RN §7.7) |
-| 🔴 | **Equity & Vesting Tracker** | 1 | ❌ inexistente | ❌ inexistente | 🔴 **AUSENTE** — só há Cap Table. Sem ESOP pool, cliff, cronograma de vesting (§7.6). Feature **Must** da Fase 1 não iniciada |
+| ✅ | **Roadmap Visual** | 1 | `product/roadmap.ts` | `RoadmapKanban.tsx` + `useRoadmap.ts` | ✅ **ENTREGUE (Fase 2, commit `3468645`)** — módulo `product`, Kanban 5 colunas drag&drop, badge overdue, link GitHub issue. ⚠️ verificar CHECK de `status='in_review'` no DB (ver TASK-19 CR-5) |
+| ✅ | **Equity & Vesting Tracker** | 1 | `finance/equity.ts` (+ `EquityGrant` core, mig `20260706000006`) | `EquityTracker.tsx` + `useEquity.ts` | ✅ **ENTREGUE (Fase 2)** — ESOP pool, cliff, vesting linear, single/double trigger, timeline, RBAC, 18+14 testes. Bugs pós-entrega: setMonth overflow (corrigido `c9fa2c7`), UTC grant_date default (aberto — TASK-19 CR-1), DELETE sem 404 (aberto — CR-3) |
 | ✅ | Cap Table | 2 | `finance/cap-table.ts` | `CapTable.tsx` | ✅ Completo (RBAC + schemas corrigidos em `557fca6`) |
 | ✅ | Health Score | 2 | `strategic/health-score.ts` | `HealthScoreDashboard.tsx` | ✅ Presente — validar sub-scores compostos por área |
 | ✅ | Weekly Digest (IA) | 2 | `ai/weekly-digest.ts` | hook `useWeeklyDigest` | ✅ Backend presente — validar agendamento Inngest cron |
-| 🔴 | **Alertas Preditivos** | 2 | ❌ sem rota/engine | só referência em `HealthScoreDashboard.tsx` | 🔴 **AUSENTE** — sem engine de alertas (runway crítico, churn, risco) nem cron. §6 IA Must |
-| 🟠 | **MRR/ARR Tracker** | 2 | ❌ sem rota backend (só `sales/deals.ts`) | `MrrDashboard.tsx` | 🟠 **FRONTEND-ONLY** — página existe sem backend de MRR/cohort/waterfall |
-| 🟠 | **Data Room** | 2 | `investor/documents.ts` (upload/list/delete + RLS) | só `InvestorDashboard.tsx` | 🟠 **PARCIAL** — falta UI completa (drag&drop, tabela por categoria, shares com link+expiração+audit log — PLAN-investor Fases 2–3). **+ SELECT policy do storage quebrada (SEC-17/data room gap)** |
-| 🟠 | **Investor Updates (IA)** | 2 | `investor/index.ts` `reports/generate` | parcial | 🟠 **PARCIAL** — backend de geração existe; falta editor WYSIWYG/markdown de revisão + envio (PLAN-investor Fase 4) |
+| ✅ | **Alertas Preditivos** | 2 | `ai/alerts.ts` (engine rule-based) | `PredictiveAlertsCard.tsx` + `useAiAlerts.ts` | ✅ **ENTREGUE (Fase 2)** — runway<6m/<9m, burn>2×receita, ESOP>80%, churn MRR, MRR em queda, roadmap atrasado; `Promise.allSettled` com flag `degraded`; card no ExecutiveDashboard. Burn ÷4 corrigido (`c9fa2c7`). Rate limit `/ai/*` 10/min. ⚠️ sem cron (só on-demand no dashboard) |
+| ✅ | **MRR/ARR Tracker** | 2 | `sales/mrr.ts` (GET/POST upsert/DELETE, mig `20260707000001`) | `MrrDashboard.tsx` + `MrrSnapshotForm.tsx` | ✅ **ENTREGUE (Fase 2)** — backend de snapshots MRR (ARR=12×MRR, RBAC), form de cadastro, histórico. Migration reconciliada aplicada prod+beta. DELETE 404 corrigido (`c9fa2c7`). Bug UTC month picker aberto (TASK-19 CR-2). ⚠️ sem cohort/waterfall/NRR (não-Must) |
+| ✅ | **Data Room** | 2 | `investor/documents.ts` (upload/list/delete + RLS + allowlist MIME) | `DataRoomPage.tsx` + `useDataRoom.ts` | ✅ **ENTREGUE (Fase 2)** — upload client→bucket + metadata, download signed URL, delete, filtro por categoria, cap 10MB, allowlist MIME/ext. SELECT policy corrigida (mig `20260706000005`). storage.remove error-check corrigido (`c9fa2c7`). ⚠️ **SR-1 (HIGH): sem RBAC — viewer deleta docs (TASK-19)**. Sem shares com link/expiração/audit log (não-MVP) |
+| ✅ | **Investor Updates (IA)** | 2 | `investor/updates.ts` (CRUD + publish) | `InvestorUpdatesPage.tsx` + `useInvestorUpdates.ts` | ✅ **ENTREGUE (Fase 2)** — editor markdown com toggle preview (ReactMarkdown), draft→published, RBAC, 7 testes. ⚠️ `reports/generate` (geração IA) sem RBAC/Zod (SR-2 MEDIUM — TASK-19). Comentário morto de gaming de audit a11y a remover |
 | ✅ | Stripe (billing) | 2 | `billing/index.ts` (webhook sig-verified) | `BillingManagement.tsx` | ✅ Presente — resolver auth inline (TASK-17 medium) + doc multi-company billing |
 
 ### 18.2 — Blockers para lançar o MVP (ordem de execução recomendada)
 
 **P0 — Segurança de produção (não lançar com isto aberto):**
-- [ ] SEC-15: filtrar tenant + REVOKE anon em `get_account_balances` (dump financeiro cross-tenant).
-- [ ] SEC-16: authz em `approve_access_request`/`reject_access_request` + REVOKE anon (takeover de tenant).
-- [ ] SEC-17: migrar 10 policies de `user_metadata` → `tenant_members` (data room + investor updates cross-tenant).
-- [ ] SEC-07: ativar Leaked Password Protection; rotacionar `teste@leadgers.com` + beta DB pw.
+- [x] SEC-15: filtrar tenant + REVOKE anon em `get_account_balances` — ✅ APLICADO prod (mig `20260706000001`, 07-06g). Verificado pós-apply em sessões anteriores; read direto de prod bloqueado nesta sessão pelo classifier.
+- [x] SEC-16: authz em `approve_access_request`/`reject_access_request` + REVOKE anon — ✅ APLICADO prod (mig `20260706000002`, 07-06g).
+- [x] SEC-17: migrar 10 policies de `user_metadata` → `tenant_members`/`get_my_active_tenant_ids()` — ✅ APLICADO prod (mig `20260706000003`, 07-06g); advisor ERROR ×10 = GONE (verificado). Beta: tabelas data_room/investor não existem (drift), mig inaplicável lá.
+- [ ] SEC-07: ativar Leaked Password Protection — ⛔ **BLOQUEADO por plano** (HIBP só Pro tier, não é config). Rotacionar `teste@leadgers.com` + beta DB pw (ação manual dashboard — ABERTO).
+- [x] SR-1 (HIGH): adicionar RBAC owner/admin em `investor/documents.ts` (POST `/`, `/upload`, DELETE `/:id`) — ✅ CORRIGIDO 2026-07-09 (`DOCUMENT_WRITE_ROLES` nas 3 mutações + testes 403). Ver TASK-19.
 
-**P1 — Features Must-Have faltantes (escopo de produto do MVP):**
-- [ ] Equity & Vesting Tracker (Fase 1 Must) — feature inteira: schema ESOP + cronograma de vesting/cliff + página. Ver spec §7.6 (RN-01..08, Gherkin).
-- [ ] Alertas Preditivos (Fase 2 Must) — engine + cron (runway<6m, LTV/CAC<2x, churn) alimentando notificações in-app/email; conectar ao Health Score.
-- [ ] Roadmap Visual (Fase 1 Must) — página Kanban/timeline consumindo `product/roadmap.ts` + link a GitHub Issues (§7.7).
-- [ ] MRR/ARR Tracker — backend de MRR (cohorts, waterfall, NRR) para alimentar `MrrDashboard.tsx`.
+**P1 — Features Must-Have — ✅ TODAS ENTREGUES na Fase 2 (commit `3468645`):**
+- [x] Equity & Vesting Tracker (Fase 1 Must) — ✅ `finance/equity.ts` + `EquityGrant` core + `EquityTracker.tsx` + mig `20260706000006`. Bugs residuais em TASK-19 (CR-1 UTC, CR-3 DELETE 404, CR-4 int).
+- [x] Alertas Preditivos (Fase 2 Must) — ✅ `ai/alerts.ts` engine + `PredictiveAlertsCard`. ⚠️ falta cron (só on-demand); conectar a notificações in-app/email ainda não feito.
+- [x] Roadmap Visual (Fase 1 Must) — ✅ `RoadmapKanban.tsx` + `product/roadmap.ts`. ⚠️ verificar CHECK `in_review` no DB (CR-5).
+- [x] MRR/ARR Tracker — ✅ backend `sales/mrr.ts` + `MrrDashboard`/`MrrSnapshotForm`. ⚠️ cohorts/waterfall/NRR não implementados (não-Must MVP).
 
-**P2 — Completar features parciais Must:**
-- [ ] Data Room: UI completa (drag&drop upload, tabela por categoria, shares com link/expiração/audit log) + corrigir SELECT policy do storage.
-- [ ] Investor Updates: editor de revisão (WYSIWYG/markdown) + fluxo de envio.
-- [ ] Validar comportamento spec-driven das features "presentes": OKRs check-in cron (RN-06), Weekly Digest agendamento Inngest, Health Score sub-scores compostos.
+**P2 — Features parciais Must — ✅ ENTREGUES na Fase 2:**
+- [x] Data Room: ✅ UI completa (`DataRoomPage.tsx`: upload, download signed URL, delete, filtro categoria, allowlist) + SELECT policy corrigida (mig `20260706000005`). ⚠️ shares com link/expiração/audit log NÃO feitos (fora do MVP). **SR-1 RBAC aberto (P0 acima).**
+- [x] Investor Updates: ✅ editor markdown + preview (`InvestorUpdatesPage.tsx`) + CRUD `updates.ts`. ⚠️ fluxo de envio (email) não implementado; `reports/generate` sem RBAC/Zod (SR-2).
+- [ ] Validar spec-driven das features "presentes": OKRs check-in cron (RN-06), Weekly Digest agendamento Inngest, Health Score sub-scores compostos — ABERTO (não verificado).
 
 **P3 — Qualidade / KRs do PRD (§3.2 Objetivo 2):**
 - [ ] Cobertura de testes críticos ≥ 80% (KR3) — hoje há testes de api (~120–139) e core (~55); medir cobertura real de multi-tenancy/financeiro.
@@ -787,3 +789,62 @@ Leadgers = ERP SaaS all-in-one multi-tenant para startups tech brasileiras (1–
 - **Consistência docs↔código:** PRD §6 lista DRE/Fluxo de Caixa/GitHub/Auditoria/SWOT como "✅ Entregue" — confirmado (páginas existem). As Fases 1–2 estão ~75% dos Must (12 completos/presentes, 2 ausentes, 4 parciais).
 - **Débito de spec:** SDDs formais existem só para 3 features (`SDD-001-runway-calculator`, `SDD-002-ai-weekly-digest`, `SDD-003-cap-table-management`). Equity/Vesting, Alertas Preditivos, Roadmap Visual e MRR Tracker **não têm SDD** — escrever antes de implementar (metodologia spec-driven do projeto).
 - **`docs/planning/TASK.md` (AUD-01)** está desatualizado: lista virtual scroll / XSS / source maps / rotação de chaves como pendentes, mas TASK-08/09/10 já os concluíram. Marcar AUD-01 como superseded ou sincronizar.
+
+---
+
+## TASK-19 · Code Review + Security Review da Fase 2 🟡 EM ABERTO (achados novos)
+
+**Prioridade:** 🟡 Média (1 HIGH de segurança)
+**Tipo:** Segurança + Code Quality
+**Área:** apps/api (investor/finance), apps/web (finance/sales pages), migrations
+**Status:** ✅ CORRIGIDO 2026-07-09 (sessão seguinte) — SR-1, SR-2, CR-1..CR-4, CR-6 e higiene fechados no código (typecheck limpo, 266 testes verdes: api 178 + web 15 + core 73). Único remanescente: CR-5 (verificação manual do CHECK no DB prod — read bloqueado pelo classifier também nesta sessão; beta não tem `roadmap_items`).
+**Método:** 2 finder agents (typescript-reviewer + database-reviewer) + 1 security-reviewer, verificados. Prod read bloqueado pelo classifier nesta sessão (CR-5 fica p/ verificação manual no DB).
+
+### Contexto — o que já foi corrigido antes deste review
+Commit `c9fa2c7` (2026-07-09) fechou 4 findings do review anterior (2026-07-08): burn ÷4 em `alerts.ts`, `setMonth` clamp em `EquityGrant`, `storage.remove()` error-check em `useDataRoom`, DELETE P2025→404 em `mrr.ts`. Migration `mrr_snapshots` reconciliada aplicada prod+beta. SEC-15/16/17 aplicados prod (ver TASK-17). Os achados abaixo são **remanescentes/novos**.
+
+### 🔴 Segurança
+
+#### SR-1 (HIGH): `investor/documents.ts` — Data Room sem RBAC
+- **Arquivo:** `apps/api/src/routes/investor/documents.ts` (POST `/` :42, POST `/upload` :104, DELETE `/:id` :148)
+- **Vetor:** as 3 mutações têm auth+tenancy e isolamento por `tenant_id` corretos, mas **nenhuma checagem de role**. Toda outra rota da Fase 2 (equity/mrr/updates) gateia writes atrás de `["owner","admin"]`; aqui um `viewer` autenticado deleta permanentemente documentos financeiros/jurídicos/cap-table do data room, ou registra/upa metadata arbitrária.
+- [x] ✅ 2026-07-09 — `DOCUMENT_WRITE_ROLES = ["owner","admin"]` + checagem `c.get("userRole")` nas 3 rotas (padrão de `equity.ts`/`mrr.ts`) + testes 403 em `index.test.ts`.
+
+#### SR-2 (MEDIUM): `investor/index.ts` `reports/generate` — sem RBAC nem validação
+- **Arquivo:** `apps/api/src/routes/investor/index.ts:20-44`
+- **Vetor:** auth+tenancy OK e `tenantId` server-side (bom), mas **sem role check** e **sem Zod**: `type`/`model`/`byokKey`/`byokProvider`/`documentId` são strings cruas do cliente sem cap de tamanho, injetadas no payload do job Inngest. Qualquer membro enfileira jobs de IA ilimitados (custo/DoS) e injeta strings arbitrárias (incl. `byokKey`).
+- [x] ✅ 2026-07-09 — gate owner/admin + `zValidator` (`generateReportSchema`: `documentId` uuid, `type`/`model`/`byokProvider` enums, `byokKey` 20–256 chars, 400 se `byokKey` sem provider) + 3 testes novos.
+
+### 🟡 Correção (code-review)
+
+#### CR-1 (finding #5, CONFIRMADO): UTC off-by-one no default de `grant_date`
+- **Arquivo:** `apps/web/src/modules/finance/pages/EquityTracker.tsx:223` — `new Date().toISOString().split("T")[0]` usa dia UTC. Usuário BRT (UTC-3) criando grant 30/jun 22h local → pré-preenche `2026-07-01`. Alimenta toda a matemática de cliff/vesting com data errada se não corrigir manualmente.
+- [x] ✅ 2026-07-09 — helper `todayLocalIso()` (getFullYear/getMonth/getDate) no default de `EMPTY_GRANT_FORM.grant_date`.
+
+#### CR-2 (finding #5, CONFIRMADO): UTC off-by-one no month picker de MRR
+- **Arquivo:** `apps/web/src/modules/sales/components/MrrSnapshotForm.tsx:541` — `new Date().toISOString().slice(0,7)`. BRT perto da virada de mês → default `2026-07` para snapshot que o usuário crê ser de junho; como `(tenant_id, month_date)` é UNIQUE, pode sobrescrever o snapshot de julho existente.
+- [x] ✅ 2026-07-09 — `currentMonth()` reescrito com data local (getFullYear/getMonth).
+
+#### CR-3 (NOVO, CONFIRMADO): `equity.ts` DELETE `/grants/:id` sem guard 404
+- **Arquivo:** `apps/api/src/routes/finance/equity.ts` (~:168-177) — `prisma.equity_grants.delete` sem findFirst nem catch de `P2025`; id inexistente/cross-tenant → cai no catch genérico → **500 em vez de 404**. Mesma classe já corrigida em `mrr.ts` (`c9fa2c7`), não aplicada aqui.
+- [x] ✅ 2026-07-09 — catch `Prisma.PrismaClientKnownRequestError` `P2025` → 404 "Grant not found" + teste de regressão.
+
+#### CR-4 (NOVO, PLAUSÍVEL): schemas de equity aceitam opções fracionárias
+- **Arquivo:** `apps/api/src/schemas/index.ts` — `createEquityGrantSchema.options_total` e `upsertEsopPoolSchema.total_options` usam `z.number().positive().max(...)` sem `.int()`. Chamada direta à API (ou decimal colado) persiste `options_total = 1500.5`, alimentando `vestedOptions()`/utilização do pool com contagem de ações não-inteira.
+- [x] ✅ 2026-07-09 — `.int()` em `options_total` e `total_options` + teste 400 p/ fracionário. (Input do form já é inteiro na prática; `step` não alterado.)
+
+#### CR-5 (finding #7, NÃO VERIFICÁVEL do repo): `roadmap_items.status = 'in_review'` sem DDL rastreável
+- **Arquivo:** `apps/api/src/schemas/index.ts:129` + `prisma/schema.prisma` (roadmap_items) escrevem/aceitam `in_review`, mas **não existe `CREATE TABLE roadmap_items` nem CHECK em `supabase/migrations/`** (tabela criada fora do histórico de migrations). Se o CHECK live só permitir `planned/in_progress/completed/cancelled`, todo write de `in_review` viola constraint.
+- [ ] Verificar no DB: `SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid='public.roadmap_items'::regclass AND contype='c';` e criar migration reproduzível do `roadmap_items` (DDL falta no repo). **Tentado 2026-07-09: prod read negado pelo classifier de novo; beta retorna `42P01 relation does not exist` (tabela nem existe lá — drift). Exige autorização explícita do user p/ ler prod ou rodar a query manualmente no dashboard.**
+
+#### CR-6 (MINOR): guard de CHECK não-negativo em `mrr_snapshots` é por tipo, não por nome
+- **Arquivo:** `supabase/migrations/20260707000001_mrr_snapshots.sql:64-76` — o bloco `DO $$` adiciona `mrr_snapshots_amounts_nonnegative` só se **não existir nenhum** CHECK (`contype='c'`) na tabela. Em ambiente onde a tabela já tinha outro CHECK, o guard pula e deixa valores negativos sem validação DB. Baixo risco (formato do old-prod conhecido), mas frágil.
+- [x] ✅ 2026-07-09 — guard trocado p/ `conname = 'mrr_snapshots_amounts_nonnegative'` (+ probe dos checks de coluna `mrr_snapshots_%_check` de envs frescos). Migration já aplicada em prod+beta antes; mudança vale p/ envs novos.
+
+### 🧹 Higiene (não-bug, remover)
+- [x] ✅ 2026-07-09 — comentário morto removido do EOF de `DataRoomPage.tsx` e `InvestorUpdatesPage.tsx`. ⚠️ O mesmo comentário existe em ~30 outros arquivos (router.tsx, App.tsx, index.css, dashboards etc.) — varredura global fica como follow-up.
+
+### Verificação de status feita nesta sessão
+- ✅ Confirmado por `git ls-files`: Equity/Alertas/Roadmap/MRR/Data Room/Investor Updates **existem** (TASK-18 estava desatualizado — corrigido acima).
+- ✅ SEC-15/16/17: marcados aplicados em prod conforme memória de sessões 07-06g/07-07b (read direto de prod bloqueado nesta sessão).
+- ⚠️ CR-5 e rotações de senha exigem acesso manual ao DB/dashboard — não verificáveis por código.
